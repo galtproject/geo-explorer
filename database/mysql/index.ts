@@ -42,10 +42,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
             // remove excluded geohashes and mark exists
             await pIteration.forEach(dbContour.geohashes, async (geohashObj) => {
                 if(!_.includes(contourGeohashes, geohashObj.symbols)) {
+                    console.log('destroy not included geohashes');
                     await this.models.GeohashContour.destroy({
                         where: { contourId: dbContour.id, geohashId: geohashObj.id }
                     });
-                    await dbContour.removeGeohash(geohashObj);
                 } else {
                     existGeohashes.push(geohashObj.symbols);
                 }
