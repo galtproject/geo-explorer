@@ -1,5 +1,5 @@
 module.exports = {
     'chainService': 'web3',
-    'database': 'mysql',
+    'database': 'mysqlV2',
     'geohashService': 'v1'
 };
