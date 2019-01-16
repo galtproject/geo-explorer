@@ -5,6 +5,7 @@ import {IExplorerChainContourEvent, IExplorerResultContour} from "../../interfac
 const config = require("./config");
 const galtUtils = require('@galtproject/utils');
 const _ = require("lodash");
+const pIteration = require("p-iteration");
 
 module.exports = async (database: IExplorerDatabase) => {
     return new ExplorerGeohashV1Service(database);
@@ -33,6 +34,16 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
 
     async getContoursByParentGeohash (parentGeohash: string) {
         return this.database.getContoursByParentGeohash(parentGeohash);
+    }
+
+    async getContoursByParentGeohashArray (parentGeohashArray: string[]) {
+        let resultContours = [];
+        await pIteration.forEach(parentGeohashArray, async(parentGeohash) => {
+            const contoursByParent = await this.getContoursByParentGeohash(parentGeohash);
+            // console.log('contoursByParent', parentGeohash, contoursByParent);
+            resultContours = resultContours.concat(contoursByParent);
+        });
+        return _.uniqBy(resultContours, 'spaceTokenId');
     }
 
     async getContoursByInnerGeohash (innerGeohash: string): Promise<[IExplorerResultContour]> {
