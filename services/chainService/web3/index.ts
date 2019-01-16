@@ -51,6 +51,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
-        return this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+        this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+    }
+
+    async getCurrentBlock() {
+        return web3.eth.getBlockNumber();
     }
 }

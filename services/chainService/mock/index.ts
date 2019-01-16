@@ -26,4 +26,12 @@ class ExplorerChainMockService implements IExplorerChainService {
             return { returnValues: {contour, id} };
         });
     }
+
+    subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
+
+    }
+    
+    async getCurrentBlock() {
+        return 0;
+    }
 }

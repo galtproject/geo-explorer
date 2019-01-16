@@ -6,8 +6,12 @@ const config = require('./config');
     const geohashService = await require('./services/geohashService/' + config.geohashService)(database);
     const chainService = await require('./services/chainService/' + config.chainService)();
 
-    // await database.setValue('start', 'true');
-    await chainService.getEventsFromBlock('SpaceTokenContourChange').then(async (events) => {
+    const prevBlockNumber = await database.getValue('lastBlockNumber');
+    
+    const currentBlockNumber = await chainService.getCurrentBlock();
+    await database.setValue('lastBlockNumber', currentBlockNumber);
+    
+    await chainService.getEventsFromBlock('SpaceTokenContourChange', prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
 
         console.log('events finish');
@@ -16,6 +20,10 @@ const config = require('./config');
 
         const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3');
         console.log('byInnerGeohashResult for w24q8xwfk4u3', byInnerGeohashResult);
+    });
+
+    chainService.subscribeForNewEvents('SpaceTokenContourChange', currentBlockNumber, async (err, newEvent) => {
+        await geohashService.handleChangeContourEvent(newEvent);
     });
     
     const server = await require('./api/')(geohashService, config.port);
