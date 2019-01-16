@@ -1,20 +1,21 @@
 module.exports = async function (sequelize, models) {
     const Sequelize = require('sequelize');
     
-    const Contour = sequelize.define('contour', {
+    const SpaceToken = sequelize.define('spaceToken', {
         // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types
         spaceTokenId: {
             type: Sequelize.STRING(100)
         },
-        geohashesJson: {
-            type: Sequelize.TEXT
+        owner: {
+            type: Sequelize.STRING(100)
         },
     }, {
         indexes: [
             // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-            { fields: ['spaceTokenId'] }
+            { fields: ['spaceTokenId'] },
+            { fields: ['owner'] }
         ]
     });
 
-    return Contour.sync({});
+    return SpaceToken.sync({});
 };
