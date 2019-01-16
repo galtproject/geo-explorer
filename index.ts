@@ -60,8 +60,9 @@ subscribeForReconnect();
         
         console.log('events finish');
         
-        const result = await database.getContoursByGeohash('w24q8r');
+        const byParentGeohashResult = await database.getContoursByParentGeohash('w24q8r');
+        console.log('result for w24q8r', byParentGeohashResult);
         
-        console.log('result for w24q8r', result);
+        const byInnerGeohashResult = await database.getContoursByInnerGeohash('w24q8xw9yh39');
     })
 })();

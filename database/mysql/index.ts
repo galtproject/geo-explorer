@@ -56,7 +56,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         })
     }
     
-    async getContoursByGeohash(parentGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> {
+    async getContoursByParentGeohash(parentGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> {
         let contourGeohashesObjs = await this.models.GeohashParent.findAll({ where: { parentGeohash } });
 
         const geohashesOfContours = contourGeohashesObjs.map(obj => obj.contourGeohash);
@@ -78,5 +78,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
             return { contour, spaceTokenId };
         });
+    }
+
+
+    async getContoursByInnerGeohash(innerGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> {
+        // TODO: get parents of innerGeohash and and detect - is it contains contours, if yes - detect contours, that includes innerGeohash
+        return [{contour: [], spaceTokenId: 0}];
     }
 }
