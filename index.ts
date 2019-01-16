@@ -15,5 +15,8 @@ const config = require('./config');
 
         const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3');
         console.log('byInnerGeohashResult for w24q8xwfk4u3', byInnerGeohashResult);
-    })
+    });
+    
+    const server = await require('./api/')(geohashService, config.port);
+    console.log('server', server);
 })();
