@@ -5,8 +5,9 @@ const config = require('./config');
     const database = await require('./database/' + config.database)();
     const geohashService = await require('./services/geohashService/' + config.geohashService)(database);
     const chainService = await require('./services/chainService/' + config.chainService)();
-    
-    chainService.getEventsFromBlock('SpaceTokenContourChange').then(async (events) => {
+
+    // await database.setValue('start', 'true');
+    await chainService.getEventsFromBlock('SpaceTokenContourChange').then(async (events) => {
         await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
 
         console.log('events finish');
@@ -18,5 +19,4 @@ const config = require('./config');
     });
     
     const server = await require('./api/')(geohashService, config.port);
-    console.log('server', server);
 })();

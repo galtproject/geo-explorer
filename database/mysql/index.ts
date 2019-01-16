@@ -36,6 +36,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     async flushDatabase() {
         await this.models.GeohashSpaceToken.destroy({ where: { } });
         await this.models.GeohashParent.destroy({ where: { } });
+        await this.models.Value.destroy({ where: { } });
         // await this.models.SpaceToken.destroy({ where: { } });
     }
     
@@ -44,7 +45,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         
         let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
             where: { spaceTokenId }, attributes: ['contourGeohash']
-        }).catch(e => console.error('26', e));
+        });
 
         // remove excluded geohashes and mark exists
         await pIteration.forEach(dbContourGeohashes, async (geohashObj) => {
@@ -96,5 +97,23 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
             return { contour, spaceTokenId };
         });
+    }
+    
+    async getValue(key: string) {
+        const valueObj = await this.models.Value.findOne({ where: { key } });
+        return valueObj ? valueObj.content : null;
+    }
+
+    async setValue(key: string, content: string) {
+        const valueObj = await this.models.Value.findOne({ where: { key } });
+        if(valueObj) {
+            return valueObj.update({ content }, {where: { key } })
+        } else {
+            return this.models.Value.create({ key, content });
+        }
+    }
+
+    async clearValue(key: string) {
+        return this.models.Value.destroy({ where: { key } });
     }
 }

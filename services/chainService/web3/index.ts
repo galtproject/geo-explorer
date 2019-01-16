@@ -49,4 +49,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
         return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
     }
+
+    subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
+        return this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+    }
 }
