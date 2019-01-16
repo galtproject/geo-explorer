@@ -9,6 +9,7 @@ const config = require('./config');
 
 module.exports = async function(extendConfig?: any) {
     const extendedConfig = _.merge({}, config, extendConfig || {});
+    // console.log('extendedConfig.options', extendedConfig.options);
     
     let sequelize = new Sequelize(extendedConfig.name, extendedConfig.user, extendedConfig.password, extendedConfig.options);
     
@@ -35,8 +36,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     async flushDatabase() {
         await this.models.GeohashSpaceToken.destroy({ where: { } });
-        await this.models.GeohashParent.destroy({ where: { } });
-        // await this.models.SpaceToken.destroy({ where: { } });
     }
     
     async addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number) {
@@ -62,25 +61,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
                 this.models.GeohashSpaceToken.update({ position }, { where: { spaceTokenId, contourGeohash }});
             });
         });
-        
-        // bind geohashes of contour to parent geohashes
-        await pIteration.forEach(contourGeohashes, async (contourGeohash) => {
-            let parentGeohash = contourGeohash;
-
-            while (parentGeohash.length > 1) {
-                parentGeohash = parentGeohash.slice(0, -1);
-                await this.models.GeohashParent.create({ parentGeohash, contourGeohash }).catch(e => {});
-            }
-        })
     }
     
     async getContoursByParentGeohash(parentGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> {
-        let contourGeohashesObjs = await this.models.GeohashParent.findAll({ where: { parentGeohash } });
-
-        const geohashesOfContours = contourGeohashesObjs.map(obj => obj.contourGeohash);
-        
         let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({
-            where: { contourGeohash: { [Op.in]: geohashesOfContours }}
+            where: { contourGeohash: { [Op.like]: parentGeohash + '%' }}
         });
 
         foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'spaceTokenId');
