@@ -1,8 +1,9 @@
 const pIteration = require("p-iteration");
+const config = require('./config');
 
 (async() => {
     const geohashService = await require('./services/geohashService')();
-    const chainService = await require('./services/chainService')();
+    const chainService = await require('./services/chainService/' + config.chainService)();
     
     chainService.getEventsFromBlock('SpaceTokenContourChange').then(async (events) => {
         await pIteration.forEach(events, geohashService.handleChangeContourEvent);

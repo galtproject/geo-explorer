@@ -1,5 +1,4 @@
 module.exports = {
-    'contractsConfigUrl': 'https://galt-local-contracts.surge.sh/',
-    'wsServer': 'ws://localhost:8546',
+    'chainService': 'web3',
     'database': 'mysql'
 };

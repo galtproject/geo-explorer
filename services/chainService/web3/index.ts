@@ -1,14 +1,15 @@
+import IExplorerChainService from "../interace";
+
 const _ = require("lodash");
 const axios = require('axios');
 
 const Web3 = require("web3");
 
-const config = require('../config');
+const config = require('./config');
 if (!config.wsServer) {
     console.error('wsServer required in config.js');
     process.exit(1);
 }
-
 
 let websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
 let web3 = new Web3(websocketProvider);
@@ -32,11 +33,19 @@ module.exports = async () => {
 
     const spaceGeoData = new web3.eth.Contract(contractsConfig.splitMergeAbi, contractsConfig.splitMergeAddress);
     
-    const service: any = {};
-    
-    service.getEventsFromBlock = async (eventName, blockNumber = null) => {
-        return spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || contractsConfig.blockNumber});
-    };
-    
-    return service;
+    return new ExplorerChainWeb3Service(spaceGeoData, contractsConfig);
 };
+
+class ExplorerChainWeb3Service implements IExplorerChainService {
+    spaceGeoData: any;
+    contractsConfig: any;
+    
+    constructor(_spaceGeoData, _contractsConfig) {
+        this.spaceGeoData = _spaceGeoData;
+        this.contractsConfig = _contractsConfig;
+    }
+    
+    getEventsFromBlock(eventName: string, blockNumber?: number) {
+        return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
+    }
+}
