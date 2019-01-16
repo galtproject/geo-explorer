@@ -23,7 +23,11 @@ module.exports = async () => {
     };
     
     service.getContoursByParentGeohash = database.getContoursByParentGeohash.bind(database);
-    service.getContoursByInnerGeohash = database.getContoursByInnerGeohash.bind(database);
+    
+    service.getContoursByInnerGeohash = async (innerGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> => {
+        // TODO: get parents of innerGeohash and and detect - is it contains contours, if yes - detect contours, that includes innerGeohash
+        return [{contour: [], spaceTokenId: 0}];
+    };
     
     return service;
 };
