@@ -27,7 +27,7 @@ describe("geohashServiceV1", function () {
             await database.flushDatabase();
         });
         
-        it("handle change contours and return results correctly", async () => {
+        it("handle getEventsFromBlock contours and return results correctly", async () => {
             const contoursEvents = await chainService.getEventsFromBlock('SpaceTokenContourChange');
             
             await pIteration.forEach(contoursEvents, geohashService.handleChangeContourEvent.bind(geohashService));
