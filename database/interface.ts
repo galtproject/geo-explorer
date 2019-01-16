@@ -1,4 +1,5 @@
 export default interface IExplorerDatabase {
-    addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number);
+    flushDatabase(): Promise<void>;
+    addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number): Promise<void>;
     getContoursByParentGeohash(parentGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]>;
 }

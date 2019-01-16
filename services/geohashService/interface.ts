@@ -1,7 +1,7 @@
-import {IExplorerChainContourEvent} from "../interfaces";
+import {IExplorerChainContourEvent, IExplorerResultContour} from "../interfaces";
 
 export default interface IExplorerGeohashService {
     handleChangeContourEvent(event: IExplorerChainContourEvent): Promise<void>;
-    getContoursByParentGeohash(parentGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]>;
-    getContoursByInnerGeohash(innerGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]>;
+    getContoursByParentGeohash(parentGeohash: string): Promise<[IExplorerResultContour]>;
+    getContoursByInnerGeohash(innerGeohash: string): Promise<[IExplorerResultContour]>;
 }

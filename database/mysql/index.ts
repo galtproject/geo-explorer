@@ -6,19 +6,37 @@ const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
 const config = require('./config');
-const sequelize = new Sequelize(config.name, config.user, config.password, config.options);
 
-module.exports = async function() {
-    const models = await require('./models/index')(sequelize);
+module.exports = async function(extendConfig?: any) {
+    const extendedConfig = _.extend({}, config, extendConfig || {});
     
-    return new MysqlExplorerDatabase(models);
+    let sequelize = new Sequelize(extendedConfig.name, extendedConfig.user, extendedConfig.password, extendedConfig.options);
+    
+    let models;
+    try {
+        models = await require('./models/index')(sequelize);
+    } catch (e) {
+        return console.error('Error', e);
+    }
+    
+    return new MysqlExplorerDatabase(sequelize, models, extendedConfig);
 };
 
 class MysqlExplorerDatabase implements IExplorerDatabase {
+    sequelize: any;
     models: any;
+    config: any;
     
-    constructor(_models) {
+    constructor(_sequelize, _models, _config) {
+        this.sequelize = _sequelize;
         this.models = _models;
+        this.config = _config;
+    }
+
+    async flushDatabase() {
+        await this.models.GeohashSpaceToken.destroy({ where: { } });
+        await this.models.GeohashParent.destroy({ where: { } });
+        await this.models.SpaceToken.destroy({ where: { } });
     }
     
     async addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number) {
