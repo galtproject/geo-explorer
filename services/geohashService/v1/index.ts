@@ -1,7 +1,8 @@
 import IExplorerDatabase from "../../../database/interface";
 import IExplorerGeohashService from "../interface";
-import {IExplorerChainContourEvent} from "../../interfaces";
+import {IExplorerChainContourEvent, IExplorerResultContour} from "../../interfaces";
 
+const config = require("./config");
 const galtUtils = require('@galtproject/utils');
 const _ = require("lodash");
 
@@ -34,8 +35,31 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
         return this.database.getContoursByParentGeohash(parentGeohash);
     }
 
-    async getContoursByInnerGeohash (innerGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> {
-        // TODO: get parents of innerGeohash and and detect - is it contains contours, if yes - detect contours, that includes innerGeohash
-        return [{contour: [], spaceTokenId: 0}];
+    async getContoursByInnerGeohash (innerGeohash: string): Promise<[IExplorerResultContour]> {
+        let resultContours = [];
+        
+        const cachedIsGeohashInsideResultContour = {
+            
+        };
+        
+        let parentGeohash = innerGeohash;
+        while (parentGeohash.length > config.maxParentGeohashToFindInner) {
+            parentGeohash = parentGeohash.slice(0, -1);
+            const contoursOfParentGeohash = await this.getContoursByParentGeohash(parentGeohash);
+            
+            const contoursThatContentsInnerGeohash = _.filter(contoursOfParentGeohash, (resultContour) => {
+                const spaceTokenId = resultContour.spaceTokenId;
+                const contour = resultContour.contour;
+                
+                if(cachedIsGeohashInsideResultContour[spaceTokenId] === undefined) {
+                    cachedIsGeohashInsideResultContour[spaceTokenId] = galtUtils.geohash.contour.isGeohashInsideContour(innerGeohash, contour);
+                }
+                return cachedIsGeohashInsideResultContour[spaceTokenId];
+            });
+            
+            resultContours = resultContours.concat(contoursThatContentsInnerGeohash);
+        }
+        
+        return _.uniqBy(resultContours, 'spaceTokenId');
     };
 }

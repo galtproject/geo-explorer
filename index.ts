@@ -11,8 +11,9 @@ const config = require('./config');
 
         console.log('events finish');
         const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r');
-        console.log('result for w24q8r', byParentGeohashResult);
+        console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
 
-        const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xw9yh39');
+        const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3');
+        console.log('byInnerGeohashResult for w24q8xwfk4u3', byInnerGeohashResult);
     })
 })();
