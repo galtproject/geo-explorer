@@ -3,6 +3,7 @@ import IExplorerDatabase from "../interface";
 const _ = require("lodash");
 const pIteration = require("p-iteration");
 const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 
 const config = require('./config');
 const sequelize = new Sequelize(config.name, config.user, config.password, config.options);
@@ -20,135 +21,75 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         this.models = _models;
     }
     
-    async addOrUpdateContour(contourGeohashes: string[], spaceTokenId: string) {
-        
+    async addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number) {
         // find contour object with included geohashes
         let dbContour = await this.models.Contour.findOne({
-            attributes: ['spaceTokenId'],
-            where: { spaceTokenId: spaceTokenId },
-            include: [{
-                model: this.models.Geohash,
-                as: 'geohashes',
-                through: {
-                    attributes: ['symbols'],
-                    // where: {completed: true}
-                }
-            }]
-        });
+            where: { spaceTokenId }, attributes: ['spaceTokenId']
+        }).catch(e => console.error('26', e));
         
+        let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
+            where: { spaceTokenId }, attributes: ['contourGeohash']
+        }).catch(e => console.error('26', e));
+
         let existGeohashes = [];
         
-        if(dbContour) {
+        const geohashesJson = JSON.stringify(contourGeohashes);
+
+        if(dbContour && dbContour.id) {
             // remove excluded geohashes and mark exists
-            await pIteration.forEach(dbContour.geohashes, async (geohashObj) => {
-                if(!_.includes(contourGeohashes, geohashObj.symbols)) {
-                    console.log('destroy not included geohashes');
-                    await this.models.GeohashContour.destroy({
-                        where: { contourId: dbContour.id, geohashId: geohashObj.id }
-                    });
+            await pIteration.forEach(dbContourGeohashes, async (geohashObj) => {
+                const contourGeohash = geohashObj.contourGeohash;
+                
+                if(!_.includes(contourGeohashes, contourGeohash)) {
+                    await this.models.GeohashSpaceToken.destroy({ where: { spaceTokenId, contourGeohash } });
                 } else {
-                    existGeohashes.push(geohashObj.symbols);
+                    existGeohashes.push(contourGeohash);
                 }
             });
-            
-            dbContour.update({
-                geohashesJson: JSON.stringify(contourGeohashes)
-            });
+
+            dbContour.update({ geohashesJson });
         } else {
             // create new contour
-            dbContour = await this.models.Contour.create({
-                spaceTokenId: spaceTokenId,
-                geohashesJson: JSON.stringify(contourGeohashes)
-            });
+            this.models.Contour.create({ spaceTokenId, geohashesJson });
         }
 
-
-        await pIteration.forEach(contourGeohashes, async (geohash) => {
+        await pIteration.forEach(contourGeohashes, async (contourGeohash) => {
             // do not create and bind exists geohashes to contour
-            if(_.includes(existGeohashes, geohash)) {
+            if(_.includes(existGeohashes, contourGeohash)) {
                 return;
             }
-            // create and bind geohash to contour
-            
-            let geohashObj = await this.models.Geohash.findOne({
-                where: { symbols: geohash }
-            });
-            if(!geohashObj) {
-                geohashObj = await this.models.Geohash.create({ symbols: geohash });
-            }
-
-            await this.models.GeohashContour.create({ contourId: dbContour.id, geohashId: geohashObj.id });
+            // bind geohash to contour
+            await this.models.GeohashSpaceToken.create({ spaceTokenId, contourGeohash }).catch(e => {});
         });
-
-        // get updated version of contour with actual included geohashes
-        dbContour = await this.models.Contour.findOne({
-            where: { spaceTokenId: spaceTokenId },
-            include: [{
-                model: this.models.Geohash,
-                as: 'geohashes',
-                through: {
-                    attributes: ['symbols'],
-                    // where: {completed: true}
-                }
-            }]
-        });
-
+        
         // bind geohashes of contour to parent geohashes
-        await pIteration.forEach(dbContour.geohashes, async (geohashObj) => {
-            let geohashParent = geohashObj.symbols;
-            
-            while (geohashParent.length > 1) {
-                geohashParent = geohashParent.slice(0, -1);
+        await pIteration.forEach(contourGeohashes, async (contourGeohash) => {
+            let parentGeohash = contourGeohash;
 
-                let parentObj = await this.models.Geohash.findOne({
-                    where: { symbols: geohashParent }
-                });
-                
-                let existPivot;
-                if(parentObj) {
-                    existPivot = await this.models.GeohashPivot.findOne({
-                        where: { parentId: parentObj.id, childrenId: geohashObj.id }
-                    });
-                } else {
-                    parentObj = await this.models.Geohash.create({
-                        symbols: geohashParent
-                    });
-                }
-                
-                if(!existPivot) {
-                    await this.models.GeohashPivot.create({ parentId: parentObj.id, childrenId: geohashObj.id });
-                }
-            } 
+            while (parentGeohash.length > 1) {
+                parentGeohash = parentGeohash.slice(0, -1);
+                await this.models.GeohashParent.create({ parentGeohash, contourGeohash }).catch(e => {});
+            }
         })
     }
     
-    async getContoursByGeohash(geohash: string): Promise<[{contour: string[], spaceTokenId: string}]> {
-        let parentObj = await this.models.Geohash.findOne({
-            where: { symbols: geohash },
-            include: [{
-                model: this.models.Geohash,
-                as: 'children',
-                foreignKey: 'parentId',
-                through: {
-                    attributes: ['symbols'],
-                    // where: {completed: true}
-                }
-            }]
-        });
+    async getContoursByGeohash(parentGeohash: string): Promise<[{contour: string[], spaceTokenId: number}]> {
+        let contourGeohashesObjs = await this.models.GeohashParent.findAll({ where: { parentGeohash } });
+
+        const contourGeohash = contourGeohashesObjs.map(obj => obj.contourGeohash);
         
-        let contoursObjects: any = [];
-        
-        await pIteration.forEach(parentObj.children, async (geohashObj) => {
-            const contoursObjects = await geohashObj.getContours();
-            
-            await pIteration.forEach(contoursObjects, async (contourObj) => {
-                contoursObjects.push({
-                    spaceTokenId: contourObj.spaceTokenId,
-                    contour: JSON.parse(contourObj.geohashesJson)
-                })
-            });
+        let spaceTokenGeohashes = await this.models.GeohashSpaceToken.findAll({
+            where: { contourGeohash: { [Op.in]: contourGeohash }}
         });
 
-        return _.uniqBy(contoursObjects, 'spaceTokenId')
+        spaceTokenGeohashes = _.uniqBy(spaceTokenGeohashes, 'spaceTokenId');
+        
+        return await pIteration.map(spaceTokenGeohashes, async (geohashObj) => {
+            const contourObj = await this.models.Contour.findOne({
+                where: { spaceTokenId: geohashObj.spaceTokenId }
+            });
+
+            return { spaceTokenId: contourObj.spaceTokenId, contour: JSON.parse(contourObj.geohashesJson) };
+        });
     }
 }

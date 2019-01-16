@@ -4,6 +4,7 @@ import IExplorerDatabase from "./database/interface";
 
 const Web3 = require("web3");
 const pIteration = require("p-iteration");
+const _ = require("lodash");
 const axios = require('axios');
 const fs = require('fs');
 const galtUtils = require('@galtproject/utils');
@@ -45,15 +46,22 @@ subscribeForReconnect();
             // console.log('update', event.returnValues.id, event.returnValues.contour.map(galtUtils.numberToGeohash));
             
             const contour: string[] = event.returnValues.contour.map(galtUtils.numberToGeohash);
-            const spaceTokenId: string = event.returnValues.id;
+            let spaceTokenId: string = event.returnValues.id;
             
-            await database.addOrUpdateContour(contour, spaceTokenId);
+            let spaceTokenNumberId: number;
+            if(_.startsWith(spaceTokenId, '0x')) {
+                spaceTokenNumberId = parseInt(galtUtils.tokenIdHexToTokenId(spaceTokenId));
+            } else {
+                spaceTokenNumberId = parseInt(spaceTokenId);
+            }
+            
+            await database.addOrUpdateContour(contour, spaceTokenNumberId);
         });
         
         console.log('events finish');
         
-        const result = await database.getContoursByGeohash('w24q8x');
+        const result = await database.getContoursByGeohash('w24q8r');
         
-        console.log(result, 'result');
+        console.log('result for w24q8r', result);
     })
 })();
