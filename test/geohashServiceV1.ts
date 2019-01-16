@@ -62,8 +62,6 @@ describe("geohashServiceV1", function () {
         });
     });
     
-    
-    
     after(() => {
         process.exit();
     })
