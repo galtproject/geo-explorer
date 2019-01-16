@@ -1,4 +1,5 @@
 import IExplorerChainService from "../interace";
+import {IExplorerChainContourEvent} from "../../interfaces";
 
 const _ = require("lodash");
 const axios = require('axios');
@@ -45,7 +46,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         this.contractsConfig = _contractsConfig;
     }
     
-    getEventsFromBlock(eventName: string, blockNumber?: number) {
+    getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
         return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
     }
 }
