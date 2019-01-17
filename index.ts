@@ -9,7 +9,7 @@ const config = require('./config');
     const database: IExplorerDatabase = await require('./database/' + config.database)();
     const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
     const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)();
-
+    
     chainService.onReconnect(fetchAndSubscribe);
     
     await fetchAndSubscribe();
@@ -27,7 +27,7 @@ const config = require('./config');
             console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
 
             const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3');
-            console.log('byInnerGeohashResult for w24q8xwfk4u3', byInnerGeohashResult);
+            console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
         });
         
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());

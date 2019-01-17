@@ -77,6 +77,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     
     private createContractInstance() {
-        this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig.splitMergeAbi, this.contractsConfig.splitMergeAddress);
+        this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.contractName + 'Abi'], this.contractsConfig[config.contractName + 'Address']);
     }
 }
