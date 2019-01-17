@@ -19,13 +19,23 @@ Indexing changes of contours and providing api for getting:
 |-----|-------------|
 | DATABASE_NAME | Specify database name for store |
 | API_PORT | Specify port of application api  |
+| CHAIN_ENV | Specify environment of contracts(local, test, prod for example)  |
 
 ## API
 
 | Uri | Description | Output example |
 |-----|-------------|----------------|
-| /v1/contours/by/inner-geohash/:geohash | get contours list by inner geohash | [{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"},{"contour":["w24q8xwe6ty4","w24q8xqxcvgc","w24q8xrpuv5x","w24q8xx1su5x","w24q8xxh8wr8"],"spaceTokenId":"0"}] |
-| /v1/contours/by/parent-geohash/:geohashes | get by inner  | [{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"},{"contour":["w24q8xwe6ty4","w24q8xqxcvgc","w24q8xrpuv5x","w24q8xx1su5x","w24q8xxh8wr8"],"spaceTokenId":"0"}] |
+| /v1/contours/by/inner-geohash/:geohash | get contours list by inner geohash | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
+| /v1/contours/by/parent-geohash/:geohashes | get by inner  | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
+
+
+## Use pm2 example
+```
+pm2 install typescript
+DATABASE_NAME=geo_explorer_local CHAIN_ENV=local API_PORT=3344 pm2 start ./index.ts --name "geo-explorer-local"
+pm2 save
+pm2 startup
+```
 
 ##  Tests
 ```
