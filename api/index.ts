@@ -14,7 +14,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
         const innerGeohash = req.params.geohash;
 
         res.send({
-            lastChangeBlockNumber: await database.getValue('lastBlockNumber'),
+            lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
             currentBlockNumber: await chainService.getCurrentBlock(),
             data: await geohashService.getContoursByInnerGeohash(innerGeohash)
         });
@@ -24,7 +24,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
         const geohashes = req.params.geohashes.split(',');
 
         res.send({
-            lastChangeBlockNumber: await database.getValue('lastBlockNumber'),
+            lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
             currentBlockNumber: await chainService.getCurrentBlock(),
             data: await geohashService.getContoursByParentGeohashArray(geohashes)
         });
