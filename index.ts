@@ -6,7 +6,12 @@ const pIteration = require("p-iteration");
 const config = require('./config');
 
 (async() => {
-    const database: IExplorerDatabase = await require('./database/' + config.database)();
+    const databaseConfig: any = {};
+    if(process.env.DATABASE_NAME) {
+        databaseConfig.name = process.env.DATABASE_NAME;
+    }
+    
+    const database: IExplorerDatabase = await require('./database/' + config.database)(databaseConfig);
     const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
     const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)();
     
@@ -38,5 +43,5 @@ const config = require('./config');
         });
     }
     
-    const server = await require('./api/')(geohashService, config.apiPort);
+    const server = await require('./api/')(geohashService, chainService, database, process.env.API_PORT || config.apiPort);
 })();
