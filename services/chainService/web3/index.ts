@@ -18,16 +18,7 @@ module.exports = async () => {
 
     const {data: contractsConfig} = await axios.get(config.contractsConfigUrl + netId + '.json');
     
-    const serviceInstance = new ExplorerChainWeb3Service(contractsConfig);
-    
-    setInterval(async () => {
-        const {data: newContractsConfig} = await axios.get(config.contractsConfigUrl + netId + '.json');
-        if(newContractsConfig.blockNumber != contractsConfig.blockNumber) {
-            serviceInstance.setContractsConfig(newContractsConfig, true);
-        }
-    }, 1000 * 60);
-    
-    return serviceInstance;
+    return new ExplorerChainWeb3Service(contractsConfig);
 };
 
 class ExplorerChainWeb3Service implements IExplorerChainService {
@@ -82,15 +73,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
                 this.subscribeForReconnect();
             }, 1000);
         });
-    }
-    
-    setContractsConfig(contractsConfig, redeployed = false) {
-        this.contractsConfig = contractsConfig;
-        this.createContractInstance();
-        
-        if(this.callbackOnReconnect) {
-            this.callbackOnReconnect(redeployed);
-        }
     }
     
     private createContractInstance() {

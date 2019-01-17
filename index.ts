@@ -6,12 +6,7 @@ const pIteration = require("p-iteration");
 const config = require('./config');
 
 (async() => {
-    const databaseConfig: any = {};
-    if(process.env.DATABASE_NAME) {
-        databaseConfig.name = process.env.DATABASE_NAME;
-    }
-    
-    const database: IExplorerDatabase = await require('./database/' + config.database)(databaseConfig);
+    const database: IExplorerDatabase = await require('./database/' + config.database)();
     const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
     const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)();
     
@@ -19,10 +14,7 @@ const config = require('./config');
     
     await fetchAndSubscribe();
     
-    async function fetchAndSubscribe(needFlushing = false) {
-        if(needFlushing) {
-            await database.flushDatabase();
-        }
+    async function fetchAndSubscribe() {
         const prevBlockNumber = await database.getValue('lastBlockNumber');
 
         const currentBlockNumber = await chainService.getCurrentBlock();
@@ -46,5 +38,5 @@ const config = require('./config');
         });
     }
     
-    const server = await require('./api/')(geohashService, chainService, database, process.env.API_PORT || config.apiPort);
+    const server = await require('./api/')(geohashService, config.apiPort);
 })();
