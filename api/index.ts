@@ -20,6 +20,8 @@ module.exports = (geohashService: IExplorerGeohashService, port) => {
         res.send(await geohashService.getContoursByParentGeohashArray(geohashes));
     });
     
+    console.log('🚀 Start application on port', port);
+    
     return service.start(port);
 };
 

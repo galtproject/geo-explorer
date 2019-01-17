@@ -1,7 +1,6 @@
 import IExplorerChainService from "../interace";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
-const _ = require("lodash");
 const axios = require('axios');
 
 const Web3 = require("web3");

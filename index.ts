@@ -38,5 +38,5 @@ const config = require('./config');
         });
     }
     
-    const server = await require('./api/')(geohashService, config.port);
+    const server = await require('./api/')(geohashService, config.apiPort);
 })();
