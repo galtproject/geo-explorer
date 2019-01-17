@@ -46,6 +46,7 @@ const config = require('./config');
         chainService.subscribeForNewEvents('SpaceTokenContourChange', currentBlockNumber, async (err, newEvent) => {
             await geohashService.handleChangeContourEvent(newEvent);
             await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+            console.log('🛎 New event, blockNumber:', currentBlockNumber);
         });
     }
     

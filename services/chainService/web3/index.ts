@@ -18,6 +18,7 @@ module.exports = async (extendConfig) => {
     const netId = await web3.eth.net.getId();
     
     const contractsConfigUrl = _.template(config.contractsConfigUrl)({ env: extendConfig.env || config.env });
+    console.log('📄 contractsConfigUrl', contractsConfigUrl);
 
     const {data: contractsConfig} = await axios.get(contractsConfigUrl + netId + '.json');
     
