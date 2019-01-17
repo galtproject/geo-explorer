@@ -19,7 +19,10 @@ const config = require('./config');
     
     await fetchAndSubscribe();
     
-    async function fetchAndSubscribe() {
+    async function fetchAndSubscribe(needFlushing = false) {
+        if(needFlushing) {
+            await database.flushDatabase();
+        }
         const prevBlockNumber = await database.getValue('lastBlockNumber');
 
         const currentBlockNumber = await chainService.getCurrentBlock();
