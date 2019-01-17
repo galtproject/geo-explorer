@@ -8,8 +8,8 @@ Indexing changes of contours and providing api for getting:
 
 ## How to run
 
-1. Edit config.ts, specify database
-2. Install database software and configure it at ./database/<config.database>/ folder
+1. Edit `config.ts`, specify database
+2. Install database software and configure it at `./database/<config.database>/` folder
 3. `npm i`
 4. `npm start`
 
