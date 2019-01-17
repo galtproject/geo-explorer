@@ -6,6 +6,11 @@ Indexing changes of contours and providing api for getting:
 - Contours discovery by parent geohashes
 - Proof of location by geohashes inside contours
 
+## Servers:
+
+- Local(pre-dev) contracts: http://142.93.168.105:3344
+- Dev contracts: http://142.93.168.105:3355
+
 ## How to run
 
 1. Edit `config.ts`, specify database
