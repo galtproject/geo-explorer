@@ -25,8 +25,17 @@ Indexing changes of contours and providing api for getting:
 
 | Uri | Description | Output example |
 |-----|-------------|----------------|
-| /v1/contours/by/inner-geohash/:geohash | get contours list by inner geohash | {"lastUpdateBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
-| /v1/contours/by/parent-geohash/:geohashes | get by inner  | [{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}] |
+| /v1/contours/by/inner-geohash/:geohash | get contours list by inner geohash | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
+| /v1/contours/by/parent-geohash/:geohashes | get by inner  | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
+
+
+## Use pm2 example
+```
+pm2 install typescript
+DATABASE_NAME=geo_explorer_local CHAIN_ENV=local API_PORT=3344 pm2 start ./index.ts --name "geo-explorer-local"
+pm2 save
+pm2 startup
+```
 
 ##  Tests
 ```
