@@ -17,15 +17,17 @@ module.exports = async (extendConfig) => {
 
     const netId = await web3.eth.net.getId();
     
-    const contractsConfigUrl = _.template(config.contractsConfigUrl)({ env: extendConfig.env || config.env });
+    let contractsConfigUrl = _.template(config.contractsConfigUrl)({ env: extendConfig.env || config.env });
+    
+    contractsConfigUrl += netId + '.json';
     console.log('📄 contractsConfigUrl', contractsConfigUrl);
 
-    const {data: contractsConfig} = await axios.get(contractsConfigUrl + netId + '.json');
+    const {data: contractsConfig} = await axios.get(contractsConfigUrl);
     
     const serviceInstance = new ExplorerChainWeb3Service(contractsConfig);
     
     setInterval(async () => {
-        const {data: newContractsConfig} = await axios.get(contractsConfigUrl + netId + '.json');
+        const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
         if(newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
             serviceInstance.setContractsConfig(newContractsConfig, true);
         }
