@@ -8,7 +8,7 @@ Indexing changes of contours and providing api for getting:
 
 ## Servers:
 
-- Local contracts: http://142.93.168.105:3344
+- Local(pre-dev) contracts: http://142.93.168.105:3344
 - Dev contracts: http://142.93.168.105:3355
 
 ## How to run
