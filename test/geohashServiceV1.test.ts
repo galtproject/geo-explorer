@@ -96,31 +96,31 @@ describe("geohashServiceV1", function () {
             });
             
             it("should return correct result from json api", async () => {
-                const server = await require('../api/')(geohashService);
+                const server = await require('../api/')(geohashService, chainService, database);
                 
                 const parentResponse = await chai.request(server).get(`/v1/contours/by/parent-geohash/${parentGeohash}`);
 
                 chai.expect(parentResponse).to.have.status(200);
-                assert.strictEqual(parentResponse.body.length, 4);
+                assert.strictEqual(parentResponse.body.data.length, 4);
 
-                checkScheme(parentResponse.body);
+                checkScheme(parentResponse.body.data);
 
                 const parentArrResponse = await chai.request(server).get(`/v1/contours/by/parent-geohash/${parentGeohashArr.join(',')}`);
 
                 chai.expect(parentArrResponse).to.have.status(200);
-                assert.strictEqual(parentArrResponse.body.length, 5);
+                assert.strictEqual(parentArrResponse.body.data.length, 5);
 
-                checkScheme(parentArrResponse.body);
+                checkScheme(parentArrResponse.body.data);
                 
                 const innerResponse = await chai.request(server).get(`/v1/contours/by/inner-geohash/${innerGeohash}`);
 
                 chai.expect(innerResponse).to.have.status(200);
-                assert.strictEqual(innerResponse.body.length, 2);
+                assert.strictEqual(innerResponse.body.data.length, 2);
 
-                checkScheme(innerResponse.body);
+                checkScheme(innerResponse.body.data);
                 
-                function checkScheme(responseBody) {
-                    responseBody.forEach((item) => {
+                function checkScheme(responseData) {
+                    responseData.forEach((item) => {
                         assert.notStrictEqual(item.contour, undefined);
                         assert.notStrictEqual(item.contour.length, 0);
                         assert.notStrictEqual(item.spaceTokenId, undefined);
