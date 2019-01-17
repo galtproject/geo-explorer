@@ -1,6 +1,7 @@
 import IExplorerChainService from "../interace";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
+const _ = require('lodash');
 const axios = require('axios');
 
 const Web3 = require("web3");
@@ -11,14 +12,25 @@ if (!config.wsServer) {
     process.exit(1);
 }
 
-module.exports = async () => {
+module.exports = async (env) => {
     const web3 = new Web3(new Web3.providers.WebsocketProvider(config.wsServer));
 
     const netId = await web3.eth.net.getId();
-
-    const {data: contractsConfig} = await axios.get(config.contractsConfigUrl + netId + '.json');
     
-    return new ExplorerChainWeb3Service(contractsConfig);
+    const contractsConfigUrl = _.template(config.contractsConfigUrl)({ env });
+
+    const {data: contractsConfig} = await axios.get(contractsConfigUrl + netId + '.json');
+    
+    const serviceInstance = new ExplorerChainWeb3Service(contractsConfig);
+    
+    setInterval(async () => {
+        const {data: newContractsConfig} = await axios.get(config.contractsConfigUrl + netId + '.json');
+        if(newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
+            serviceInstance.setContractsConfig(newContractsConfig, true);
+        }
+    }, 1000 * 60);
+    
+    return serviceInstance;
 };
 
 class ExplorerChainWeb3Service implements IExplorerChainService {
@@ -73,6 +85,15 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
                 this.subscribeForReconnect();
             }, 1000);
         });
+    }
+    
+    setContractsConfig(contractsConfig, redeployed = false) {
+        this.contractsConfig = contractsConfig;
+        this.createContractInstance();
+        
+        if(this.callbackOnReconnect) {
+            this.callbackOnReconnect(redeployed);
+        }
     }
     
     private createContractInstance() {
