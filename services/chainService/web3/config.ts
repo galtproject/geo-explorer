@@ -1,4 +1,5 @@
 module.exports = {
     'contractsConfigUrl': 'https://galt-local-contracts.surge.sh/',
-    'wsServer': 'ws://localhost:8546'
+    'wsServer': 'ws://localhost:8546',
+    'contractName': 'splitMergeSandbox'
 };

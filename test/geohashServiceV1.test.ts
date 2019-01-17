@@ -81,6 +81,18 @@ describe("geohashServiceV1", function () {
 
                     assert.strictEqual(isInside, true);
                 });
+
+                await geohashService.handleChangeContourEvent({ returnValues: {contour: [], id: byInnerGeohashResult[0].spaceTokenId.toString() } });
+
+                const byInnerGeohashNewResult = await geohashService.getContoursByInnerGeohash(innerGeohash);
+
+                assert.strictEqual(byInnerGeohashNewResult.length, 2);
+
+                byInnerGeohashResult.forEach(resultContour => {
+                    const isInside = galtUtils.geohash.contour.isGeohashInsideContour(innerGeohash, resultContour.contour);
+
+                    assert.strictEqual(isInside, true);
+                });
             });
             
             it("should return correct result from json api", async () => {
@@ -103,7 +115,7 @@ describe("geohashServiceV1", function () {
                 const innerResponse = await chai.request(server).get(`/v1/contours/by/inner-geohash/${innerGeohash}`);
 
                 chai.expect(innerResponse).to.have.status(200);
-                assert.strictEqual(innerResponse.body.length, 3);
+                assert.strictEqual(innerResponse.body.length, 2);
 
                 checkScheme(innerResponse.body);
                 

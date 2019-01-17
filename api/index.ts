@@ -1,7 +1,5 @@
 import IExplorerGeohashService from "../services/geohashService/interface";
 
-const pIteration = require('p-iteration');
-const _ = require('lodash');
 const service = require('restana')({
     ignoreTrailingSlash: true
 });

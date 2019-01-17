@@ -7,6 +7,8 @@ module.exports = async () => {
 };
 
 class ExplorerChainMockService implements IExplorerChainService {
+    newEventsCallback;
+    
     constructor() {
         
     }
@@ -25,5 +27,21 @@ class ExplorerChainMockService implements IExplorerChainService {
             let id = numberId.toString();
             return { returnValues: {contour, id} };
         });
+    }
+
+    subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
+        this.newEventsCallback = callback;
+    }
+
+    callNewEvent(eventName: string, contour, id) {
+        this.newEventsCallback({ returnValues: {contour, id} });
+    }
+    
+    async getCurrentBlock() {
+        return 0;
+    }
+
+    async onReconnect(callback) {
+        
     }
 }

@@ -12,41 +12,71 @@ if (!config.wsServer) {
     process.exit(1);
 }
 
-let websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
-let web3 = new Web3(websocketProvider);
-
-function subscribeForReconnect() {
-    websocketProvider.on('end', () => {
-        setTimeout(() => {
-            console.log('🔁 Websocket reconnect');
-            websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
-            web3 = new Web3(websocketProvider);
-            subscribeForReconnect();
-        }, 1000);
-    });
-}
-subscribeForReconnect();
-
 module.exports = async () => {
+    const web3 = new Web3(new Web3.providers.WebsocketProvider(config.wsServer));
+
     const netId = await web3.eth.net.getId();
 
     const {data: contractsConfig} = await axios.get(config.contractsConfigUrl + netId + '.json');
-
-    const spaceGeoData = new web3.eth.Contract(contractsConfig.splitMergeAbi, contractsConfig.splitMergeAddress);
     
-    return new ExplorerChainWeb3Service(spaceGeoData, contractsConfig);
+    return new ExplorerChainWeb3Service(contractsConfig);
 };
 
 class ExplorerChainWeb3Service implements IExplorerChainService {
+    websocketProvider: any;
+    web3: any;
+    
     spaceGeoData: any;
     contractsConfig: any;
     
-    constructor(_spaceGeoData, _contractsConfig) {
-        this.spaceGeoData = _spaceGeoData;
+    callbackOnReconnect: any;
+    
+    constructor(_contractsConfig) {
+        this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
+        this.web3 = new Web3(this.websocketProvider);
+        
         this.contractsConfig = _contractsConfig;
+        
+        this.createContractInstance();
+        
+        this.subscribeForReconnect();
     }
     
     getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
         return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
+    }
+
+    subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
+        this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+    }
+
+    async getCurrentBlock() {
+        return this.web3.eth.getBlockNumber();
+    }
+
+    onReconnect(callback) {
+        this.callbackOnReconnect = callback;
+    }
+
+    private subscribeForReconnect() {
+        this.websocketProvider.on('end', () => {
+            setTimeout(() => {
+                console.log('🔁 Websocket reconnect');
+                
+                this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
+                this.web3 = new Web3(this.websocketProvider);
+                this.createContractInstance();
+                
+                if(this.callbackOnReconnect) {
+                    this.callbackOnReconnect();
+                }
+                
+                this.subscribeForReconnect();
+            }, 1000);
+        });
+    }
+    
+    private createContractInstance() {
+        this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.contractName + 'Abi'], this.contractsConfig[config.contractName + 'Address']);
     }
 }
