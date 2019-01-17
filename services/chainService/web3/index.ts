@@ -24,7 +24,7 @@ module.exports = async (extendConfig) => {
     const serviceInstance = new ExplorerChainWeb3Service(contractsConfig);
     
     setInterval(async () => {
-        const {data: newContractsConfig} = await axios.get(config.contractsConfigUrl + netId + '.json');
+        const {data: newContractsConfig} = await axios.get(contractsConfigUrl + netId + '.json');
         if(newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
             serviceInstance.setContractsConfig(newContractsConfig, true);
         }
