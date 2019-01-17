@@ -12,12 +12,12 @@ if (!config.wsServer) {
     process.exit(1);
 }
 
-module.exports = async (env) => {
+module.exports = async (extendConfig) => {
     const web3 = new Web3(new Web3.providers.WebsocketProvider(config.wsServer));
 
     const netId = await web3.eth.net.getId();
     
-    const contractsConfigUrl = _.template(config.contractsConfigUrl)({ env });
+    const contractsConfigUrl = _.template(config.contractsConfigUrl)({ env: extendConfig.env || config.env });
 
     const {data: contractsConfig} = await axios.get(contractsConfigUrl + netId + '.json');
     
