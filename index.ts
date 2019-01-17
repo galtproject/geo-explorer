@@ -13,7 +13,10 @@ const config = require('./config');
     
     const database: IExplorerDatabase = await require('./database/' + config.database)(databaseConfig);
     const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
-    const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)();
+    
+    const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)({
+        env: process.env.CHAIN_ENV || config.chainEnv
+    });
     
     chainService.onReconnect(fetchAndSubscribe);
     
