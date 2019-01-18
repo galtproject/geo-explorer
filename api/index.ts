@@ -3,7 +3,8 @@ import IExplorerDatabase from "../database/interface";
 import IExplorerChainService from "../services/chainService/interace";
 
 const service = require('restana')({
-    ignoreTrailingSlash: true
+    ignoreTrailingSlash: true,
+    maxParamLength: 2000
 });
 
 const bodyParser = require('body-parser');
