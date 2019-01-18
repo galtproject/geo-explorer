@@ -14,28 +14,25 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     service.get('/v1/contours/by/inner-geohash/:geohash', async (req, res) => {
         const innerGeohash = req.params.geohash;
 
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "X-Requested-With");
-        
-        res.send({
-            lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
-            currentBlockNumber: await chainService.getCurrentBlock(),
-            data: await geohashService.getContoursByInnerGeohash(innerGeohash)
-        });
+        await respondByScheme(res, await geohashService.getContoursByInnerGeohash(innerGeohash));
     });
     
     service.get('/v1/contours/by/parent-geohash/:geohashes', async (req, res) => {
         const geohashes = req.params.geohashes.split(',');
 
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "X-Requested-With");
-        
+        await respondByScheme(res, await geohashService.getContoursByParentGeohashArray(geohashes));
+    });
+    
+    async function respondByScheme (res, data) {
         res.send({
             lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
             currentBlockNumber: await chainService.getCurrentBlock(),
-            data: await geohashService.getContoursByParentGeohashArray(geohashes)
+            data
+        }, 200, {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "X-Requested-With"
         });
-    });
+    }
     
     console.log('🚀 Start application on port', port);
     
