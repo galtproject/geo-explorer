@@ -10,6 +10,12 @@ const bodyParser = require('body-parser');
 service.use(bodyParser.json());
 
 module.exports = (geohashService: IExplorerGeohashService, chainService: IExplorerChainService, database: IExplorerDatabase, port) => {
+    service.all('*', function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "X-Requested-With");
+        next();
+    });
+    
     service.get('/v1/contours/by/inner-geohash/:geohash', async (req, res) => {
         const innerGeohash = req.params.geohash;
 
