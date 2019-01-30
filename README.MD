@@ -8,8 +8,8 @@ Indexing changes of contours and providing api for getting:
 
 ## Servers:
 
-- Local(pre-dev) contracts: http://142.93.168.105:3344
-- Dev contracts: http://142.93.168.105:3355
+- Local(pre-dev) contracts: https://geo-explorer.testnet.galtproject.io:33440
+- Dev contracts: https://geo-explorer.testnet.galtproject.io:33550
 
 ## How to run
 
