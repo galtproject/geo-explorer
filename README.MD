@@ -24,7 +24,7 @@ Indexing changes of contours and providing api for getting:
 |-----|-------------|
 | DATABASE_NAME | Specify database name for store |
 | API_PORT | Specify port of application api  |
-| CHAIN_ENV | Specify environment of contracts(local, dev, test, prod for example)  |
+| CHAIN_ENV | Specify environment of contracts(`local`, `dev`, `test`, `prod` for example)  |
 
 ## API
 
