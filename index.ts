@@ -29,12 +29,11 @@ const config = require('./config');
     if (needFlushing) {
       await database.flushDatabase();
     }
-    prevBlockNumber = (await database.getValue('lastBlockNumber')) || chainService.contractsConfig.blockNumber;
+    prevBlockNumber = (await database.getValue('lastBlockNumber'));
 
     const currentBlockNumber = await chainService.getCurrentBlock();
 
     await chainService.getEventsFromBlock('SetSpaceTokenContour', parseInt(prevBlockNumber)).then(async (events) => {
-      console.log('prevBlockNumber', prevBlockNumber, 'events', events);
       await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
 
       // console.log('events finish');
