@@ -1,4 +1,4 @@
-import IExplorerDatabase from "../interface";
+import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -36,6 +36,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async flushDatabase() {
     await this.models.GeohashSpaceToken.destroy({where: {}});
+    await this.models.SpaceTokensOrders.destroy({where: {}});
+    await this.models.SpaceTokenGeoData.destroy({where: {}});
+    await this.models.SaleOrder.destroy({where: {}});
     await this.models.Value.destroy({where: {}});
   }
 
@@ -49,7 +52,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     // remove excluded geohashes and mark exists
     await pIteration.forEach(dbContourGeohashes, async (geohashObj) => {
       const contourGeohash = geohashObj.contourGeohash;
-            
+
       if (!_.includes(contourGeohashes, contourGeohash)) {
         await this.models.GeohashSpaceToken.destroy({where: {spaceTokenId, contourGeohash}});
       }
@@ -71,7 +74,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return spaceTokenGeohashes.map(geohashObj => geohashObj.contourGeohash);
     })
   }
-  
+
   async getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], spaceTokenId: number }]> {
     let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({
       where: {contourGeohash: {[Op.like]: parentGeohash + '%'}}
@@ -86,6 +89,44 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
       return {contour, spaceTokenId};
     });
+  }
+  
+  async getSpaceTokenGeoData(spaceTokenId) {
+    return this.models.SpaceTokenGeoData.findOne({
+      where: { spaceTokenId }
+    });
+  }
+
+  async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
+    let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
+
+    if(dbObject) {
+      await this.models.SpaceTokenGeoData.update(geoData, {
+        where: {spaceTokenId: geoData.spaceTokenId}
+      });
+    } else {
+      return this.models.SpaceTokenGeoData.create(geoData);
+    }
+    return this.getSpaceTokenGeoData(geoData.spaceTokenId);
+  }
+
+  async getSaleOrder(orderId) {
+    return this.models.SaleOrder.findOne({
+      where: { orderId }
+    });
+  }
+  
+  async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
+    let dbObject = await this.getSaleOrder(saleOrder.orderId);
+
+    if(dbObject) {
+      await this.models.SaleOrder.update(saleOrder, {
+        where: {orderId: saleOrder.orderId}
+      });
+    } else {
+      return this.models.SaleOrder.create(saleOrder);
+    }
+    return this.getSaleOrder(saleOrder.orderId);
   }
 
   async getValue(key: string) {

@@ -99,9 +99,29 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       const spaceTokenId = geohashObj.spaceTokenId;
 
       let contour = await this.getContourBySpaceTokenId(spaceTokenId);
-      
+
       return {contour, spaceTokenId};
     });
+  }
+
+  getSpaceTokenGeoData(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+
+  addOrUpdateGeoData(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+  
+  getSaleOrder(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+
+  addOrUpdateSaleOrder(geoData) {
+    console.error("Not supported");
+    return null;
   }
 
   async getValue(key: string) {

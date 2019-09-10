@@ -1,10 +1,11 @@
-import IExplorerChainService from "../interace";
+import IExplorerChainService, {ChainServiceEvents} from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
 const _ = require('lodash');
 const axios = require('axios');
 
 const Web3 = require("web3");
+const Web3Utils = require("web3-utils");
 
 const config = require('./config');
 if (!config.wsServer) {
@@ -42,6 +43,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   web3: any;
 
   spaceGeoData: any;
+  propertyMarket: any;
   contractsConfig: any;
 
   callbackOnReconnect: any;
@@ -56,13 +58,26 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
+  
+  getContractByEvent(eventName) {
+    if(eventName === ChainServiceEvents.SetSpaceTokenContour) {
+      return this.spaceGeoData;
+    }
+    if(eventName === ChainServiceEvents.SetSpaceTokenDataLink) {
+      return this.spaceGeoData;
+    }
+    if(eventName === ChainServiceEvents.SaleOrderStatusChanged) {
+      return this.propertyMarket;
+    }
+    return null;
+  }
 
   getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
-    return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
+    return this.getContractByEvent(eventName).getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
   }
 
   subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
-    this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+    this.getContractByEvent(eventName).events[eventName]({fromBlock: blockNumber}, callback);
   }
 
   async getCurrentBlock() {
@@ -81,7 +96,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
         this.web3 = new Web3(this.websocketProvider);
         this.createContractInstance();
-                
+
         if (this.callbackOnReconnect) {
           this.callbackOnReconnect();
         }
@@ -101,6 +116,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   private createContractInstance() {
-    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.contractName + 'Abi'], this.contractsConfig[config.contractName + 'Address']);
+    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
+    this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
+  }
+  
+  public async getSpaceTokenArea(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
+      return Web3Utils.fromWei(result.toString(10), 'ether');
+    })
+  }
+
+  getSaleOrder(orderId) {
+    return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
+      return result;
+    })
   }
 }

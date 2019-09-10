@@ -1,5 +1,5 @@
 import IExplorerDatabase from "../database/interface";
-import IExplorerChainService from "../services/chainService/interace";
+import IExplorerChainService from "../services/chainService/interface";
 import IExplorerGeohashService from "../services/geohashService/interface";
 
 const chai: any = require('chai');
@@ -145,7 +145,7 @@ describe("geohashServiceV1", function () {
         const sourceContour = ['w24q8r9pgd0p', 'w24q8r3newq1', 'w24q8r6pm9gc', 'w24q8rf0q48p'];
 
         const tokenId = 99;
-        
+
         await database.addOrUpdateContour(sourceContour, tokenId);
         let dbContour = await database.getContourBySpaceTokenId(tokenId);
         assert.deepStrictEqual(dbContour, sourceContour);

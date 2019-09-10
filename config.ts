@@ -1,7 +1,8 @@
 module.exports = {
-    'chainService': 'web3',
-    'database': 'mysqlV2',
-    'geohashService': 'v1',
-    'apiPort': 3344,
-    'chainEnv': 'local'
+  'chainService': 'web3',
+  'database': 'mysqlV2',
+  'geohashService': 'v1',
+  'geoDataService': 'v1',
+  'apiPort': 3344,
+  'chainEnv': 'local'
 };

@@ -1,6 +1,7 @@
 import IExplorerDatabase from "./database/interface";
 import IExplorerGeohashService from "./services/geohashService/interface";
-import IExplorerChainService from "./services/chainService/interace";
+import IExplorerChainService, {ChainServiceEvents} from "./services/chainService/interface";
+import IExplorerGeoDataService from "./services/geoDataService/interface";
 
 const pIteration = require("p-iteration");
 const config = require('./config');
@@ -12,17 +13,19 @@ const config = require('./config');
   }
 
   const database: IExplorerDatabase = await require('./database/' + config.database)(databaseConfig);
-  const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
 
   const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)({
     env: process.env.CHAIN_ENV || config.chainEnv,
     lastBlockNumber: await database.getValue('lastBlockNumber')
   });
 
+  const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
+  const geoDataService: IExplorerGeoDataService = await require('./services/geoDataService/' + config.geoDataService)(database, chainService);
+
   chainService.onReconnect(fetchAndSubscribe);
-  
+
   let prevBlockNumber = await database.getValue('lastBlockNumber');
-  
+
   await fetchAndSubscribe(chainService.contractsConfig.blockNumber > prevBlockNumber);
 
   async function fetchAndSubscribe(needFlushing = false) {
@@ -33,24 +36,46 @@ const config = require('./config');
 
     const currentBlockNumber = await chainService.getCurrentBlock();
 
-    await chainService.getEventsFromBlock('SetSpaceTokenContour', parseInt(prevBlockNumber)).then(async (events) => {
-      await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
+    // await chainService.getEventsFromBlock('SetSpaceTokenContour', parseInt(prevBlockNumber)).then(async (events) => {
+    //   await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
+    //
+    //   // console.log('events finish');
+    //   // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r');
+    //   // console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
+    //   //
+    //   // const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3');
+    //   // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
+    // });
+    //
+    // chainService.subscribeForNewEvents(ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
+    //   console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
+    //   await geohashService.handleChangeContourEvent(newEvent);
+    //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    // });
 
-      // console.log('events finish');
-      // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r');
-      // console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
-      //
-      // const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3');
-      // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
+    chainService.subscribeForNewEvents(ChainServiceEvents.SetSpaceTokenDataLink, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New SetSpaceTokenDataLink event, blockNumber:', currentBlockNumber);
+      await geoDataService.handleChangeSpaceTokenDataEvent(newEvent);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
+
+    await chainService.getEventsFromBlock(ChainServiceEvents.SetSpaceTokenDataLink, parseInt(prevBlockNumber)).then(async (events) => {
+      await pIteration.forEach(events, geoDataService.handleChangeSpaceTokenDataEvent.bind(geoDataService));
+    });
+
+    chainService.subscribeForNewEvents(ChainServiceEvents.SaleOrderStatusChanged, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New SaleOrderStatusChanged event, blockNumber:', currentBlockNumber);
+      await geoDataService.handleSaleOrderEvent(newEvent);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
+    
+    await chainService.getEventsFromBlock(ChainServiceEvents.SaleOrderStatusChanged, parseInt(prevBlockNumber)).then(async (events) => {
+      await pIteration.forEach(events, geoDataService.handleSaleOrderEvent.bind(geoDataService));
     });
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 
-    chainService.subscribeForNewEvents('SetSpaceTokenContour', currentBlockNumber, async (err, newEvent) => {
-      await geohashService.handleChangeContourEvent(newEvent);
-      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
-      console.log('🛎 New event, blockNumber:', currentBlockNumber);
-    });
+    //todo: handle DeleteSpaceTokenGeoData
   }
 
   const server = await require('./api/')(geohashService, chainService, database, process.env.API_PORT || config.apiPort);

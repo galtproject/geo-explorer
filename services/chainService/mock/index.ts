@@ -1,4 +1,4 @@
-import IExplorerChainService from "../interace";
+import IExplorerChainService from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
 const galtUtils = require('@galtproject/utils');
@@ -12,10 +12,11 @@ class ExplorerChainMockService implements IExplorerChainService {
   web3: any;
 
   spaceGeoData: any;
+  propertyMarket: any;
   contractsConfig: any;
 
   callbackOnReconnect: any;
-  
+
   newEventsCallback;
 
   constructor() {
@@ -33,8 +34,8 @@ class ExplorerChainMockService implements IExplorerChainService {
       ['w24q8r9f3sgd', 'w24q8r9g3879', 'w24q8r9v9x7d', 'w24q8r9txx24', 'w24q8r9er821', 'w24q8r9e2brc', 'w24q8r9s2brf', 'w24q8r9kqbk6', 'w24q8r96quu6']
     ].map((stringContour, numberId) => {
       let contour: number[] = stringContour.map(galtUtils.geohashToGeohash5);
-      let id = numberId.toString();
-      return {returnValues: {contour, id}};
+      let spaceTokenId = numberId.toString();
+      return {returnValues: {contour, spaceTokenId}};
     });
   }
 
@@ -52,5 +53,8 @@ class ExplorerChainMockService implements IExplorerChainService {
 
   async onReconnect(callback) {
 
+  }
+  public async getSpaceTokenArea(spaceTokenId) {
+    return 0;
   }
 }
