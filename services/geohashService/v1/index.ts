@@ -20,7 +20,10 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
 
   async handleChangeContourEvent(event: IExplorerChainContourEvent) {
     console.log('event', event);
-    const contour: string[] = event.returnValues.contour.map(galtUtils.numberToGeohash);
+    const contour: string[] = event.returnValues.contour.map((geohash5z) => {
+      const { geohash5 } = galtUtils.geohash5zToGeohash5(geohash5z);
+      return galtUtils.numberToGeohash(geohash5);
+    });
     let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'];
 
     let spaceTokenNumberId: number;

@@ -1,5 +1,5 @@
-import IExplorerDatabase from "../../../database/interface";
-import IExplorerGeohashService, {default as IExplorerGeoDataService} from "../interface";
+import IExplorerDatabase, {FilterSaleOrdersQuery} from "../../../database/interface";
+import {default as IExplorerGeoDataService, FilterSaleOrdersGeoQuery} from "../interface";
 import {
   IExplorerChainContourEvent,
   IExplorerGeoDataEvent,
@@ -7,6 +7,7 @@ import {
   IExplorerSaleOrderEvent
 } from "../../interfaces";
 import IExplorerChainService from "../../chainService/interface";
+import IExplorerGeohashService from "../../geohashService/interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -14,7 +15,7 @@ const pIteration = require("p-iteration");
 const {GeesomeClient} = require('geesome-libs/src/GeesomeClient');
 const {isIpldHash} = require('geesome-libs/src/ipfsHelper');
 
-module.exports = async (database: IExplorerDatabase, chainService: IExplorerChainService) => {
+module.exports = async (database: IExplorerDatabase, geohashService: IExplorerGeohashService, chainService: IExplorerChainService) => {
   const geesome = new GeesomeClient({
     server: 'https://geesome-node.galtproject.io:7722',
     apiKey: "MCYK5V1-15Q48EQ-QSEKRWX-1ZS0SPW"
@@ -23,17 +24,19 @@ module.exports = async (database: IExplorerDatabase, chainService: IExplorerChai
   await geesome.init();
   await geesome.initRuntimeIpfsNode();
   
-  return new ExplorerGeoDataV1Service(database, chainService, geesome);
+  return new ExplorerGeoDataV1Service(database, geohashService, chainService, geesome);
 };
 
 class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   database: IExplorerDatabase;
   chainService: IExplorerChainService;
+  geohashService: IExplorerGeohashService;
   geesome;
 
-  constructor(_database, _chainService, _geesome) {
+  constructor(_database, _geohashService, _chainService, _geesome) {
     this.database = _database;
     this.geesome = _geesome;
+    this.geohashService = _geohashService;
     this.chainService = _chainService;
   }
 
@@ -90,7 +93,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
-      currency: chainOrder.escrowCurrency,
+      currency: chainOrder.escrowCurrency.toString(10) == '0' ? 'eth' : 'erc20',
       currencyAddress: chainOrder.tokenContract,
       price: chainOrder.ask,
       description: orderData.description
@@ -100,4 +103,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     await dbOrder.addSpaceTokens(dbSpaceTokens);
   };
+  
+  async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
+    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
+    }
+    console.log('filterQuery.tokensIds', filterQuery.tokensIds);
+    return this.database.filterSaleOrders(filterQuery);
+  }
 }

@@ -1,4 +1,4 @@
-import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder} from "../interface";
+import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder, FilterSaleOrdersQuery} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -127,6 +127,66 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return this.models.SaleOrder.create(saleOrder);
     }
     return this.getSaleOrder(saleOrder.orderId);
+  }
+
+  async filterSaleOrders(filterQuery: FilterSaleOrdersQuery) {
+    const allWheres: any = {};
+    
+    ['area', 'price', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
+      const minVal = filterQuery[field + 'Min'];
+      const maxVal = filterQuery[field + 'Max'];
+      if(!minVal && !maxVal)
+        return;
+      
+      const fieldWhereObj = {};
+      if(minVal)
+        fieldWhereObj[Op.gte] = minVal;
+      
+      if(maxVal)
+        fieldWhereObj[Op.lte] = maxVal;
+      
+      allWheres[field] = fieldWhereObj;
+    });
+    
+    if(filterQuery.regions && filterQuery.regions.length) {
+      for(let i = 1; i <= 9; i++) {
+        allWheres['regionLvl' + i] = {[Op.in]: filterQuery.regions};
+      }
+    }
+    
+    if(filterQuery.types && filterQuery.types.length) {
+      allWheres['type'] = {[Op.in]: filterQuery.types};
+    }
+    if(filterQuery.subtypes && filterQuery.subtypes.length) {
+      allWheres['subtype'] = {[Op.in]: filterQuery.subtypes};
+    }
+    
+    if(filterQuery.tokensIds) {
+      allWheres['spaceTokenId'] = {[Op.in]: filterQuery.tokensIds};
+    }
+    
+    ['currency', 'currencyAddress'].forEach((field) => {
+      if(filterQuery[field])
+        allWheres[field] = filterQuery[field];
+    });
+    
+    function resultWhere(sourceWhere, fields) {
+      const res = {};
+      _.forEach(sourceWhere, (value, key) => {
+        if(!_.isUndefined(value) && _.includes(fields, key))
+          res[key] = value;
+      });
+      return res;
+    }
+    
+    return this.models.SaleOrder.findAll({
+      where: resultWhere(allWheres, ['price','currency', 'currencyAddress']),
+      include : [{
+        association: 'spaceTokens',
+        required: true,
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+      }]
+    });
   }
 
   async getValue(key: string) {

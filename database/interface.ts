@@ -15,6 +15,8 @@ export default interface IExplorerDatabase {
   
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
+  filterSaleOrders(filterQuery: FilterSaleOrdersQuery): Promise<ISaleOrder[]>;
+
   getValue(key: string): Promise<string>;
 
   setValue(key: string, content: string): Promise<void>;
@@ -52,4 +54,24 @@ export interface ISaleOrder {
   description;
   
   addSpaceTokens?(tokensObjects);
+}
+
+export interface FilterSaleOrdersQuery {
+  tokensIds?: string[];
+  
+  currency?: string;
+  currencyAddress?: string;
+  
+  regions?: string[];
+  types?: string[];
+  subtypes?: string[];
+  
+  priceMin?: number;
+  priceMax?: number;
+
+  areaMin?: number;
+  areaMax?: number;
+
+  bedroomsCountMin?: number;
+  bathroomsCountMin?: number;
 }
