@@ -38,6 +38,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
         req.query[key.value] = searchParams.get(key.value);
       }
     }
+    next();
   });
   service.get('/v1/contours/by/inner-geohash/:geohash', async (req, res) => {
     const innerGeohash = req.params.geohash;
