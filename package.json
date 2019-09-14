@@ -16,7 +16,7 @@
     "axios": "^0.18.1",
     "fs": "0.0.1-security",
     "geesome-libs": "git+ssh://git@github.com/galtproject/geesome-libs.git#cb53446",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "mysql2": "^1.6.4",
     "p-iteration": "^1.1.7",
     "restana": "^2.7.0",
