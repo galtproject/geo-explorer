@@ -26,12 +26,14 @@ export default interface IExplorerChainService {
   getCurrentBlock(): Promise<number>;
 
   onReconnect(callback): void;
+  
+  getSpaceTokenOwner(spaceTokenId): Promise<string>;
 
   getSpaceTokenArea(spaceTokenId): Promise<number>;
 
   getSpaceTokenContourData(spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
 
-  getSpaceTokenData(spaceTokenId): Promise<{ area: number, geohashContour: string[], heightsContour: number[] }>;
+  getSpaceTokenData(spaceTokenId): Promise<{ area: number, areaSource: string, geohashContour: string[], heightsContour: number[] }>;
 
   getSaleOrder(orderId): Promise<ChainServiceSaleOrder>;
 }

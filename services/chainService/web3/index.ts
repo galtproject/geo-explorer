@@ -54,6 +54,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   spaceGeoData: any;
   propertyMarket: any;
+  spaceToken: any;
+  
   contractsConfig: any;
 
   callbackOnReconnect: any;
@@ -128,6 +130,11 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   private createContractInstance() {
     this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
     this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
+    this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
+  }
+
+  public async getSpaceTokenOwner(spaceTokenId) {
+    return this.spaceToken.methods.ownerOf(spaceTokenId).call({});
   }
   
   public async getSpaceTokenArea(spaceTokenId) {

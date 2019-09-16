@@ -55,6 +55,9 @@ export interface ISpaceTokenGeoData {
   bedroomsCount;
   yearBuilt;
   area;
+  owner;
+  areaSource;
+  dataLink;
   dataJson;
   geohashContourJson;
   heightsContourJson;

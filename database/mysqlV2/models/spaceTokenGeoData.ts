@@ -69,6 +69,15 @@ module.exports = async function (sequelize, models) {
     area: {
       type: Sequelize.FLOAT
     },
+    owner: {
+      type: Sequelize.STRING(100)
+    },
+    areaSource: {
+      type: Sequelize.STRING(100)
+    },
+    dataLink: {
+      type: Sequelize.STRING(100)
+    },
     dataJson: {
       type: Sequelize.TEXT
     },

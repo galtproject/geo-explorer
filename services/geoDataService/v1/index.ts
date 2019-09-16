@@ -69,6 +69,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     
     const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
+    const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
 
     await this.database.addOrUpdateGeoData({
       spaceTokenId: spaceTokenId,
@@ -89,7 +90,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bathroomsCount: details.bathrooms,
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
+      owner: owner,
       area: geoData.area,
+      areaSource: geoData.areaSource,
+      dataLink: dataLink,
       dataJson: JSON.stringify(spaceData),
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       heightsContourJson: JSON.stringify(geoData.heightsContour)

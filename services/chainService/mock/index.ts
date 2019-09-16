@@ -66,6 +66,9 @@ class ExplorerChainMockService implements IExplorerChainService {
   public async getSaleOrder(orderId) {
     return null;
   }
+  public async getSpaceTokenOwner(spaceTokenId) {
+    return null;
+  }
   public async getSpaceTokenArea(spaceTokenId) {
     return 0;
   }
