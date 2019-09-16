@@ -173,7 +173,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   getSaleOrder(orderId) {
     return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
-      result.ask = Web3Utils.fromWei(result.area.toString(10), 'ether');
+      result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
       return result;
     })
   }
