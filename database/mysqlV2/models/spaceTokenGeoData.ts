@@ -72,6 +72,9 @@ module.exports = async function (sequelize, models) {
     owner: {
       type: Sequelize.STRING(100)
     },
+    ledgerIdentifier: {
+      type: Sequelize.STRING(100)
+    },
     areaSource: {
       type: Sequelize.STRING(100)
     },

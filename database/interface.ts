@@ -57,6 +57,7 @@ export interface ISpaceTokenGeoData {
   area;
   owner;
   areaSource;
+  ledgerIdentifier;
   dataLink;
   dataJson;
   geohashContourJson;

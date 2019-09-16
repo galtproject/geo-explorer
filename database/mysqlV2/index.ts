@@ -199,8 +199,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async filterSaleOrders(ordersQuery: SaleOrdersQuery) {
-    if(ordersQuery.limit > 100) {
-      ordersQuery.limit = 100;
+    if(ordersQuery.limit > 1000) {
+      ordersQuery.limit = 1000;
     }
     
     const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
