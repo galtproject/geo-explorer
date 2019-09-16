@@ -57,7 +57,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return;
     }
     
-    const {data, floorPlans, photos} = await this.geesome.getObject(dataLink).catch(() => {});
+    const spaceData = await this.geesome.getObject(dataLink).catch(() => {});
+    const {data, floorPlans, photos} = spaceData;
     if(!data || !data.region) {
       return;
     }
@@ -84,7 +85,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bathroomsCount: data.bathrooms,
       bedroomsCount: data.bedrooms,
       yearBuilt: data.yearBuilt,
-      area
+      area,
+      dataJson: JSON.stringify(spaceData)
     });
   };
 

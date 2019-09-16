@@ -53,6 +53,7 @@ export interface ISpaceTokenGeoData {
   bedroomsCount;
   yearBuilt;
   area;
+  dataJson;
 }
 
 export interface ISaleOrder {
