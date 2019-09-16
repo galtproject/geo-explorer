@@ -69,6 +69,9 @@ module.exports = async function (sequelize, models) {
     area: {
       type: Sequelize.FLOAT
     },
+    dataJson: {
+      type: Sequelize.TEXT
+    }
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
