@@ -208,6 +208,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.limit = ordersQuery.limit || 20;
     findAllParam.offset = ordersQuery.offset || 0;
     
+    findAllParam.order = [
+      [ordersQuery.sortBy || 'createdAt', ordersQuery.sortDir || 'DESC']
+    ];
+    
     return this.models.SaleOrder.findAll(findAllParam);
   }
 
