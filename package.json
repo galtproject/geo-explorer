@@ -15,7 +15,7 @@
     "@types/es6-promise": "^3.3.0",
     "axios": "^0.18.0",
     "fs": "0.0.1-security",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "mysql2": "^1.6.4",
     "p-iteration": "^1.1.7",
     "restana": "^2.7.0",
