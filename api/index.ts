@@ -25,11 +25,8 @@ service.use(bodyParser.json());
 module.exports = (geohashService: IExplorerGeohashService, chainService: IExplorerChainService, database: IExplorerDatabase, geoDataService: IExplorerGeoDataService, port) => {
   
   service.use(async (req, res, next) => {
-    res.on('response', e => {
-      e.res.setHeader('Access-Control-Allow-Origin', "*");
-      e.res.setHeader('Access-Control-Allow-Headers', "X-Requested-With");
-    });
-
+    setHeaders(res);
+    
     req.query = {};
     if (_.includes(req.url, '?')) {
       const searchParams: any = new URLSearchParams(req.url.split('?')[1]);
@@ -40,6 +37,16 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     }
     next();
   });
+
+  service.options("/*", function (req, res, next) {
+    setHeaders(res);
+    res.send(200);
+  });
+  service.head("/*", function (req, res, next) {
+    setHeaders(res);
+    res.send(200);
+  });
+  
   service.get('/v1/contours/by/inner-geohash/:geohash', async (req, res) => {
     const innerGeohash = req.params.geohash;
 
@@ -65,6 +72,14 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "X-Requested-With"
     });
+  }
+  
+  function setHeaders(res) {
+    res.setHeader('Strict-Transport-Security', 'max-age=0');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD");
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
   }
 
   console.log('🚀 Start application on port', port);
