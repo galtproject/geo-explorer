@@ -85,9 +85,10 @@ const config = require('./config');
     // const orders = await geoDataService.filterOrders({
     //   // areaMin: 2000,
     //   // surroundingsGeohashBox: ['dpzpufr']
-    //   surroundingsGeohashBox: ['9q598']
+    //   surroundingsGeohashBox: ['9q598'],
+    //   limit: 2
     // });
-    // console.log('found orders', orders.length);
+    // console.log('found orders', orders.list.length, orders.total);
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 

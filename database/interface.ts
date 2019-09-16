@@ -25,6 +25,7 @@ export default interface IExplorerDatabase {
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
   filterSaleOrders(filterQuery: SaleOrdersQuery): Promise<ISaleOrder[]>;
+  filterSaleOrdersCount(filterQuery: SaleOrdersQuery): Promise<number>;
 
   getValue(key: string): Promise<string>;
 
@@ -70,8 +71,8 @@ export interface SaleOrdersQuery {
   limit?: number;
   offset?: number;
   
-  sortBy: string;
-  sortDir: string;
+  sortBy?: string;
+  sortDir?: string;
   
   tokensIds?: string[];
   

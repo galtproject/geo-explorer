@@ -137,48 +137,48 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     return this.getSaleOrder(saleOrder.orderId);
   }
-
-  async filterSaleOrders(ordersQuery: SaleOrdersQuery) {
+  
+  saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
     const allWheres: any = {};
-    
+
     ['area', 'price', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
       const minVal = ordersQuery[field + 'Min'];
       const maxVal = ordersQuery[field + 'Max'];
       if(!minVal && !maxVal)
         return;
-      
+
       const fieldWhereObj = {};
       if(minVal)
         fieldWhereObj[Op.gte] = minVal;
-      
+
       if(maxVal)
         fieldWhereObj[Op.lte] = maxVal;
-      
+
       allWheres[field] = fieldWhereObj;
     });
-    
+
     if(ordersQuery.regions && ordersQuery.regions.length) {
       for(let i = 1; i <= 9; i++) {
         allWheres['regionLvl' + i] = {[Op.in]: ordersQuery.regions};
       }
     }
-    
+
     if(ordersQuery.types && ordersQuery.types.length) {
       allWheres['type'] = {[Op.in]: ordersQuery.types};
     }
     if(ordersQuery.subtypes && ordersQuery.subtypes.length) {
       allWheres['subtype'] = {[Op.in]: ordersQuery.subtypes};
     }
-    
+
     if(ordersQuery.tokensIds) {
       allWheres['spaceTokenId'] = {[Op.in]: ordersQuery.tokensIds};
     }
-    
+
     ['currency', 'currencyAddress'].forEach((field) => {
       if(ordersQuery[field])
         allWheres[field] = ordersQuery[field];
     });
-    
+
     function resultWhere(sourceWhere, fields) {
       const res = {};
       _.forEach(sourceWhere, (value, key) => {
@@ -188,20 +188,35 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return res;
     }
     
-    if(ordersQuery.limit > 100) {
-      ordersQuery.limit = 100;
-    }
-    
-    return this.models.SaleOrder.findAll({
+    return {
       where: resultWhere(allWheres, ['price','currency', 'currencyAddress']),
-      limit: ordersQuery.limit || 20,
-      offset: ordersQuery.offset || 0,
       include : [{
         association: 'spaceTokens',
         required: true,
         where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
       }]
-    });
+    }
+  }
+
+  async filterSaleOrders(ordersQuery: SaleOrdersQuery) {
+    if(ordersQuery.limit > 100) {
+      ordersQuery.limit = 100;
+    }
+    
+    const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
+
+    findAllParam.limit = ordersQuery.limit || 20;
+    findAllParam.offset = ordersQuery.offset || 0;
+    
+    return this.models.SaleOrder.findAll(findAllParam);
+  }
+
+  async filterSaleOrdersCount(ordersQuery: SaleOrdersQuery) {
+    const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
+
+    findAllParam.distinct = true;
+    
+    return this.models.SaleOrder.count(findAllParam);
   }
 
   async getValue(key: string) {

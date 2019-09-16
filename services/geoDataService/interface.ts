@@ -15,9 +15,14 @@ export default interface IExplorerGeoDataService {
   
   handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
 
-  filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrder[]>;
+  filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
   surroundingsGeohashBox?: string[];
+}
+
+export interface ISaleOrdersListResponse {
+  list: ISaleOrder[];
+  total: number;
 }

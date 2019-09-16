@@ -120,6 +120,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
-    return this.database.filterSaleOrders(filterQuery);
+    return {
+      list: await this.database.filterSaleOrders(filterQuery),
+      total: await this.database.filterSaleOrdersCount(filterQuery)
+    };
   }
 }

@@ -133,6 +133,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return null;
   }
 
+  filterSaleOrders(params) {
+    console.error("Not supported");
+    return null;
+  }
+  
+  filterSaleOrdersCount(params) {
+    console.error("Not supported");
+    return null;
+  }
+
   async getValue(key: string) {
     const valueObj = await this.models.Value.findOne({where: {key}});
     return valueObj ? valueObj.content : null;
