@@ -24,7 +24,7 @@ export default interface IExplorerDatabase {
   
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
-  filterSaleOrders(filterQuery: FilterSaleOrdersQuery): Promise<ISaleOrder[]>;
+  filterSaleOrders(filterQuery: SaleOrdersQuery): Promise<ISaleOrder[]>;
 
   getValue(key: string): Promise<string>;
 
@@ -66,7 +66,13 @@ export interface ISaleOrder {
   addSpaceTokens?(tokensObjects);
 }
 
-export interface FilterSaleOrdersQuery {
+export interface SaleOrdersQuery {
+  limit?: number;
+  offset?: number;
+  
+  sortBy: string;
+  sortDir: string;
+  
   tokensIds?: string[];
   
   currency?: string;

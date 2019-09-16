@@ -7,7 +7,7 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase, {FilterSaleOrdersQuery} from "../../../database/interface";
+import IExplorerDatabase, {SaleOrdersQuery} from "../../../database/interface";
 import {default as IExplorerGeoDataService, FilterSaleOrdersGeoQuery} from "../interface";
 import {
   IExplorerChainContourEvent,

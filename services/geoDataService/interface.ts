@@ -8,7 +8,7 @@
  */
 
 import {IExplorerGeoDataEvent, IExplorerSaleOrderEvent} from "../interfaces";
-import {FilterSaleOrdersQuery, ISaleOrder} from "../../database/interface";
+import {SaleOrdersQuery, ISaleOrder} from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
   handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent): Promise<void>;
@@ -18,6 +18,6 @@ export default interface IExplorerGeoDataService {
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrder[]>;
 }
 
-export interface FilterSaleOrdersGeoQuery extends FilterSaleOrdersQuery {
+export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
   surroundingsGeohashBox?: string[];
 }

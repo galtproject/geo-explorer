@@ -7,7 +7,7 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder, FilterSaleOrdersQuery} from "../interface";
+import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder, SaleOrdersQuery} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -138,12 +138,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.getSaleOrder(saleOrder.orderId);
   }
 
-  async filterSaleOrders(filterQuery: FilterSaleOrdersQuery) {
+  async filterSaleOrders(ordersQuery: SaleOrdersQuery) {
     const allWheres: any = {};
     
     ['area', 'price', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
-      const minVal = filterQuery[field + 'Min'];
-      const maxVal = filterQuery[field + 'Max'];
+      const minVal = ordersQuery[field + 'Min'];
+      const maxVal = ordersQuery[field + 'Max'];
       if(!minVal && !maxVal)
         return;
       
@@ -157,26 +157,26 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres[field] = fieldWhereObj;
     });
     
-    if(filterQuery.regions && filterQuery.regions.length) {
+    if(ordersQuery.regions && ordersQuery.regions.length) {
       for(let i = 1; i <= 9; i++) {
-        allWheres['regionLvl' + i] = {[Op.in]: filterQuery.regions};
+        allWheres['regionLvl' + i] = {[Op.in]: ordersQuery.regions};
       }
     }
     
-    if(filterQuery.types && filterQuery.types.length) {
-      allWheres['type'] = {[Op.in]: filterQuery.types};
+    if(ordersQuery.types && ordersQuery.types.length) {
+      allWheres['type'] = {[Op.in]: ordersQuery.types};
     }
-    if(filterQuery.subtypes && filterQuery.subtypes.length) {
-      allWheres['subtype'] = {[Op.in]: filterQuery.subtypes};
+    if(ordersQuery.subtypes && ordersQuery.subtypes.length) {
+      allWheres['subtype'] = {[Op.in]: ordersQuery.subtypes};
     }
     
-    if(filterQuery.tokensIds) {
-      allWheres['spaceTokenId'] = {[Op.in]: filterQuery.tokensIds};
+    if(ordersQuery.tokensIds) {
+      allWheres['spaceTokenId'] = {[Op.in]: ordersQuery.tokensIds};
     }
     
     ['currency', 'currencyAddress'].forEach((field) => {
-      if(filterQuery[field])
-        allWheres[field] = filterQuery[field];
+      if(ordersQuery[field])
+        allWheres[field] = ordersQuery[field];
     });
     
     function resultWhere(sourceWhere, fields) {
@@ -188,8 +188,14 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return res;
     }
     
+    if(ordersQuery.limit > 100) {
+      ordersQuery.limit = 100;
+    }
+    
     return this.models.SaleOrder.findAll({
       where: resultWhere(allWheres, ['price','currency', 'currencyAddress']),
+      limit: ordersQuery.limit || 20,
+      offset: ordersQuery.offset || 0,
       include : [{
         association: 'spaceTokens',
         required: true,
