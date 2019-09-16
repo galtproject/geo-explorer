@@ -63,7 +63,19 @@ class ExplorerChainMockService implements IExplorerChainService {
   async onReconnect(callback) {
 
   }
+  public async getSaleOrder(orderId) {
+    return null;
+  }
   public async getSpaceTokenArea(spaceTokenId) {
     return 0;
+  }
+  public async getSpaceTokenContour(spaceTokenId) {
+    return [];
+  }
+  public async getSpaceTokenContourData(spaceTokenId) {
+    return null;
+  }
+  public async getSpaceTokenData(spaceTokenId) {
+    return null;
   }
 }

@@ -10,6 +10,7 @@
 import IExplorerChainService, {ChainServiceEvents} from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
+const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
 const axios = require('axios');
 
@@ -132,6 +133,41 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   public async getSpaceTokenArea(spaceTokenId) {
     return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
       return Web3Utils.fromWei(result.toString(10), 'ether');
+    })
+  }
+
+  public async getSpaceTokenContourData(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenContour(spaceTokenId).call({}).then(result => {
+      const geohashContour = [];
+      const heightsContour = [];
+      result.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        geohashContour,
+        heightsContour
+      };
+    })
+  }
+
+  public async getSpaceTokenData(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
+      
+      const geohashContour = [];
+      const heightsContour = [];
+      
+      result.contour.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
+        geohashContour,
+        heightsContour
+      };
     })
   }
 

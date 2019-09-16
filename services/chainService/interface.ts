@@ -29,6 +29,10 @@ export default interface IExplorerChainService {
 
   getSpaceTokenArea(spaceTokenId): Promise<number>;
 
+  getSpaceTokenContourData(spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
+
+  getSpaceTokenData(spaceTokenId): Promise<{ area: number, geohashContour: string[], heightsContour: number[] }>;
+
   getSaleOrder(orderId): Promise<ChainServiceSaleOrder>;
 }
 

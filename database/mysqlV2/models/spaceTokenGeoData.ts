@@ -71,6 +71,12 @@ module.exports = async function (sequelize, models) {
     },
     dataJson: {
       type: Sequelize.TEXT
+    },
+    geohashContourJson: {
+      type: Sequelize.TEXT
+    },
+    heightsContourJson: {
+      type: Sequelize.TEXT
     }
   }, {
     indexes: [

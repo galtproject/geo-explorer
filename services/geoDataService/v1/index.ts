@@ -58,35 +58,41 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     
     const spaceData = await this.geesome.getObject(dataLink).catch(() => {});
-    const {data, floorPlans, photos} = spaceData;
-    if(!data || !data.region) {
+    let {details, floorPlans, photos} = spaceData;
+    
+    if(!details) {
+      details = spaceData.data;
+    }
+    
+    if(!details || !details.region) {
       return;
     }
     
-    const area = await this.chainService.getSpaceTokenArea(spaceTokenId);
-    console.log('area', area);
+    const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
 
     await this.database.addOrUpdateGeoData({
       spaceTokenId: spaceTokenId,
-      type: data.type,
-      subtype: data.subtype,
-      fullRegion: data.region.join(', '),
-      regionLvl1: data.region[0],
-      regionLvl2: data.region[1],
-      regionLvl3: data.region[2],
-      regionLvl4: data.region[3],
-      regionLvl5: data.region[4],
-      regionLvl6: data.region[5],
-      regionLvl7: data.region[6],
-      regionLvl8: data.region[7],
-      regionLvl9: data.region[8],
+      type: details.type,
+      subtype: details.subtype,
+      fullRegion: details.region.join(', '),
+      regionLvl1: details.region[0],
+      regionLvl2: details.region[1],
+      regionLvl3: details.region[2],
+      regionLvl4: details.region[3],
+      regionLvl5: details.region[4],
+      regionLvl6: details.region[5],
+      regionLvl7: details.region[6],
+      regionLvl8: details.region[7],
+      regionLvl9: details.region[8],
       photosCount: photos.length,
       floorPlansCount: floorPlans.length,
-      bathroomsCount: data.bathrooms,
-      bedroomsCount: data.bedrooms,
-      yearBuilt: data.yearBuilt,
-      area,
-      dataJson: JSON.stringify(spaceData)
+      bathroomsCount: details.bathrooms,
+      bedroomsCount: details.bedrooms,
+      yearBuilt: details.yearBuilt,
+      area: geoData.area,
+      dataJson: JSON.stringify(spaceData),
+      geohashContourJson: JSON.stringify(geoData.geohashContour),
+      heightsContourJson: JSON.stringify(geoData.heightsContour)
     });
   };
 

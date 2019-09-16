@@ -25,6 +25,7 @@ export default interface IExplorerDatabase {
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
   filterSaleOrders(filterQuery: SaleOrdersQuery): Promise<ISaleOrder[]>;
+  
   filterSaleOrdersCount(filterQuery: SaleOrdersQuery): Promise<number>;
 
   getValue(key: string): Promise<string>;
@@ -55,6 +56,8 @@ export interface ISpaceTokenGeoData {
   yearBuilt;
   area;
   dataJson;
+  geohashContourJson;
+  heightsContourJson;
 }
 
 export interface ISaleOrder {
