@@ -21,10 +21,19 @@ module.exports = async function (sequelize, models) {
     currencyAddress: {
       type: Sequelize.STRING(100)
     },
-    price: {
+    currencyName: {
+      type: Sequelize.STRING(100)
+    },
+    ask: {
       type: Sequelize.FLOAT
     },
+    lastBuyer: {
+      type: Sequelize.STRING(100)
+    },
     description: {
+      type: Sequelize.TEXT
+    },
+    dataJson: {
       type: Sequelize.TEXT
     }
   }, {

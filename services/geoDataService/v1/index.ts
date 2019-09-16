@@ -112,8 +112,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       orderId,
       currency: chainOrder.escrowCurrency.toString(10) == '0' ? 'eth' : 'erc20',
       currencyAddress: chainOrder.tokenContract,
-      price: chainOrder.ask,
-      description: orderData.description
+      //TODO: get currencyName from contract
+      currencyName: 'DAI',
+      ask: chainOrder.ask,
+      description: orderData.description,
+      dataJson: JSON.stringify(orderData),
+      lastBuyer: chainOrder.lastBuyer
     });
     
     const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, (id) => this.database.getSpaceTokenGeoData(id));

@@ -141,7 +141,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
     const allWheres: any = {};
 
-    ['area', 'price', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
+    ['area', 'ask', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
       const minVal = ordersQuery[field + 'Min'];
       const maxVal = ordersQuery[field + 'Max'];
       if(!minVal && !maxVal)
@@ -189,7 +189,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     
     return {
-      where: resultWhere(allWheres, ['price','currency', 'currencyAddress']),
+      where: resultWhere(allWheres, ['ask','currency', 'currencyAddress']),
       include : [{
         association: 'spaceTokens',
         required: true,

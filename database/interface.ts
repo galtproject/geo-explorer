@@ -64,8 +64,11 @@ export interface ISaleOrder {
   orderId;
   currency;
   currencyAddress;
-  price;
+  currencyName;
+  ask;
   description;
+  lastBuyer;
+  dataJson;
   
   addSpaceTokens?(tokensObjects);
 }
@@ -86,8 +89,8 @@ export interface SaleOrdersQuery {
   types?: string[];
   subtypes?: string[];
   
-  priceMin?: number;
-  priceMax?: number;
+  askMin?: number;
+  askMax?: number;
 
   areaMin?: number;
   areaMax?: number;
