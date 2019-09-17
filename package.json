@@ -11,16 +11,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@galtproject/utils": "^0.9.1",
+    "@galtproject/utils": "git+ssh://git@github.com/galtproject/galtproject-utils-js.git#ba9c628",
     "@types/es6-promise": "^3.3.0",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "fs": "0.0.1-security",
-    "lodash": "^4.17.11",
+    "geesome-libs": "git+ssh://git@github.com/galtproject/geesome-libs.git#cb53446",
+    "lodash": "^4.17.13",
     "mysql2": "^1.6.4",
     "p-iteration": "^1.1.7",
     "restana": "^2.7.0",
     "sequelize": "^4.42.0",
-    "web3": "^1.0.0-beta.37"
+    "typescript": "^3.6.3",
+    "web3": "^1.0.0-beta.52"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -28,7 +30,6 @@
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "mocha": "^5.2.0",
-    "ts-node": "^7.0.1",
-    "typings": "^2.1.1"
+    "ts-node": "^7.0.1"
   }
 }

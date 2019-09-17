@@ -1,10 +1,21 @@
-import IExplorerChainService from "../interace";
+/*
+ * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka)
+ *
+ * Copyright ©️ 2019 Galt•Core Blockchain Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka) by
+ * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
+ */
+
+import IExplorerChainService, {ChainServiceEvents} from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
+const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
 const axios = require('axios');
 
 const Web3 = require("web3");
+const Web3Utils = require("web3-utils");
 
 const config = require('./config');
 if (!config.wsServer) {
@@ -42,6 +53,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   web3: any;
 
   spaceGeoData: any;
+  propertyMarket: any;
+  spaceToken: any;
+  
   contractsConfig: any;
 
   callbackOnReconnect: any;
@@ -56,13 +70,26 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
+  
+  getContractByEvent(eventName) {
+    if(eventName === ChainServiceEvents.SetSpaceTokenContour) {
+      return this.spaceGeoData;
+    }
+    if(eventName === ChainServiceEvents.SetSpaceTokenDataLink) {
+      return this.spaceGeoData;
+    }
+    if(eventName === ChainServiceEvents.SaleOrderStatusChanged) {
+      return this.propertyMarket;
+    }
+    return null;
+  }
 
   getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
-    return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
+    return this.getContractByEvent(eventName).getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
   }
 
   subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
-    this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+    this.getContractByEvent(eventName).events[eventName]({fromBlock: blockNumber}, callback);
   }
 
   async getCurrentBlock() {
@@ -81,7 +108,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
         this.web3 = new Web3(this.websocketProvider);
         this.createContractInstance();
-                
+
         if (this.callbackOnReconnect) {
           this.callbackOnReconnect();
         }
@@ -101,6 +128,60 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   private createContractInstance() {
-    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.contractName + 'Abi'], this.contractsConfig[config.contractName + 'Address']);
+    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
+    this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
+    this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
+  }
+
+  public async getSpaceTokenOwner(spaceTokenId) {
+    return this.spaceToken.methods.ownerOf(spaceTokenId).call({});
+  }
+  
+  public async getSpaceTokenArea(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
+      return Web3Utils.fromWei(result.toString(10), 'ether');
+    })
+  }
+
+  public async getSpaceTokenContourData(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenContour(spaceTokenId).call({}).then(result => {
+      const geohashContour = [];
+      const heightsContour = [];
+      result.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        geohashContour,
+        heightsContour
+      };
+    })
+  }
+
+  public async getSpaceTokenData(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
+      
+      const geohashContour = [];
+      const heightsContour = [];
+      
+      result.contour.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
+        geohashContour,
+        heightsContour
+      };
+    })
+  }
+
+  getSaleOrder(orderId) {
+    return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
+      result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
+      return result;
+    })
   }
 }

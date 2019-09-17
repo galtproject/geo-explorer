@@ -1,4 +1,13 @@
-import IExplorerDatabase from "../interface";
+/*
+ * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka)
+ *
+ * Copyright ©️ 2019 Galt•Core Blockchain Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka) by
+ * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
+ */
+
+import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder, SaleOrdersQuery} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -36,6 +45,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async flushDatabase() {
     await this.models.GeohashSpaceToken.destroy({where: {}});
+    await this.models.SpaceTokensOrders.destroy({where: {}});
+    await this.models.SpaceTokenGeoData.destroy({where: {}});
+    await this.models.SaleOrder.destroy({where: {}});
     await this.models.Value.destroy({where: {}});
   }
 
@@ -49,7 +61,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     // remove excluded geohashes and mark exists
     await pIteration.forEach(dbContourGeohashes, async (geohashObj) => {
       const contourGeohash = geohashObj.contourGeohash;
-            
+
       if (!_.includes(contourGeohashes, contourGeohash)) {
         await this.models.GeohashSpaceToken.destroy({where: {spaceTokenId, contourGeohash}});
       }
@@ -71,7 +83,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return spaceTokenGeohashes.map(geohashObj => geohashObj.contourGeohash);
     })
   }
-  
+
   async getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], spaceTokenId: number }]> {
     let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({
       where: {contourGeohash: {[Op.like]: parentGeohash + '%'}}
@@ -86,6 +98,129 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
       return {contour, spaceTokenId};
     });
+  }
+  
+  async getSpaceTokenGeoData(spaceTokenId) {
+    return this.models.SpaceTokenGeoData.findOne({
+      where: { spaceTokenId }
+    });
+  }
+
+  async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
+    let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
+
+    if(dbObject) {
+      await this.models.SpaceTokenGeoData.update(geoData, {
+        where: {spaceTokenId: geoData.spaceTokenId}
+      });
+    } else {
+      return this.models.SpaceTokenGeoData.create(geoData);
+    }
+    return this.getSpaceTokenGeoData(geoData.spaceTokenId);
+  }
+
+  async getSaleOrder(orderId) {
+    return this.models.SaleOrder.findOne({
+      where: { orderId }
+    });
+  }
+  
+  async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
+    let dbObject = await this.getSaleOrder(saleOrder.orderId);
+
+    if(dbObject) {
+      await this.models.SaleOrder.update(saleOrder, {
+        where: {orderId: saleOrder.orderId}
+      });
+    } else {
+      return this.models.SaleOrder.create(saleOrder);
+    }
+    return this.getSaleOrder(saleOrder.orderId);
+  }
+  
+  saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
+    const allWheres: any = {};
+
+    ['area', 'ask', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
+      const minVal = ordersQuery[field + 'Min'];
+      const maxVal = ordersQuery[field + 'Max'];
+      if(!minVal && !maxVal)
+        return;
+
+      const fieldWhereObj = {};
+      if(minVal)
+        fieldWhereObj[Op.gte] = minVal;
+
+      if(maxVal)
+        fieldWhereObj[Op.lte] = maxVal;
+
+      allWheres[field] = fieldWhereObj;
+    });
+
+    if(ordersQuery.regions && ordersQuery.regions.length) {
+      for(let i = 1; i <= 9; i++) {
+        allWheres['regionLvl' + i] = {[Op.in]: ordersQuery.regions};
+      }
+    }
+
+    if(ordersQuery.types && ordersQuery.types.length) {
+      allWheres['type'] = {[Op.in]: ordersQuery.types};
+    }
+    if(ordersQuery.subtypes && ordersQuery.subtypes.length) {
+      allWheres['subtype'] = {[Op.in]: ordersQuery.subtypes};
+    }
+
+    if(ordersQuery.tokensIds) {
+      allWheres['spaceTokenId'] = {[Op.in]: ordersQuery.tokensIds};
+    }
+
+    ['currency', 'currencyAddress'].forEach((field) => {
+      if(ordersQuery[field])
+        allWheres[field] = ordersQuery[field];
+    });
+
+    function resultWhere(sourceWhere, fields) {
+      const res = {};
+      _.forEach(sourceWhere, (value, key) => {
+        if(!_.isUndefined(value) && _.includes(fields, key))
+          res[key] = value;
+      });
+      return res;
+    }
+    
+    return {
+      where: resultWhere(allWheres, ['ask','currency', 'currencyAddress']),
+      include : [{
+        association: 'spaceTokens',
+        required: true,
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+      }]
+    }
+  }
+
+  async filterSaleOrders(ordersQuery: SaleOrdersQuery) {
+    if(ordersQuery.limit > 1000) {
+      ordersQuery.limit = 1000;
+    }
+    
+    const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
+
+    findAllParam.limit = ordersQuery.limit || 20;
+    findAllParam.offset = ordersQuery.offset || 0;
+    
+    findAllParam.order = [
+      [ordersQuery.sortBy || 'createdAt', ordersQuery.sortDir || 'DESC']
+    ];
+    
+    return this.models.SaleOrder.findAll(findAllParam);
+  }
+
+  async filterSaleOrdersCount(ordersQuery: SaleOrdersQuery) {
+    const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
+
+    findAllParam.distinct = true;
+    
+    return this.models.SaleOrder.count(findAllParam);
   }
 
   async getValue(key: string) {
