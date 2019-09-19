@@ -179,20 +179,73 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = ordersQuery[field];
     });
 
-    function resultWhere(sourceWhere, fields) {
+    function resultWhere(sourceWhere, fields, relation?) {
       const res = {};
       _.forEach(sourceWhere, (value, key) => {
-        if(!_.isUndefined(value) && _.includes(fields, key))
+        if(!_.isUndefined(value) && _.includes(fields, key)){
+          if(relation) {
+            key = `$${relation}.${key}$`;
+          }
           res[key] = value;
+        }
       });
+      console.log('resultWhere', res);
       return res;
     }
+
+    // console.log('attributes', _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key));
+    
+    // console.log('_conformInclude', this.models.SaleOrder._conformInclude({
+    //   association: 'spaceTokens',
+    //   required: true,
+    //   attributes: _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key),
+    //   where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    // }, this.models.SaleOrder));
+    
+    // const queryOptions = {
+    //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
+    //   include : {//[this.models.SaleOrder._conformInclude({
+    //     association: 'spaceTokens',
+    //     required: true,
+    //     attributes: _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key),
+    //     where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    //   }//, this.models.SaleOrder)]
+    // };
+    //
+    // this.models.SaleOrder._conformOptions(queryOptions, this.models.SaleOrder);
+    // this.models.SaleOrder._expandIncludeAll(queryOptions);
+    // this.models.SaleOrder._validateIncludedElements(queryOptions, {
+    //   [this.models.SaleOrder.getTableName(queryOptions)]: true
+    // });
+    //
+    // let query = this.models.SaleOrder.sequelize.dialect.QueryGenerator.selectQuery(this.models.SaleOrder.getTableName(), queryOptions, this.models.SaleOrder);
+    //
+    // query = query.replace('ON `saleOrder`.`id` = `spaceTokens->spaceTokensOrders`.`saleOrderId` AND', 'ON `saleOrder`.`id` = `spaceTokens->spaceTokensOrders`.`saleOrderId` WHERE');
+    //
+    // console.log('query', query);
+    //
+    // this.sequelize.query(query).then(([results, metadata]) => {
+    //   console.log('query result', results);
+    // });
+
+    //https://github.com/sequelize/sequelize/issues/10943
+    //https://github.com/sequelize/sequelize/issues/4880
+    //https://github.com/sequelize/sequelize/issues/10582
     
     return {
-      where: resultWhere(allWheres, ['ask','currency', 'currencyAddress']),
+      where: _.extend(
+        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
+        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
+      ),
       include : [{
-        association: 'spaceTokens',
-        required: true,
+        model: this.models.SpaceTokenGeoData,
+        // association: this.models.SpaceTokenGeoData,
+        // association: this.models.SpaceTokensOrders,
+        as: 'spaceTokens',
+        // include: 'SpaceTokenGeoData',
+        // required: false
+        // association: 'spaceTokens',
+        // required: true,
         where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
       }]
     }
@@ -207,10 +260,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     findAllParam.limit = ordersQuery.limit || 20;
     findAllParam.offset = ordersQuery.offset || 0;
+
+    const orders = await this.models.SaleOrder.findAll(findAllParam);
     
+    findAllParam.where = { id: { [ Op.in]: orders.map(o => o.id) } };
+    findAllParam.include.forEach(i => {
+      i.where = null;
+    });
+
     findAllParam.order = [
       [ordersQuery.sortBy || 'createdAt', ordersQuery.sortDir || 'DESC']
     ];
+    
     
     return this.models.SaleOrder.findAll(findAllParam);
   }
