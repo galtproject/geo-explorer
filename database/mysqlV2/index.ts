@@ -158,9 +158,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
     
     const filtersByTypes = {};
-    ['land', 'building'].forEach(propertyType => {
+    ['land', 'building'].forEach(tokenType => {
       ['area'].forEach(field => {
-        const filterField = propertyType + _.upperFirst(field);
+        const filterField = tokenType + _.upperFirst(field);
         const minVal = ordersQuery[filterField + 'Min'];
         const maxVal = ordersQuery[filterField + 'Max'];
         if(!minVal && !maxVal)
@@ -170,7 +170,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
           filtersByTypes[field] = [];
         
         const fieldWhereObj = {
-          type: propertyType,
+          type: tokenType,
           value: {}
         };
         
@@ -190,7 +190,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       whereArr.forEach(whereItem => {
         orArray.push({
           [field]: whereItem.value,
-          'type': whereItem.type
+          'tokenType': whereItem.type
         });
       });
     });
