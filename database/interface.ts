@@ -37,6 +37,7 @@ export default interface IExplorerDatabase {
 
 export interface ISpaceTokenGeoData {
   spaceTokenId;
+  tokenType;
   type;
   subtype;
   fullRegion;
