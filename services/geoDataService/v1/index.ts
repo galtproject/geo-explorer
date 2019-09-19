@@ -73,6 +73,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     await this.database.addOrUpdateGeoData({
       spaceTokenId: spaceTokenId,
+      tokenType: geoData.spaceTokenType,
       type: details.type,
       subtype: details.subtype,
       fullRegion: details.region.join(', '),

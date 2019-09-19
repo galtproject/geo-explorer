@@ -176,7 +176,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
         geohashContour,
         heightsContour,
-        ledgerIdentifier
+        ledgerIdentifier,
+        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType]
       };
     })
   }

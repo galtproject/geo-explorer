@@ -15,6 +15,9 @@ module.exports = async function (sequelize, models) {
     spaceTokenId: {
       type: Sequelize.STRING(100)
     },
+    tokenType: {
+      type: Sequelize.STRING(100)
+    },
     type: {
       type: Sequelize.STRING(100)
     },
