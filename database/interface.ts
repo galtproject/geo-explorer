@@ -96,8 +96,11 @@ export interface SaleOrdersQuery {
   askMin?: number;
   askMax?: number;
 
-  areaMin?: number;
-  areaMax?: number;
+  buildingAreaMin?: number;
+  buildingAreaMax?: number;
+
+  landAreaMin?: number;
+  landAreaMax?: number;
 
   bedroomsCountMin?: number;
   bathroomsCountMin?: number;

@@ -141,7 +141,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
     const allWheres: any = {};
 
-    ['area', 'ask', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
+    ['ask', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
       const minVal = ordersQuery[field + 'Min'];
       const maxVal = ordersQuery[field + 'Max'];
       if(!minVal && !maxVal)
@@ -156,6 +156,50 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
       allWheres[field] = fieldWhereObj;
     });
+    
+    const filtersByTypes = {};
+    ['land', 'building'].forEach(propertyType => {
+      ['area'].forEach(field => {
+        const filterField = propertyType + _.upperFirst(field);
+        const minVal = ordersQuery[filterField + 'Min'];
+        const maxVal = ordersQuery[filterField + 'Max'];
+        if(!minVal && !maxVal)
+          return;
+        
+        if(!filtersByTypes[field])
+          filtersByTypes[field] = [];
+        
+        const fieldWhereObj = {
+          type: propertyType,
+          value: {}
+        };
+        
+        if(minVal)
+          fieldWhereObj.value[Op.gte] = minVal;
+
+        if(maxVal)
+          fieldWhereObj.value[Op.lte] = maxVal;
+        
+        filtersByTypes[field].push(fieldWhereObj)
+      });
+    });
+
+    const orArray = [];
+    
+    _.forEach(filtersByTypes, (whereArr, field) => {
+      whereArr.forEach(whereItem => {
+        orArray.push({
+          [field]: whereItem.value,
+          'type': whereItem.type
+        });
+      });
+    });
+    
+    if(orArray.length > 0) {
+      allWheres[Op.and] = {
+        [Op.or]: orArray
+      };
+    }
 
     if(ordersQuery.regions && ordersQuery.regions.length) {
       for(let i = 1; i <= 9; i++) {
@@ -179,29 +223,24 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = ordersQuery[field];
     });
 
+    console.log('allWheres', allWheres);
+    
     function resultWhere(sourceWhere, fields, relation?) {
       const res = {};
-      _.forEach(sourceWhere, (value, key) => {
-        if(!_.isUndefined(value) && _.includes(fields, key)){
-          if(relation) {
-            key = `$${relation}.${key}$`;
-          }
-          res[key] = value;
+      _.forEach(fields, (key) => {
+        const value = sourceWhere[key];
+        // console.log('key', key);
+        if(_.isUndefined(value))
+          return;
+        
+        if(relation) {
+          key = `$${relation}.${key}$`;
         }
+        res[key] = value;
       });
       console.log('resultWhere', res);
       return res;
     }
-
-    // console.log('attributes', _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key));
-    
-    // console.log('_conformInclude', this.models.SaleOrder._conformInclude({
-    //   association: 'spaceTokens',
-    //   required: true,
-    //   attributes: _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key),
-    //   where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
-    // }, this.models.SaleOrder));
-    
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
     //   include : {//[this.models.SaleOrder._conformInclude({
@@ -246,7 +285,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', Op.and])
       }]
     }
   }
