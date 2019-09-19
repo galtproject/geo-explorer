@@ -58,7 +58,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     
     const spaceData = await this.geesome.getObject(dataLink).catch(() => {});
-    let {details, floorPlans, photos} = spaceData;
+    let {details, floorPlans, photos, ledgerIdentifier} = spaceData;
     
     if(!details) {
       details = spaceData.data;
@@ -96,7 +96,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataLink: dataLink,
       dataJson: JSON.stringify(spaceData),
       geohashContourJson: JSON.stringify(geoData.geohashContour),
-      heightsContourJson: JSON.stringify(geoData.heightsContour)
+      heightsContourJson: JSON.stringify(geoData.heightsContour),
+      ledgerIdentifier: ledgerIdentifier
     });
   };
 

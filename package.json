@@ -20,7 +20,7 @@
     "mysql2": "^1.6.4",
     "p-iteration": "^1.1.7",
     "restana": "^2.7.0",
-    "sequelize": "^4.42.0",
+    "sequelize": "5.19.0",
     "typescript": "^3.6.3",
     "web3": "^1.0.0-beta.52"
   },

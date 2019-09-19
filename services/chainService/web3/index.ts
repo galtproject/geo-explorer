@@ -162,6 +162,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   public async getSpaceTokenData(spaceTokenId) {
     return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
       
+      const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
+      
       const geohashContour = [];
       const heightsContour = [];
       
@@ -173,7 +175,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
         geohashContour,
-        heightsContour
+        heightsContour,
+        ledgerIdentifier
       };
     })
   }
