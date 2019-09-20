@@ -142,8 +142,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres: any = {};
 
     ['ask', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
-      const minVal = ordersQuery[field + 'Min'];
-      const maxVal = ordersQuery[field + 'Max'];
+      const minVal = parseFloat(ordersQuery[field + 'Min']);
+      const maxVal = parseFloat(ordersQuery[field + 'Max']);
       if(!minVal && !maxVal)
         return;
 
