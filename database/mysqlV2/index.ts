@@ -311,6 +311,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       [ordersQuery.sortBy || 'createdAt', ordersQuery.sortDir || 'DESC']
     ];
     
+    delete findAllParam.limit;
+    delete findAllParam.offset;
     
     return this.models.SaleOrder.findAll(findAllParam);
   }
