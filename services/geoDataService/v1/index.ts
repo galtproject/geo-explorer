@@ -70,7 +70,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
     const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
-
+    
     await this.database.addOrUpdateGeoData({
       spaceTokenId: spaceTokenId,
       tokenType: geoData.spaceTokenType,
