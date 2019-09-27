@@ -16,6 +16,8 @@ export default interface IExplorerGeoDataService {
   handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
 
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
+
+  getOrderById(orderId): Promise<ISaleOrder>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {

@@ -63,6 +63,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterOrders(req.body));
   });
 
+  service.post('/v1/orders/get-by-id/:id', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getOrderById(req.params.id));
+  });
+
   async function respondByScheme(res, data) {
     res.send({
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
