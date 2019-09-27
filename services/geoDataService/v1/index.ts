@@ -142,4 +142,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       total: await this.database.filterSaleOrdersCount(filterQuery)
     };
   }
+  
+  async getOrderById(orderId) {
+    return this.database.getSaleOrder(orderId);
+  }
 }

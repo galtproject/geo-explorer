@@ -121,7 +121,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getSaleOrder(orderId) {
     return this.models.SaleOrder.findOne({
-      where: { orderId }
+      where: {orderId},
+      include: [{
+        model: this.models.SpaceTokenGeoData,
+        as: 'spaceTokens',
+      }]
     });
   }
   
