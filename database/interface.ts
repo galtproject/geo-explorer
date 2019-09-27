@@ -63,6 +63,7 @@ export interface ISpaceTokenGeoData {
   dataJson;
   geohashContourJson;
   heightsContourJson;
+  featureArray;
 }
 
 export interface ISaleOrder {
@@ -86,6 +87,8 @@ export interface SaleOrdersQuery {
   sortDir?: string;
   
   tokensIds?: string[];
+  
+  features?: string[];
   
   currency?: string;
   currencyAddress?: string;

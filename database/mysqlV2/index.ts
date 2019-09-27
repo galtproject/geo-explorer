@@ -217,6 +217,20 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(ordersQuery.tokensIds) {
       allWheres['spaceTokenId'] = {[Op.in]: ordersQuery.tokensIds};
     }
+    
+    if(ordersQuery.features && ordersQuery.features.length) {
+      let featureQueryRoot = { };
+
+      let currentFeatureQueryItem = featureQueryRoot;
+      ordersQuery.features.forEach((feature, index) => {
+        currentFeatureQueryItem[Op.like] = `%|${feature}|%`;
+        if(index + 1 < ordersQuery.features.length) {
+          currentFeatureQueryItem[Op.and] = {};
+          currentFeatureQueryItem = currentFeatureQueryItem[Op.and];
+        }
+      });
+      allWheres['featureArray'] = { [Op.and]: featureQueryRoot};
+    }
 
     ['currency', 'currencyAddress'].forEach((field) => {
       if(ordersQuery[field])
@@ -285,7 +299,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', Op.and])
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'featureArray', Op.and])
       }]
     }
   }

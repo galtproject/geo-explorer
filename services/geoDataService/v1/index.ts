@@ -98,7 +98,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson: JSON.stringify(spaceData),
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       heightsContourJson: JSON.stringify(geoData.heightsContour),
-      ledgerIdentifier: ledgerIdentifier
+      ledgerIdentifier: ledgerIdentifier,
+      featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     });
   };
 
