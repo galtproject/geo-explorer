@@ -87,8 +87,9 @@ const config = require('./config');
     //   // surroundingsGeohashBox: ['dpzpufr']
     //   // surroundingsGeohashBox: ['9q598'],
     //   // limit: 2
-    //   // subtypes: ['villa'],
-    //   features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
+    //   types: ['land'],
+    //   // subtypes: ['beachLot'],
+    //   // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
     // });
     // console.log('found orders', orders.list.length, orders.total);
 
