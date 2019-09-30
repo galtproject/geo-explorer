@@ -13,5 +13,6 @@ module.exports = {
   'wsServer': 'ws://localhost:8546',
   'geoDataContractName': 'spaceGeoDataRegistry',
   'propertyMarketContractName': 'propertyMarket',
-  'spaceTokenContractName': 'spaceToken'
+  'spaceTokenContractName': 'spaceToken',
+  'newPropertyManagerName': 'newPropertyManager'
 };

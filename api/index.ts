@@ -67,6 +67,14 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.getOrderById(req.params.id));
   });
 
+  service.post('/v1/applications/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterApplications(req.body));
+  });
+
+  service.post('/v1/applications/get-by-id/:contract/:id', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getApplicationById(req.params.id, req.params.contract));
+  });
+
   async function respondByScheme(res, data) {
     res.send({
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),

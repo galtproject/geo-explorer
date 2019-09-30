@@ -56,44 +56,65 @@ const config = require('./config');
       // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
     });
 
-    chainService.subscribeForNewEvents(ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
-      console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
-      await geohashService.handleChangeContourEvent(newEvent);
-      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
-    });
+    // chainService.subscribeForNewEvents(ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
+    //   console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
+    //   await geohashService.handleChangeContourEvent(newEvent);
+    //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    // });
+    //
+    // chainService.subscribeForNewEvents(ChainServiceEvents.SetSpaceTokenDataLink, currentBlockNumber, async (err, newEvent) => {
+    //   console.log('🛎 New SetSpaceTokenDataLink event, blockNumber:', currentBlockNumber);
+    //   await geoDataService.handleChangeSpaceTokenDataEvent(newEvent);
+    //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    // });
+    //
+    // await chainService.getEventsFromBlock(ChainServiceEvents.SetSpaceTokenDataLink, parseInt(prevBlockNumber)).then(async (events) => {
+    //   await pIteration.forEach(events, geoDataService.handleChangeSpaceTokenDataEvent.bind(geoDataService));
+    // });
+    //
+    // chainService.subscribeForNewEvents(ChainServiceEvents.SaleOrderStatusChanged, currentBlockNumber, async (err, newEvent) => {
+    //   console.log('🛎 New SaleOrderStatusChanged event, blockNumber:', currentBlockNumber);
+    //   await geoDataService.handleSaleOrderEvent(newEvent);
+    //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    // });
+    //
+    // await chainService.getEventsFromBlock(ChainServiceEvents.SaleOrderStatusChanged, parseInt(prevBlockNumber)).then(async (events) => {
+    //   await pIteration.forEach(events, geoDataService.handleSaleOrderEvent.bind(geoDataService));
+    // });
 
-    chainService.subscribeForNewEvents(ChainServiceEvents.SetSpaceTokenDataLink, currentBlockNumber, async (err, newEvent) => {
-      console.log('🛎 New SetSpaceTokenDataLink event, blockNumber:', currentBlockNumber);
-      await geoDataService.handleChangeSpaceTokenDataEvent(newEvent);
-      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
-    });
-
-    await chainService.getEventsFromBlock(ChainServiceEvents.SetSpaceTokenDataLink, parseInt(prevBlockNumber)).then(async (events) => {
-      await pIteration.forEach(events, geoDataService.handleChangeSpaceTokenDataEvent.bind(geoDataService));
-    });
-
-    chainService.subscribeForNewEvents(ChainServiceEvents.SaleOrderStatusChanged, currentBlockNumber, async (err, newEvent) => {
+    chainService.subscribeForNewEvents(ChainServiceEvents.NewPropertyApplication, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New SaleOrderStatusChanged event, blockNumber:', currentBlockNumber);
-      await geoDataService.handleSaleOrderEvent(newEvent);
+      await geoDataService.handleNewApplicationEvent(newEvent);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
-    
-    await chainService.getEventsFromBlock(ChainServiceEvents.SaleOrderStatusChanged, parseInt(prevBlockNumber)).then(async (events) => {
-      await pIteration.forEach(events, geoDataService.handleSaleOrderEvent.bind(geoDataService));
+
+    await chainService.getEventsFromBlock(ChainServiceEvents.NewPropertyApplication, parseInt(prevBlockNumber)).then(async (events) => {
+      await pIteration.forEach(events, geoDataService.handleNewApplicationEvent.bind(geoDataService));
     });
     
-    const orders = await geoDataService.filterOrders({
-    //   // landAreaMin: 3000,
-    //   // surroundingsGeohashBox: ['dpzpufr']
-    //   // surroundingsGeohashBox: ['9q598'],
-    //   // limit: 2
-    //   types: ['land'],
-    //    
-      subtypes: ['beachLot'],
-      bedroomsCountMin: 3
-    //   // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
+    // const orders = await geoDataService.filterOrders({
+    // //   // landAreaMin: 3000,
+    // //   // surroundingsGeohashBox: ['dpzpufr']
+    // //   // surroundingsGeohashBox: ['9q598'],
+    // //   // limit: 2
+    // //   types: ['land'],
+    // //    
+    //   subtypes: ['beachLot'],
+    //   bedroomsCountMin: 3
+    // //   // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
+    // });
+    // console.log('found orders', orders.list.length, orders.total);
+
+    const applications = await geoDataService.filterApplications({
+      // landAreaMin: 3000,
+      // surroundingsGeohashBox: ['dpzpufr']
+      // surroundingsGeohashBox: ['9q598'],
+      // limit: 2
+      // types: ['land'],
+      // subtypes: ['beachLot'],
+      // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
     });
-    console.log('found orders', orders.list.length, orders.total);
+    console.log('found applications', applications.list.length, applications.total);
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 

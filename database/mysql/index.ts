@@ -7,7 +7,7 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase from "../interface";
+import IExplorerDatabase, {ApplicationsQuery, IApplication} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -139,6 +139,31 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
   
   filterSaleOrdersCount(params) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async getApplication(applicationId) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async addOrUpdateApplication(application: IApplication) {
+    console.error("Not supported");
+    return null;
+  }
+
+  applicationsQueryToFindAllParam(applicationsQuery: ApplicationsQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async filterApplications(applicationsQuery: ApplicationsQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async filterApplicationsCount(applicationsQuery: ApplicationsQuery) {
     console.error("Not supported");
     return null;
   }
