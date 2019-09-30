@@ -33,15 +33,20 @@ export default interface IExplorerChainService {
 
   getSpaceTokenContourData(spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
 
-  getSpaceTokenData(spaceTokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, geohashContour: string[], heightsContour: number[] }>;
+  getSpaceTokenData(spaceTokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
 
   getSaleOrder(orderId): Promise<ChainServiceSaleOrder>;
+
+  getNewPropertyApplication(applicationId): Promise<{ spaceTokenId: string, id: string, applicant: string, currency: string, status: string }>;
+
+  getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
 }
 
 export enum ChainServiceEvents {
   SetSpaceTokenContour = 'SetSpaceTokenContour',
   SetSpaceTokenDataLink = 'SetSpaceTokenDataLink',
-  SaleOrderStatusChanged = 'SaleOrderStatusChanged'
+  SaleOrderStatusChanged = 'SaleOrderStatusChanged',
+  NewPropertyApplication = 'NewApplication'
 }
 
 export interface ChainServiceSaleOrder {

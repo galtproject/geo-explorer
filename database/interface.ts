@@ -28,6 +28,14 @@ export default interface IExplorerDatabase {
   
   filterSaleOrdersCount(filterQuery: SaleOrdersQuery): Promise<number>;
 
+  getApplication(applicationId, contractAddress): Promise<IApplication>;
+
+  addOrUpdateApplication(application: IApplication): Promise<IApplication>;
+
+  filterApplications(filterQuery: ApplicationsQuery): Promise<IApplication[]>;
+
+  filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
+  
   getValue(key: string): Promise<string>;
 
   setValue(key: string, content: string): Promise<void>;
@@ -79,6 +87,21 @@ export interface ISaleOrder {
   addSpaceTokens?(tokensObjects);
 }
 
+export interface IApplication {
+  applicationId;
+  applicantAddress;
+  feeCurrency;
+  feeAmount;
+  feeCurrencyAddress;
+  feeCurrencyName;
+  status;
+  contractType;
+  contractAddress;
+  dataJson;
+
+  addSpaceTokens?(tokensObjects);
+}
+
 export interface SaleOrdersQuery {
   limit?: number;
   offset?: number;
@@ -105,6 +128,35 @@ export interface SaleOrdersQuery {
 
   landAreaMin?: number;
   landAreaMax?: number;
+
+  bedroomsCountMin?: number;
+  bathroomsCountMin?: number;
+}
+
+export interface ApplicationsQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  tokensIds?: string[];
+
+  features?: string[];
+
+  feeAmount?: number;
+  feeCurrency?: string;
+  feeCurrencyAddress?: string;
+
+  regions?: string[];
+  types?: string[];
+  subtypes?: string[];
+
+  askMin?: number;
+  askMax?: number;
+
+  areaMin?: number;
+  areaMax?: number;
 
   bedroomsCountMin?: number;
   bathroomsCountMin?: number;

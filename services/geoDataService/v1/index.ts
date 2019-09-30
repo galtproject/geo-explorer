@@ -8,10 +8,10 @@
  */
 
 import IExplorerDatabase, {SaleOrdersQuery} from "../../../database/interface";
-import {default as IExplorerGeoDataService, FilterSaleOrdersGeoQuery} from "../interface";
+import {default as IExplorerGeoDataService, FilterApplicationsGeoQuery, FilterSaleOrdersGeoQuery} from "../interface";
 import {
   IExplorerChainContourEvent,
-  IExplorerGeoDataEvent,
+  IExplorerGeoDataEvent, IExplorerNewApplicationEvent,
   IExplorerResultContour,
   IExplorerSaleOrderEvent
 } from "../../interfaces";
@@ -50,29 +50,41 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent) {
-    let dataLink: string = event.returnValues.dataLink.replace('config_address=', '');
     let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'];
+    return this.saveSpaceTokenById(spaceTokenId);
+  };
+  
+  async saveSpaceTokenById(spaceTokenId) {
+    const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
+    const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
 
+    const dataLink = geoData.dataLink.replace('config_address=', '');
+
+    return this.saveSpaceTokenByDataLink(dataLink, {
+      spaceTokenId: spaceTokenId,
+      owner: owner,
+      ...geoData
+    })
+  }
+  
+  async saveSpaceTokenByDataLink(dataLink, geoData) {
     if(!isIpldHash(dataLink)) {
       return;
     }
-    
+
     const spaceData = await this.geesome.getObject(dataLink).catch(() => {});
     let {details, floorPlans, photos, ledgerIdentifier} = spaceData;
-    
+
     if(!details) {
       details = spaceData.data;
     }
-    
+
     if(!details || !details.region) {
       return;
     }
-    
-    const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
-    const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
-    
+
     await this.database.addOrUpdateGeoData({
-      spaceTokenId: spaceTokenId,
+      spaceTokenId: geoData.spaceTokenId,
       tokenType: geoData.spaceTokenType,
       type: details.type,
       subtype: details.subtype,
@@ -91,7 +103,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bathroomsCount: details.bathrooms,
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
-      owner: owner,
+      owner: geoData.owner,
       area: geoData.area,
       areaSource: geoData.areaSource,
       dataLink: dataLink,
@@ -101,7 +113,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ledgerIdentifier: ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     });
-  };
+  }
 
   async handleSaleOrderEvent(event: IExplorerSaleOrderEvent) {
     let orderId: string = event.returnValues.orderId;
@@ -145,5 +157,53 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   
   async getOrderById(orderId) {
     return this.database.getSaleOrder(orderId);
+  }
+  
+  async handleNewApplicationEvent(event: IExplorerNewApplicationEvent) {
+    const {contractAddress} = event;
+    const {applicationId, applicant} = event.returnValues;
+
+    const application = await this.chainService.getNewPropertyApplication(applicationId);
+    const applicationDetails = await this.chainService.getNewPropertyApplicationDetails(applicationId);
+    
+    console.log('application', application);
+    console.log('applicationDetails', applicationDetails);
+    
+    const dbApplication = await this.database.addOrUpdateApplication({
+      applicationId,
+      applicantAddress: applicant,
+      feeCurrency: application.currency == '0' ? 'eth' : 'erc20',
+      //TODO: get currency address of GALT
+      feeCurrencyAddress: '',
+      feeCurrencyName: application.currency == '0' ? 'ETH' : 'GALT',
+      status: application.status,
+      contractType: 'newPropertyManager',
+      contractAddress,
+      //TODO: fee amount
+      feeAmount: 0,
+      dataJson: ''
+    });
+    
+    console.log('dbApplication.applicationId', dbApplication.applicationId);
+    
+    const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, applicationDetails);
+    console.log('spaceToken', spaceToken);
+    
+    await dbApplication.addSpaceTokens([spaceToken]);
+  };
+
+  async filterApplications(filterQuery: FilterApplicationsGeoQuery) {
+    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
+    }
+    console.log('filterQuery.tokensIds', filterQuery.tokensIds);
+    return {
+      list: await this.database.filterApplications(filterQuery),
+      total: await this.database.filterApplicationsCount(filterQuery)
+    };
+  }
+
+  async getApplicationById(applicationId, contractAddress) {
+    return this.database.getApplication(applicationId, contractAddress);
   }
 }

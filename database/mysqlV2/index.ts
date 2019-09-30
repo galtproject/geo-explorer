@@ -7,7 +7,13 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase, {ISpaceTokenGeoData, ISaleOrder, SaleOrdersQuery} from "../interface";
+import IExplorerDatabase, {
+  ISpaceTokenGeoData,
+  ISaleOrder,
+  SaleOrdersQuery,
+  IApplication,
+  ApplicationsQuery
+} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -341,6 +347,172 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.distinct = true;
     
     return this.models.SaleOrder.count(findAllParam);
+  }
+  
+  async getApplication(applicationId, contractAddress) {
+    return this.models.Application.findOne({
+      where: {applicationId, contractAddress},
+      include: [{
+        model: this.models.SpaceTokenGeoData,
+        as: 'spaceTokens',
+      }]
+    });
+  }
+
+  async addOrUpdateApplication(application: IApplication) {
+    let dbObject = await this.getApplication(application.applicationId, application.contractAddress);
+
+    if(dbObject) {
+      await this.models.Application.update(application, {
+        where: {applicationId: application.applicationId, contractAddress: application.contractAddress}
+      });
+    } else {
+      return this.models.Application.create(application);
+    }
+    return this.getApplication(application.applicationId, application.contractAddress);
+  }
+  
+  applicationsQueryToFindAllParam(applicationsQuery: ApplicationsQuery) {
+    const allWheres: any = {};
+
+    ['feeAmount', 'bedroomsCount', 'bathroomsCount', 'area'].forEach(field => {
+      const minVal = parseFloat(applicationsQuery[field + 'Min']);
+      const maxVal = parseFloat(applicationsQuery[field + 'Max']);
+      if(!minVal && !maxVal)
+        return;
+
+      const fieldWhereObj = {};
+      if(minVal)
+        fieldWhereObj[Op.gte] = minVal;
+
+      if(maxVal)
+        fieldWhereObj[Op.lte] = maxVal;
+
+      allWheres[field] = fieldWhereObj;
+    });
+
+    if(applicationsQuery.regions && applicationsQuery.regions.length) {
+      for(let i = 1; i <= 9; i++) {
+        allWheres['regionLvl' + i] = {[Op.in]: applicationsQuery.regions};
+      }
+    }
+
+    if(applicationsQuery.types && applicationsQuery.types.length) {
+      allWheres['type'] = {[Op.in]: applicationsQuery.types};
+    }
+    if(applicationsQuery.subtypes && applicationsQuery.subtypes.length) {
+      allWheres['subtype'] = {[Op.in]: applicationsQuery.subtypes};
+    }
+
+    if(applicationsQuery.tokensIds) {
+      allWheres['spaceTokenId'] = {[Op.in]: applicationsQuery.tokensIds};
+    }
+
+    ['feeCurrency', 'feeCurrencyAddress', 'applicantAddress', 'contractType', 'contractAddress'].forEach((field) => {
+      if(applicationsQuery[field])
+        allWheres[field] = applicationsQuery[field];
+    });
+
+    console.log('allWheres', allWheres);
+
+    function resultWhere(sourceWhere, fields, relation?) {
+      const res = {};
+      _.forEach(fields, (key) => {
+        const value = sourceWhere[key];
+        // console.log('key', key);
+        if(_.isUndefined(value))
+          return;
+
+        if(relation) {
+          key = `$${relation}.${key}$`;
+        }
+        res[key] = value;
+      });
+      console.log('resultWhere', res);
+      return res;
+    }
+    // const queryOptions = {
+    //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
+    //   include : {//[this.models.SaleOrder._conformInclude({
+    //     association: 'spaceTokens',
+    //     required: true,
+    //     attributes: _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key),
+    //     where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    //   }//, this.models.SaleOrder)]
+    // };
+    //
+    // this.models.SaleOrder._conformOptions(queryOptions, this.models.SaleOrder);
+    // this.models.SaleOrder._expandIncludeAll(queryOptions);
+    // this.models.SaleOrder._validateIncludedElements(queryOptions, {
+    //   [this.models.SaleOrder.getTableName(queryOptions)]: true
+    // });
+    //
+    // let query = this.models.SaleOrder.sequelize.dialect.QueryGenerator.selectQuery(this.models.SaleOrder.getTableName(), queryOptions, this.models.SaleOrder);
+    //
+    // query = query.replace('ON `saleOrder`.`id` = `spaceTokens->spaceTokensOrders`.`saleOrderId` AND', 'ON `saleOrder`.`id` = `spaceTokens->spaceTokensOrders`.`saleOrderId` WHERE');
+    //
+    // console.log('query', query);
+    //
+    // this.sequelize.query(query).then(([results, metadata]) => {
+    //   console.log('query result', results);
+    // });
+
+    //https://github.com/sequelize/sequelize/issues/10943
+    //https://github.com/sequelize/sequelize/issues/4880
+    //https://github.com/sequelize/sequelize/issues/10582
+
+    return {
+      where: _.extend(
+        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress']),
+        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
+      ),
+      include : [{
+        model: this.models.SpaceTokenGeoData,
+        // association: this.models.SpaceTokenGeoData,
+        // association: this.models.SpaceTokensOrders,
+        as: 'spaceTokens',
+        // include: 'SpaceTokenGeoData',
+        // required: false
+        // association: 'spaceTokens',
+        // required: true,
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', Op.and])
+      }]
+    }
+  }
+
+  async filterApplications(applicationsQuery: ApplicationsQuery) {
+    if(applicationsQuery.limit > 1000) {
+      applicationsQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.applicationsQueryToFindAllParam(applicationsQuery);
+
+    findAllParam.limit = applicationsQuery.limit || 20;
+    findAllParam.offset = applicationsQuery.offset || 0;
+
+    const applications = await this.models.Application.findAll(findAllParam);
+
+    findAllParam.where = { id: { [ Op.in]: applications.map(o => o.id) } };
+    findAllParam.include.forEach(i => {
+      i.where = null;
+    });
+
+    findAllParam.order = [
+      [applicationsQuery.sortBy || 'createdAt', applicationsQuery.sortDir || 'DESC']
+    ];
+
+    delete findAllParam.limit;
+    delete findAllParam.offset;
+
+    return this.models.Application.findAll(findAllParam);
+  }
+
+  async filterApplicationsCount(applicationsQuery: ApplicationsQuery) {
+    const findAllParam: any = this.applicationsQueryToFindAllParam(applicationsQuery);
+
+    findAllParam.distinct = true;
+
+    return this.models.Application.count(findAllParam);
   }
 
   async getValue(key: string) {
