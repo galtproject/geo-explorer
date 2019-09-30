@@ -35,7 +35,57 @@ module.exports = async function (sequelize, models) {
     },
     dataJson: {
       type: Sequelize.TEXT
-    }
+    },
+    
+    // SPACE TOKENS FIELDS
+    featureArray: {
+      type: Sequelize.TEXT
+    },
+    typesSubtypesArray: {
+      type: Sequelize.TEXT
+    },
+    minLandArea: {
+      type: Sequelize.FLOAT
+    },
+    maxLandArea: {
+      type: Sequelize.FLOAT
+    },
+    sumLandArea: {
+      type: Sequelize.FLOAT
+    },
+    minBuildingArea: {
+      type: Sequelize.FLOAT
+    },
+    maxBuildingArea: {
+      type: Sequelize.FLOAT
+    },
+    sumBuildingArea: {
+      type: Sequelize.FLOAT
+    },
+    minYearBuilt: {
+      type: Sequelize.INTEGER
+    },
+    maxYearBuilt: {
+      type: Sequelize.INTEGER
+    },
+    sumBathroomsCount: {
+      type: Sequelize.INTEGER
+    },
+    sumBedroomsCount: {
+      type: Sequelize.INTEGER
+    },
+    maxBathroomsCount: {
+      type: Sequelize.INTEGER
+    },
+    maxBedroomsCount: {
+      type: Sequelize.INTEGER
+    },
+    minBathroomsCount: {
+      type: Sequelize.INTEGER
+    },
+    minBedroomsCount: {
+      type: Sequelize.INTEGER
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
