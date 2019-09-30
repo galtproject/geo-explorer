@@ -1,4 +1,13 @@
-import IExplorerDatabase from "../interface";
+/*
+ * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka)
+ *
+ * Copyright ©️ 2019 Galt•Core Blockchain Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka) by
+ * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
+ */
+
+import IExplorerDatabase, {ApplicationsQuery, IApplication} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -99,9 +108,64 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       const spaceTokenId = geohashObj.spaceTokenId;
 
       let contour = await this.getContourBySpaceTokenId(spaceTokenId);
-      
+
       return {contour, spaceTokenId};
     });
+  }
+
+  getSpaceTokenGeoData(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+
+  addOrUpdateGeoData(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+  
+  getSaleOrder(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+
+  addOrUpdateSaleOrder(geoData) {
+    console.error("Not supported");
+    return null;
+  }
+
+  filterSaleOrders(params) {
+    console.error("Not supported");
+    return null;
+  }
+  
+  filterSaleOrdersCount(params) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async getApplication(applicationId) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async addOrUpdateApplication(application: IApplication) {
+    console.error("Not supported");
+    return null;
+  }
+
+  applicationsQueryToFindAllParam(applicationsQuery: ApplicationsQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async filterApplications(applicationsQuery: ApplicationsQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  async filterApplicationsCount(applicationsQuery: ApplicationsQuery) {
+    console.error("Not supported");
+    return null;
   }
 
   async getValue(key: string) {

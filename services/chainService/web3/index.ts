@@ -1,10 +1,21 @@
-import IExplorerChainService from "../interace";
+/*
+ * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka)
+ *
+ * Copyright ©️ 2019 Galt•Core Blockchain Company
+ * (Founded by [Nikolai Popeka](https://github.com/npopeka) by
+ * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
+ */
+
+import IExplorerChainService, {ChainServiceEvents} from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
+const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
 const axios = require('axios');
 
 const Web3 = require("web3");
+const Web3Utils = require("web3-utils");
 
 const config = require('./config');
 if (!config.wsServer) {
@@ -42,6 +53,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   web3: any;
 
   spaceGeoData: any;
+  propertyMarket: any;
+  spaceToken: any;
+  newPropertyManager: any;
+  
   contractsConfig: any;
 
   callbackOnReconnect: any;
@@ -56,13 +71,41 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
+  
+  getContractByEvent(eventName) {
+    if(eventName === ChainServiceEvents.SetSpaceTokenContour) {
+      return this.spaceGeoData;
+    }
+    if(eventName === ChainServiceEvents.SetSpaceTokenDataLink) {
+      return this.spaceGeoData;
+    }
+    if(eventName === ChainServiceEvents.SaleOrderStatusChanged) {
+      return this.propertyMarket;
+    }
+    if(eventName === ChainServiceEvents.NewPropertyApplication) {
+      return this.newPropertyManager;
+    }
+    return null;
+  }
 
   getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
-    return this.spaceGeoData.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber});
+    const contract = this.getContractByEvent(eventName);
+    return contract.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber}).then(events => {
+      return events.map(e => {
+        e.contractAddress = e.address;
+        return e;
+      })
+    });
   }
 
   subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
-    this.spaceGeoData.events[eventName]({fromBlock: blockNumber}, callback);
+    const contract = this.getContractByEvent(eventName);
+
+    contract.events[eventName]({fromBlock: blockNumber}, (e) => {
+      // console.log('event', e);
+      e.contractAddress = e.address;
+      callback(e);
+    });
   }
 
   async getCurrentBlock() {
@@ -81,7 +124,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
         this.web3 = new Web3(this.websocketProvider);
         this.createContractInstance();
-                
+
         if (this.callbackOnReconnect) {
           this.callbackOnReconnect();
         }
@@ -101,6 +144,115 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   private createContractInstance() {
-    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.contractName + 'Abi'], this.contractsConfig[config.contractName + 'Address']);
+    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
+    this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
+    this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
+    this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
+  }
+
+  public async getSpaceTokenOwner(spaceTokenId) {
+    return this.spaceToken.methods.ownerOf(spaceTokenId).call({});
+  }
+  
+  public async getSpaceTokenArea(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
+      return Web3Utils.fromWei(result.toString(10), 'ether');
+    })
+  }
+
+  public async getSpaceTokenContourData(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenContour(spaceTokenId).call({}).then(result => {
+      const geohashContour = [];
+      const heightsContour = [];
+      result.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        geohashContour,
+        heightsContour
+      };
+    })
+  }
+
+  public async getSpaceTokenData(spaceTokenId) {
+    return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
+      
+      const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
+      
+      const geohashContour = [];
+      const heightsContour = [];
+      
+      result.contour.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
+        geohashContour,
+        heightsContour,
+        ledgerIdentifier,
+        humanAddress: result.humanAddress,
+        dataLink: result.dataLink,
+        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType.toString(10)]
+      };
+    })
+  }
+
+  getSaleOrder(orderId) {
+    return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
+      result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
+      return result;
+    })
+  }
+
+  getNewPropertyApplication(applicationId) {
+    return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
+      result.id = applicationId.toString(10);
+      result.spaceTokenId = result.spaceTokenId.toString(10);
+      result.currency = result.currency.toString(10);
+
+      result.status = {
+        '0': 'not_exists',
+        '1': 'partially_submitted',
+        '2': 'contour_verification',
+        '3': 'cancelled',
+        '4': 'cv_rejected',
+        '5': 'pending',
+        '6': 'approved',
+        '7': 'rejected',
+        '8': 'reverted',
+        '9': 'partially_submitted',
+        '10': 'stored',
+        '11': 'closed'
+      }[result.status.toString(10)];
+      return result;
+    })
+  }
+
+  getNewPropertyApplicationDetails(applicationId) {
+    return this.newPropertyManager.methods.getApplicationDetails(applicationId).call({}).then(result => {
+      const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
+
+      const geohashContour = [];
+      const heightsContour = [];
+
+      result.contour.map((geohash5z) => {
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+        heightsContour.push(height / 100);
+        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      });
+      return {
+        area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
+        geohashContour,
+        heightsContour,
+        ledgerIdentifier,
+        humanAddress: result.humanAddress,
+        dataLink: result.dataLink,
+        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType.toString(10)]
+      };
+    })
   }
 }

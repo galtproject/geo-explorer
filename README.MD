@@ -11,6 +11,9 @@ Indexing changes of contours and providing api for getting:
 - Local(pre-dev) contracts: https://geo-explorer.testnet.galtproject.io:33440
 - Dev contracts: https://geo-explorer.testnet.galtproject.io:33550
 
+## Result in UI:
+![image](https://user-images.githubusercontent.com/4842007/65043644-982f5180-d95b-11e9-8ded-e71c99c2aee9.png)
+
 ## How to run
 
 1. Edit `config.ts`, specify database
