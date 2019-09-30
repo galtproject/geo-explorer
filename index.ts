@@ -92,18 +92,18 @@ const config = require('./config');
       await pIteration.forEach(events, geoDataService.handleNewApplicationEvent.bind(geoDataService));
     });
     
-    const orders = await geoDataService.filterOrders({
-    //   // landAreaMin: 3000,
-    //   // surroundingsGeohashBox: ['dpzpufr']
-    //   // surroundingsGeohashBox: ['9q598'],
-    //   // limit: 2
-    //   types: ['land'],
-    //    
-      subtypes: ['beachLot'],
-      bedroomsCountMin: 3
-    //   // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
-    });
-    console.log('found orders', orders.list.length, orders.total);
+    // const orders = await geoDataService.filterOrders({
+    // //   // landAreaMin: 3000,
+    // //   // surroundingsGeohashBox: ['dpzpufr']
+    // //   // surroundingsGeohashBox: ['9q598'],
+    // //   // limit: 2
+    // //   types: ['land'],
+    // //    
+    //   subtypes: ['beachLot'],
+    //   bedroomsCountMin: 3
+    // //   // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
+    // });
+    // console.log('found orders', orders.list.length, orders.total);
 
     const applications = await geoDataService.filterApplications({
       // landAreaMin: 3000,

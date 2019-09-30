@@ -113,6 +113,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
+    // console.log('geoData', geoData);
     let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
 
     if(dbObject) {
@@ -136,7 +137,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
   
   async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
-    console.log('addOrUpdateSaleOrder', saleOrder);
+    // console.log('addOrUpdateSaleOrder', saleOrder);
     let dbObject = await this.getSaleOrder(saleOrder.orderId);
 
     if(dbObject) {

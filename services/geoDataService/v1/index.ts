@@ -51,7 +51,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent) {
     let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'];
-    return this.saveSpaceTokenById(spaceTokenId);
+    await this.saveSpaceTokenById(spaceTokenId);
   };
   
   async saveSpaceTokenById(spaceTokenId) {
@@ -83,21 +83,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return;
     }
 
-    await this.database.addOrUpdateGeoData({
+    return this.database.addOrUpdateGeoData({
       spaceTokenId: geoData.spaceTokenId,
       tokenType: geoData.spaceTokenType,
       type: details.type,
       subtype: details.subtype,
       fullRegion: details.region.join(', '),
-      regionLvl1: details.region[0],
-      regionLvl2: details.region[1],
-      regionLvl3: details.region[2],
-      regionLvl4: details.region[3],
-      regionLvl5: details.region[4],
-      regionLvl6: details.region[5],
-      regionLvl7: details.region[6],
-      regionLvl8: details.region[7],
-      regionLvl9: details.region[8],
+      regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
+      regionLvl2: details.region[1] || '',
+      regionLvl3: details.region[2] || '',
+      regionLvl4: details.region[3] || '',
+      regionLvl5: details.region[4] || '',
+      regionLvl6: details.region[5] || '',
+      regionLvl7: details.region[6] || '',
+      regionLvl8: details.region[7] || '',
+      regionLvl9: details.region[8] || '',
       photosCount: photos.length,
       floorPlansCount: floorPlans.length,
       bathroomsCount: details.bathrooms,
@@ -190,9 +190,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const application = await this.chainService.getNewPropertyApplication(applicationId);
     const applicationDetails = await this.chainService.getNewPropertyApplicationDetails(applicationId);
     
-    console.log('application', application);
-    console.log('applicationDetails', applicationDetails);
-    
     const dbApplication = await this.database.addOrUpdateApplication({
       applicationId,
       applicantAddress: applicant,
@@ -210,10 +207,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     console.log('dbApplication.applicationId', dbApplication.applicationId);
     
-    const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, applicationDetails);
-    console.log('spaceToken', spaceToken);
+    const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, {
+      spaceTokenId: 'application_' + contractAddress + '_' + applicationId,
+      applicationDetails
+    });
+    // console.log('spaceToken', spaceToken);
     
-    await dbApplication.addSpaceTokens([spaceToken]);
+    if(spaceToken) {
+      await dbApplication.addSpaceTokens([spaceToken]);
+    }
   };
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {

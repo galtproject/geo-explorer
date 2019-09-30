@@ -21,7 +21,7 @@ export default interface IExplorerGeoDataService {
 
   handleNewApplicationEvent(event: IExplorerNewApplicationEvent): Promise<void>;
 
-  filterApplications(ordersQuery: FilterApplicationsGeoQuery): Promise<IApplicationsListResponse>;
+  filterApplications(applicationsQuery: FilterApplicationsGeoQuery): Promise<IApplicationsListResponse>;
 
   getApplicationById(applicationId, contractAddress): Promise<IApplication>;
 }

@@ -210,7 +210,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   getNewPropertyApplication(applicationId) {
     return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
-      result.id = result.id.toString(10);
+      result.id = applicationId.toString(10);
       result.spaceTokenId = result.spaceTokenId.toString(10);
       result.currency = result.currency.toString(10);
 
