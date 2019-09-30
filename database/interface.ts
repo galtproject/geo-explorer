@@ -68,13 +68,30 @@ export interface ISpaceTokenGeoData {
 
 export interface ISaleOrder {
   orderId;
-  currency;
-  currencyAddress;
-  currencyName;
-  ask;
-  description;
-  lastBuyer;
-  dataJson;
+  currency?;
+  currencyAddress?;
+  currencyName?;
+  ask?;
+  description?;
+  lastBuyer?;
+  dataJson?;
+
+  featureArray?;
+  typesSubtypesArray?;
+  minLandArea?;
+  maxLandArea?;
+  sumLandArea?;
+  minBuildingArea?;
+  maxBuildingArea?;
+  sumBuildingArea?;
+  minYearBuilt?;
+  maxYearBuilt?;
+  sumBathroomsCount?;
+  sumBedroomsCount?;
+  maxBathroomsCount?;
+  maxBedroomsCount?;
+  minBathroomsCount?;
+  minBedroomsCount?;
   
   addSpaceTokens?(tokensObjects);
 }

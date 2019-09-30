@@ -57,7 +57,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return;
     }
     
-    const spaceData = await this.geesome.getObject(dataLink).catch(() => {});
+    const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
     let {details, floorPlans, photos, ledgerIdentifier} = spaceData;
     
     if(!details) {
@@ -112,9 +112,27 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const chainOrder = await this.chainService.getSaleOrder(orderId);
+    
+    const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, (id) => this.database.getSpaceTokenGeoData(id));
 
     const orderData = await this.geesome.getObject(chainOrder.details.dataAddress);
 
+    let allFeatures = [];
+    dbSpaceTokens.forEach(token => {
+      const spaceData = JSON.parse(token.dataJson);
+      allFeatures = allFeatures.concat((spaceData.details || {}).features || []);
+    });
+
+    allFeatures = _.uniq(allFeatures);
+
+
+    let allTypesSubTypes = [];
+    dbSpaceTokens.forEach(token => {
+      allTypesSubTypes = allTypesSubTypes.concat([token.type, token.subtype].filter(s => s));
+    });
+
+    allTypesSubTypes = _.uniq(allTypesSubTypes);
+    
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
       currency: chainOrder.escrowCurrency.toString(10) == '0' ? 'eth' : 'erc20',
@@ -124,10 +142,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ask: chainOrder.ask,
       description: orderData.description,
       dataJson: JSON.stringify(orderData),
-      lastBuyer: chainOrder.lastBuyer
+      lastBuyer: chainOrder.lastBuyer,
+      sumBathroomsCount: _.sumBy(dbSpaceTokens, 'bathroomsCount'),
+      sumBedroomsCount: _.sumBy(dbSpaceTokens, 'bedroomsCount'),
+      sumLandArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'land'}), 'bathroomsCount'),
+      sumBuildingArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'building'}), 'bedroomsCount'),
+      featureArray: '|' + allFeatures.join('|') + '|',
+      typesSubtypesArray: '|' + allTypesSubTypes.join('|') + '|'
     });
     
-    const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, (id) => this.database.getSpaceTokenGeoData(id));
+    console.log('saved', dbOrder.orderId);
 
     await dbOrder.addSpaceTokens(dbSpaceTokens);
   };

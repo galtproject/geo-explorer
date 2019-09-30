@@ -130,6 +130,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
   
   async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
+    console.log('addOrUpdateSaleOrder', saleOrder);
     let dbObject = await this.getSaleOrder(saleOrder.orderId);
 
     if(dbObject) {
@@ -158,6 +159,13 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(maxVal)
         fieldWhereObj[Op.lte] = maxVal;
 
+      const dbFields = {
+        'bedroomsCount': 'sumBedroomsCount',
+        'bathroomsCount': 'sumBathroomsCount'
+      };
+      
+      field = dbFields[field] || field;
+      
       allWheres[field] = fieldWhereObj;
     });
     
@@ -192,9 +200,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     _.forEach(filtersByTypes, (whereArr, field) => {
       whereArr.forEach(whereItem => {
+
+        if(whereItem.type === 'building') {
+          field = 'sumBuildingArea';
+        }
+        if(whereItem.type === 'land') {
+          field = 'sumLandArea';
+        }
+        
         orArray.push({
-          [field]: whereItem.value,
-          'tokenType': whereItem.type
+          [field]: whereItem.value
         });
       });
     });
@@ -211,13 +226,21 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       }
     }
 
-    if(ordersQuery.types && ordersQuery.types.length) {
-      allWheres['type'] = {[Op.in]: ordersQuery.types};
-    }
-    if(ordersQuery.subtypes && ordersQuery.subtypes.length) {
-      allWheres['subtype'] = {[Op.in]: ordersQuery.subtypes};
-    }
+    if((ordersQuery.types && ordersQuery.types.length) || (ordersQuery.subtypes && ordersQuery.subtypes.length)) {
+      let typeQueryRoot = { };
 
+      let currentTypeQueryItem = typeQueryRoot;
+      const allTypes = (ordersQuery.types || []).concat(ordersQuery.subtypes || []);
+      allTypes.forEach((type, index) => {
+        currentTypeQueryItem[Op.like] = `%|${type}|%`;
+        if(index + 1 < allTypes.length) {
+          currentTypeQueryItem[Op.and] = {};
+          currentTypeQueryItem = currentTypeQueryItem[Op.and];
+        }
+      });
+      allWheres['typesSubtypesArray'] = { [Op.and]: typeQueryRoot};
+    }
+    
     if(ordersQuery.tokensIds) {
       allWheres['spaceTokenId'] = {[Op.in]: ordersQuery.tokensIds};
     }
@@ -291,7 +314,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     return {
       where: _.extend(
-        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
+        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
@@ -303,7 +326,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'featureArray', Op.and])
+        where: resultWhere(allWheres, ['spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
       }]
     }
   }
