@@ -492,7 +492,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress']),
+        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress', 'applicantAddress', 'contractAddress']),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
