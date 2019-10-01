@@ -203,6 +203,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       contractAddress,
       //TODO: fee amount
       feeAmount: 0,
+      rolesArray: '|' + application.assignedOracleTypes.join('|') + '|',
       dataJson: ''
     });
     

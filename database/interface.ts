@@ -115,6 +115,7 @@ export interface IApplication {
   status;
   contractType;
   contractAddress;
+  rolesArray;
   dataJson;
 
   addSpaceTokens?(tokensObjects);

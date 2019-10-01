@@ -39,6 +39,9 @@ module.exports = async function (sequelize, models) {
     applicantAddress: {
       type: Sequelize.STRING(100)
     },
+    rolesArray: {
+      type: Sequelize.TEXT
+    },
     dataJson: {
       type: Sequelize.TEXT
     }

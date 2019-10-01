@@ -213,6 +213,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.id = applicationId.toString(10);
       result.spaceTokenId = result.spaceTokenId.toString(10);
       result.currency = result.currency.toString(10);
+      result.assignedOracleTypes = result.assignedOracleTypes.map(typeHex => Web3Utils.hexToUtf8(typeHex));
 
       result.status = {
         '0': 'not_exists',
