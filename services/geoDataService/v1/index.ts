@@ -51,10 +51,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent) {
     let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'];
-    await this.saveSpaceTokenById(spaceTokenId);
+    await this.saveSpaceTokenById(spaceTokenId, { createdAtBlock: event.blockNumber });
   };
   
-  async saveSpaceTokenById(spaceTokenId) {
+  async saveSpaceTokenById(spaceTokenId, additionalData = {}) {
     const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
     const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
 
@@ -63,7 +63,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.saveSpaceTokenByDataLink(dataLink, {
       spaceTokenId: spaceTokenId,
       owner: owner,
-      ...geoData
+      ...geoData,
+      ...additionalData
     })
   }
   
@@ -111,7 +112,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       heightsContourJson: JSON.stringify(geoData.heightsContour),
       ledgerIdentifier: ledgerIdentifier,
-      featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
+      featureArray: details.features ? '|' + details.features.join('|') + '|' : '',
+      createdAtBlock: geoData.createdAtBlock
     });
   }
 
@@ -161,7 +163,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       sumLandArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'land'}), 'bathroomsCount'),
       sumBuildingArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'building'}), 'bedroomsCount'),
       featureArray: '|' + allFeatures.join('|') + '|',
-      typesSubtypesArray: '|' + allTypesSubTypes.join('|') + '|'
+      typesSubtypesArray: '|' + allTypesSubTypes.join('|') + '|',
+      createdAtBlock: event.blockNumber
     });
     
     console.log('order saved', dbOrder.orderId);
@@ -204,13 +207,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       //TODO: fee amount
       feeAmount: 0,
       rolesArray: '|' + application.assignedOracleTypes.join('|') + '|',
-      dataJson: ''
+      dataJson: '',
+      createdAtBlock: event.blockNumber
     });
     
     console.log('dbApplication.applicationId', dbApplication.applicationId);
     
     const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, {
       spaceTokenId: 'application_' + contractAddress + '_' + applicationId,
+      createdAtBlock: event.blockNumber,
       ...applicationDetails
     });
     // console.log('spaceToken', spaceToken);

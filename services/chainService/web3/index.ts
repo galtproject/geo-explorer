@@ -92,6 +92,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     const contract = this.getContractByEvent(eventName);
     return contract.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber}).then(events => {
       return events.map(e => {
+        console.log('event', e);
         e.contractAddress = e.address;
         return e;
       })

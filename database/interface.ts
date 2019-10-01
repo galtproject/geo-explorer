@@ -72,6 +72,7 @@ export interface ISpaceTokenGeoData {
   geohashContourJson;
   heightsContourJson;
   featureArray;
+  createdAtBlock;
 }
 
 export interface ISaleOrder {
@@ -83,6 +84,7 @@ export interface ISaleOrder {
   ask?;
   description?;
   lastBuyer?;
+  createdAtBlock;
   dataJson?;
 
   featureArray?;
@@ -116,6 +118,7 @@ export interface IApplication {
   contractType;
   contractAddress;
   rolesArray;
+  createdAtBlock;
   dataJson;
 
   addSpaceTokens?(tokensObjects);

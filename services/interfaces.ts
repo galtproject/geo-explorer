@@ -20,14 +20,17 @@ export interface IExplorerResultContour {
 export interface IExplorerGeoDataEvent {
   returnValues: { dataLink: string, spaceTokenId: string };
   contractAddress;
+  blockNumber;
 }
 
 export interface IExplorerSaleOrderEvent {
   returnValues: { orderId: string, status: string };
   contractAddress;
+  blockNumber;
 }
 
 export interface IExplorerNewApplicationEvent {
   returnValues: { applicationId: string, applicant: string };
   contractAddress;
+  blockNumber;
 }

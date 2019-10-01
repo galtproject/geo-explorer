@@ -39,6 +39,9 @@ module.exports = async function (sequelize, models) {
     dataJson: {
       type: Sequelize.TEXT
     },
+    createdAtBlock: {
+      type: Sequelize.INTEGER
+    },
     
     // SPACE TOKENS FIELDS
     featureArray: {

@@ -42,6 +42,9 @@ module.exports = async function (sequelize, models) {
     rolesArray: {
       type: Sequelize.TEXT
     },
+    createdAtBlock: {
+      type: Sequelize.INTEGER
+    },
     dataJson: {
       type: Sequelize.TEXT
     }
