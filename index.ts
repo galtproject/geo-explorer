@@ -81,6 +81,16 @@ const config = require('./config');
     await chainService.getEventsFromBlock(ChainServiceEvents.SaleOrderStatusChanged, parseInt(prevBlockNumber)).then(async (events) => {
       await pIteration.forEach(events, geoDataService.handleSaleOrderEvent.bind(geoDataService));
     });
+
+    chainService.subscribeForNewEvents(ChainServiceEvents.NewPropertyApplication, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New NewPropertyApplication event, blockNumber:', currentBlockNumber);
+      await geoDataService.handleNewApplicationEvent(newEvent);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
+
+    await chainService.getEventsFromBlock(ChainServiceEvents.NewPropertyApplication, parseInt(prevBlockNumber)).then(async (events) => {
+      await pIteration.forEach(events, geoDataService.handleNewApplicationEvent.bind(geoDataService));
+    });
     
     const orders = await geoDataService.filterOrders({
     //   // landAreaMin: 3000,

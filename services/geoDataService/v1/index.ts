@@ -164,7 +164,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       typesSubtypesArray: '|' + allTypesSubTypes.join('|') + '|'
     });
     
-    console.log('saved', dbOrder.orderId);
+    console.log('order saved', dbOrder.orderId);
 
     await dbOrder.addSpaceTokens(dbSpaceTokens);
   };
