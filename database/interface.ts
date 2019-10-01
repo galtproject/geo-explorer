@@ -118,6 +118,8 @@ export interface IApplication {
   contractType;
   contractAddress;
   rolesArray;
+  availableRolesArray;
+  oraclesArray;
   createdAtBlock;
   dataJson;
 
@@ -163,8 +165,10 @@ export interface ApplicationsQuery {
   sortDir?: string;
 
   tokensIds?: string[];
-  tokenType: string;
-  contractType: string;
+  tokenType?: string;
+  contractType?: string;
+  availableRoles?: string[];
+  oracleAddress?: string;
 
   features?: string[];
 

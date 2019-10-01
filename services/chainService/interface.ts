@@ -40,13 +40,16 @@ export default interface IExplorerChainService {
   getNewPropertyApplication(applicationId): Promise<{ spaceTokenId: string, id: string, applicant: string, currency: string, status: string, assignedOracleTypes: string[] }>;
 
   getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
+  
+  getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string }>;
 }
 
 export enum ChainServiceEvents {
   SetSpaceTokenContour = 'SetSpaceTokenContour',
   SetSpaceTokenDataLink = 'SetSpaceTokenDataLink',
   SaleOrderStatusChanged = 'SaleOrderStatusChanged',
-  NewPropertyApplication = 'NewApplication'
+  NewPropertyApplication = 'NewApplication',
+  NewPropertyValidationStatusChanged = 'ValidationStatusChanged'
 }
 
 export interface ChainServiceSaleOrder {

@@ -194,6 +194,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const application = await this.chainService.getNewPropertyApplication(applicationId);
     const applicationDetails = await this.chainService.getNewPropertyApplicationDetails(applicationId);
     
+    const oracles = [];
+    const availableRoles = [];
+    
+    await pIteration.map(application.assignedOracleTypes, async (roleName) => {
+      const roleOracle = await this.chainService.getNewPropertyApplicationOracle(applicationId, roleName);
+      if(roleOracle.status === 'pending') {
+        availableRoles.push(roleName);
+      }
+      if(roleOracle.address) {
+        oracles.push(roleOracle.address);
+      }
+    });
+    
     const dbApplication = await this.database.addOrUpdateApplication({
       applicationId,
       applicantAddress: applicant,
@@ -207,6 +220,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       //TODO: fee amount
       feeAmount: 0,
       rolesArray: '|' + application.assignedOracleTypes.join('|') + '|',
+      availableRolesArray: '|' + availableRoles.join('|') + '|',
+      oraclesArray: '|' + oracles.join('|') + '|',
       dataJson: '',
       createdAtBlock: event.blockNumber
     });

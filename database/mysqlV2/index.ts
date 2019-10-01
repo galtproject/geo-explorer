@@ -442,6 +442,24 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: applicationsQuery[field]};
     });
 
+    if(applicationsQuery.availableRoles && applicationsQuery.availableRoles.length) {
+      let featureQueryRoot = { };
+
+      let currentFeatureQueryItem = featureQueryRoot;
+      applicationsQuery.availableRoles.forEach((feature, index) => {
+        currentFeatureQueryItem[Op.like] = `%|${feature}|%`;
+        if(index + 1 < applicationsQuery.availableRoles.length) {
+          currentFeatureQueryItem[Op.and] = {};
+          currentFeatureQueryItem = currentFeatureQueryItem[Op.and];
+        }
+      });
+      if(applicationsQuery.oracleAddress) {
+        allWheres[Op.or] = [{ availableRolesArray: featureQueryRoot}, {oracleAddress: {[Op.like]: '%' + applicationsQuery.oracleAddress + '%'}}];
+      } else {
+        allWheres['availableRolesArray'] = { [Op.and]: featureQueryRoot};
+      }
+    }
+
     console.log('allWheres', allWheres);
 
     function resultWhere(sourceWhere, fields, relation?) {

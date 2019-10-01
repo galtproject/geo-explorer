@@ -85,6 +85,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(eventName === ChainServiceEvents.NewPropertyApplication) {
       return this.newPropertyManager;
     }
+    if(eventName === ChainServiceEvents.NewPropertyValidationStatusChanged) {
+      return this.newPropertyManager;
+    }
     return null;
   }
 
@@ -254,6 +257,15 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
         spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType.toString(10)]
+      };
+    })
+  }
+
+  getNewPropertyApplicationOracle(applicationId, roleName) {
+    return this.newPropertyManager.methods.getApplicationOracle(applicationId, Web3Utils.utf8ToHex(roleName)).call({}).then(result => {
+      return {
+        address: result.oracle === '0x0000000000000000000000000000000000000000' ? null : result.oracle,
+        status: ({"0": "null", "1": "pending", "2": "locked", "3": "approved", "4": "rejected", "5": "reverted"})[result.status.toString(10)]
       };
     })
   }
