@@ -210,7 +210,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, {
       spaceTokenId: 'application_' + contractAddress + '_' + applicationId,
-      applicationDetails
+      ...applicationDetails
     });
     // console.log('spaceToken', spaceToken);
     
