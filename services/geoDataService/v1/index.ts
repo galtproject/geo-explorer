@@ -152,6 +152,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       //TODO: get currencyName from contract
       currencyName: 'DAI',
       ask: chainOrder.ask,
+      seller: chainOrder.seller,
       description: orderData.description,
       dataJson: JSON.stringify(orderData),
       lastBuyer: chainOrder.lastBuyer,

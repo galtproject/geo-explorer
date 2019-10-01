@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     lastBuyer: {
       type: Sequelize.STRING(100)
     },
+    seller: {
+      type: Sequelize.STRING(100)
+    },
     description: {
       type: Sequelize.TEXT
     },

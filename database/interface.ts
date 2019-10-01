@@ -79,6 +79,7 @@ export interface ISaleOrder {
   currency?;
   currencyAddress?;
   currencyName?;
+  seller?;
   ask?;
   description?;
   lastBuyer?;
