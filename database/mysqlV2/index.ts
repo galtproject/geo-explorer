@@ -432,7 +432,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['spaceTokenId'] = {[Op.in]: applicationsQuery.tokensIds};
     }
 
-    ['feeCurrency', 'contractType'].forEach((field) => {
+    ['feeCurrency', 'contractType', 'tokenType'].forEach((field) => {
       if(applicationsQuery[field])
         allWheres[field] = applicationsQuery[field];
     });
@@ -492,7 +492,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress', 'applicantAddress', 'contractAddress']),
+        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress', 'applicantAddress', 'contractAddress', 'contractType']),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
@@ -504,7 +504,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', Op.and])
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', Op.and])
       }]
     }
   }

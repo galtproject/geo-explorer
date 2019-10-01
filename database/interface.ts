@@ -163,6 +163,8 @@ export interface ApplicationsQuery {
   sortDir?: string;
 
   tokensIds?: string[];
+  tokenType: string;
+  contractType: string;
 
   features?: string[];
 
