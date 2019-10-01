@@ -314,7 +314,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     return {
       where: _.extend(
-        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', Op.and]),
+        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{

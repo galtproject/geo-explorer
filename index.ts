@@ -89,9 +89,9 @@ const config = require('./config');
     //   // limit: 2
     //   types: ['land'],
     //    
-      subtypes: ['beachLot'],
-      bedroomsCountMin: 3
-    //   // features: ['refrigerator', 'dishwasher', 'greatViews']//, 'securitySystem'
+    //   subtypes: ['beachLot'],
+    //   bedroomsCountMin: 3,
+      features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
     });
     console.log('found orders', orders.list.length, orders.total);
 
