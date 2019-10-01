@@ -9,6 +9,7 @@
 
 export interface IExplorerChainContourEvent {
   returnValues: { contour: number[], spaceTokenId: string };
+  contractAddress;
 }
 
 export interface IExplorerResultContour {
@@ -18,8 +19,15 @@ export interface IExplorerResultContour {
 
 export interface IExplorerGeoDataEvent {
   returnValues: { dataLink: string, spaceTokenId: string };
+  contractAddress;
 }
 
 export interface IExplorerSaleOrderEvent {
   returnValues: { orderId: string, status: string };
+  contractAddress;
+}
+
+export interface IExplorerNewApplicationEvent {
+  returnValues: { applicationId: string, applicant: string };
+  contractAddress;
 }

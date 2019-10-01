@@ -7,8 +7,8 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import {IExplorerGeoDataEvent, IExplorerSaleOrderEvent} from "../interfaces";
-import {SaleOrdersQuery, ISaleOrder} from "../../database/interface";
+import {IExplorerGeoDataEvent, IExplorerNewApplicationEvent, IExplorerSaleOrderEvent} from "../interfaces";
+import {SaleOrdersQuery, ISaleOrder, ApplicationsQuery, IApplication} from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
   handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent): Promise<void>;
@@ -18,6 +18,12 @@ export default interface IExplorerGeoDataService {
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
 
   getOrderById(orderId): Promise<ISaleOrder>;
+
+  handleNewApplicationEvent(event: IExplorerNewApplicationEvent): Promise<void>;
+
+  filterApplications(applicationsQuery: FilterApplicationsGeoQuery): Promise<IApplicationsListResponse>;
+
+  getApplicationById(applicationId, contractAddress): Promise<IApplication>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -26,5 +32,14 @@ export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
 
 export interface ISaleOrdersListResponse {
   list: ISaleOrder[];
+  total: number;
+}
+
+export interface FilterApplicationsGeoQuery extends ApplicationsQuery {
+  surroundingsGeohashBox?: string[];
+}
+
+export interface IApplicationsListResponse {
+  list: IApplication[];
   total: number;
 }
