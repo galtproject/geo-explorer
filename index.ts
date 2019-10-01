@@ -119,7 +119,7 @@ const config = require('./config');
       //   // limit: 2
       //   types: ['land'],
       //    
-      //   subtypes: ['beachLot'],
+        availableRoles: ['PM_LAWYER_ORACLE_TYPE', 'PM_SURVEYOR_ORACLE_TYPE'],
       //   bedroomsCountMin: 3,
       // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
       applicantAddress: '0xf0430bbb78C3c359c22d4913484081A563B86170'

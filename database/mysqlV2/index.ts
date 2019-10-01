@@ -443,20 +443,14 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
 
     if(applicationsQuery.availableRoles && applicationsQuery.availableRoles.length) {
-      let featureQueryRoot = { };
+      let availableRolesQuery = applicationsQuery.availableRoles.map((roleName) => ({
+        [Op.like]: `%|${roleName}|%`
+      }));
 
-      let currentFeatureQueryItem = featureQueryRoot;
-      applicationsQuery.availableRoles.forEach((feature, index) => {
-        currentFeatureQueryItem[Op.like] = `%|${feature}|%`;
-        if(index + 1 < applicationsQuery.availableRoles.length) {
-          currentFeatureQueryItem[Op.and] = {};
-          currentFeatureQueryItem = currentFeatureQueryItem[Op.and];
-        }
-      });
       if(applicationsQuery.oracleAddress) {
-        allWheres[Op.or] = [{ availableRolesArray: featureQueryRoot}, {oracleAddress: {[Op.like]: '%' + applicationsQuery.oracleAddress + '%'}}];
+        allWheres[Op.or] = [{ [Op.and]: {'availableRolesArray': {[Op.or]: availableRolesQuery} } }, {oracleAddress: {[Op.like]: '%' + applicationsQuery.oracleAddress + '%'}}];
       } else {
-        allWheres['availableRolesArray'] = { [Op.and]: featureQueryRoot};
+        allWheres['availableRolesArray'] = { [Op.or]: availableRolesQuery};
       }
     }
 
@@ -510,7 +504,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress', 'applicantAddress', 'contractAddress', 'contractType']),
+        resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyAddress', 'applicantAddress', 'contractAddress', 'contractType', 'availableRolesArray', Op.or]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
