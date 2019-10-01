@@ -95,6 +95,21 @@ const config = require('./config');
     });
     console.log('found orders', orders.list.length, orders.total);
 
+
+    const applications = await geoDataService.filterApplications({
+      //   // landAreaMin: 3000,
+      //   // surroundingsGeohashBox: ['dpzpufr']
+      //   // surroundingsGeohashBox: ['9q598'],
+      //   // limit: 2
+      //   types: ['land'],
+      //    
+      //   subtypes: ['beachLot'],
+      //   bedroomsCountMin: 3,
+      // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
+      applicantAddress: '0xf0430bbb78C3c359c22d4913484081A563B86170'
+    });
+    console.log('found orders', applications.list.length, applications.total);
+
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 
     //todo: handle DeleteSpaceTokenGeoData

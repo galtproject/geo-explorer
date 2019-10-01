@@ -166,6 +166,9 @@ export interface ApplicationsQuery {
   feeCurrency?: string;
   feeCurrencyAddress?: string;
 
+  applicantAddress?: string;
+  contractAddress?: string;
+
   regions?: string[];
   types?: string[];
   subtypes?: string[];
