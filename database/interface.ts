@@ -70,6 +70,7 @@ export interface ISpaceTokenGeoData {
   dataLink;
   dataJson;
   geohashContourJson;
+  geohashesCount;
   heightsContourJson;
   featureArray;
   createdAtBlock;
@@ -184,12 +185,12 @@ export interface ApplicationsQuery {
   types?: string[];
   subtypes?: string[];
 
-  askMin?: number;
-  askMax?: number;
+  geohashesCountMin: number;
+  geohashesCountMaxx: number;
+
+  totalOraclesRewardMin?: number;
+  totalOraclesRewardMax?: number;
 
   areaMin?: number;
   areaMax?: number;
-
-  bedroomsCountMin?: number;
-  bathroomsCountMin?: number;
 }

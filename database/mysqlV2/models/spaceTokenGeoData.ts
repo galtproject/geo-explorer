@@ -90,6 +90,9 @@ module.exports = async function (sequelize, models) {
     geohashContourJson: {
       type: Sequelize.TEXT
     },
+    geohashesCount: {
+      type: Sequelize.INTEGER
+    },
     heightsContourJson: {
       type: Sequelize.TEXT
     },

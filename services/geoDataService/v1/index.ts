@@ -110,6 +110,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataLink: dataLink,
       dataJson: JSON.stringify(spaceData),
       geohashContourJson: JSON.stringify(geoData.geohashContour),
+      geohashesCount: geoData.geohashContour.length,
       heightsContourJson: JSON.stringify(geoData.heightsContour),
       ledgerIdentifier: ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : '',

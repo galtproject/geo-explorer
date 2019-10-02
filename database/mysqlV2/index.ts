@@ -399,7 +399,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   applicationsQueryToFindAllParam(applicationsQuery: ApplicationsQuery) {
     const allWheres: any = {};
 
-    ['feeAmount', 'bedroomsCount', 'bathroomsCount', 'area', 'totalOraclesReward'].forEach(field => {
+    ['feeAmount', 'bedroomsCount', 'bathroomsCount', 'area', 'totalOraclesReward', 'geohashesCount'].forEach(field => {
       const minVal = parseFloat(applicationsQuery[field + 'Min']);
       const maxVal = parseFloat(applicationsQuery[field + 'Max']);
       if(!minVal && !maxVal)
@@ -516,7 +516,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', Op.and])
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', Op.and])
       }]
     }
   }
