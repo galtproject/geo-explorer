@@ -432,7 +432,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['spaceTokenId'] = {[Op.in]: applicationsQuery.tokensIds};
     }
 
-    ['feeCurrency', 'contractType', 'tokenType'].forEach((field) => {
+    ['feeCurrency', 'contractType', 'tokenType', 'feeCurrencyName'].forEach((field) => {
       if(applicationsQuery[field])
         allWheres[field] = applicationsQuery[field];
     });
