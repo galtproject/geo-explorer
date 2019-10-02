@@ -448,7 +448,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       }));
 
       if(applicationsQuery.oracleAddress) {
-        allWheres[Op.or] = [{ [Op.and]: {'availableRolesArray': {[Op.or]: availableRolesQuery} } }, {oracleAddress: {[Op.like]: '%' + applicationsQuery.oracleAddress + '%'}}];
+        allWheres[Op.or] = [{ [Op.and]: {'availableRolesArray': {[Op.or]: availableRolesQuery} } }, {oraclesArray: {[Op.like]: '%' + applicationsQuery.oracleAddress + '%'}}];
       } else {
         allWheres['availableRolesArray'] = { [Op.or]: availableRolesQuery};
       }
