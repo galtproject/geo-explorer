@@ -266,7 +266,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return {
         address: result.oracle === '0x0000000000000000000000000000000000000000' ? null : result.oracle,
         status: ({"0": "null", "1": "pending", "2": "locked", "3": "approved", "4": "rejected", "5": "reverted"})[result.status.toString(10)],
-        reward: Web3Utils.fromWei(result.reward.toString(10), 'ether')
+        reward: parseFloat(Web3Utils.fromWei(result.reward.toString(10), 'ether'))
       };
     })
   }
