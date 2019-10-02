@@ -196,6 +196,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     const oracles = [];
     const availableRoles = [];
+    let totalOraclesReward = 0;
     
     await pIteration.map(application.assignedOracleTypes, async (roleName) => {
       const roleOracle = await this.chainService.getNewPropertyApplicationOracle(applicationId, roleName);
@@ -205,6 +206,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       if(roleOracle.address) {
         oracles.push(roleOracle.address);
       }
+      totalOraclesReward += roleOracle.reward;
     });
     
     const dbApplication = await this.database.addOrUpdateApplication({
@@ -223,7 +225,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       availableRolesArray: '|' + availableRoles.join('|') + '|',
       oraclesArray: '|' + oracles.join('|') + '|',
       dataJson: '',
-      createdAtBlock: event.blockNumber
+      createdAtBlock: event.blockNumber,
+      totalOraclesReward
     });
     
     console.log('dbApplication.applicationId', dbApplication.applicationId);

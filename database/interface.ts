@@ -120,6 +120,7 @@ export interface IApplication {
   rolesArray;
   availableRolesArray;
   oraclesArray;
+  totalOraclesReward;
   createdAtBlock;
   dataJson;
 

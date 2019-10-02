@@ -41,7 +41,7 @@ export default interface IExplorerChainService {
 
   getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
   
-  getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string }>;
+  getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
 }
 
 export enum ChainServiceEvents {

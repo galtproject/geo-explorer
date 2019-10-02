@@ -399,7 +399,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   applicationsQueryToFindAllParam(applicationsQuery: ApplicationsQuery) {
     const allWheres: any = {};
 
-    ['feeAmount', 'bedroomsCount', 'bathroomsCount', 'area'].forEach(field => {
+    ['feeAmount', 'bedroomsCount', 'bathroomsCount', 'area', 'totalOraclesReward'].forEach(field => {
       const minVal = parseFloat(applicationsQuery[field + 'Min']);
       const maxVal = parseFloat(applicationsQuery[field + 'Max']);
       if(!minVal && !maxVal)

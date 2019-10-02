@@ -48,6 +48,9 @@ module.exports = async function (sequelize, models) {
     oraclesArray: {
       type: Sequelize.TEXT
     },
+    totalOraclesReward: {
+      type: Sequelize.FLOAT
+    },
     createdAtBlock: {
       type: Sequelize.INTEGER
     },

@@ -265,7 +265,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return this.newPropertyManager.methods.getApplicationOracle(applicationId, Web3Utils.utf8ToHex(roleName)).call({}).then(result => {
       return {
         address: result.oracle === '0x0000000000000000000000000000000000000000' ? null : result.oracle,
-        status: ({"0": "null", "1": "pending", "2": "locked", "3": "approved", "4": "rejected", "5": "reverted"})[result.status.toString(10)]
+        status: ({"0": "null", "1": "pending", "2": "locked", "3": "approved", "4": "rejected", "5": "reverted"})[result.status.toString(10)],
+        reward: Web3Utils.fromWei(result.reward.toString(10), 'ether')
       };
     })
   }
