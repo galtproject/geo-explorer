@@ -185,8 +185,8 @@ export interface ApplicationsQuery {
   types?: string[];
   subtypes?: string[];
 
-  geohashesCountMin: number;
-  geohashesCountMaxx: number;
+  geohashesCountMin?: number;
+  geohashesCountMax?: number;
 
   totalOraclesRewardMin?: number;
   totalOraclesRewardMax?: number;
