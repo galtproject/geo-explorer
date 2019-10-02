@@ -206,8 +206,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       if(roleOracle.address) {
         oracles.push(roleOracle.address);
       }
+      console.log('roleOracle.reward', roleOracle.reward);
       totalOraclesReward += roleOracle.reward;
     });
+    console.log('totalOraclesReward', totalOraclesReward);
     
     const dbApplication = await this.database.addOrUpdateApplication({
       applicationId,
