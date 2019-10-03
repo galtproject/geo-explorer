@@ -27,7 +27,7 @@ module.exports = async function (sequelize, models) {
     feeCurrencyName: {
       type: Sequelize.STRING(100)
     },
-    status: {
+    statusName: {
       type: Sequelize.STRING(100)
     },
     contractType: {

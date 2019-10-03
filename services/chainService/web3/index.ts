@@ -222,7 +222,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.currency = result.currency.toString(10);
       result.assignedOracleTypes = result.assignedOracleTypes.map(typeHex => Web3Utils.hexToUtf8(typeHex));
 
-      result.status = {
+      result.statusName = {
         '0': 'not_exists',
         '1': 'partially_submitted',
         '2': 'contour_verification',

@@ -115,7 +115,7 @@ export interface IApplication {
   feeAmount;
   feeCurrencyAddress;
   feeCurrencyName;
-  status;
+  statusName;
   contractType;
   contractAddress;
   rolesArray;
