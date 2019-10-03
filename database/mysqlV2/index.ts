@@ -387,6 +387,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     let dbObject = await this.getApplication(application.applicationId, application.contractAddress);
 
     if(dbObject) {
+      application.createdAtBlock = dbObject.createdAtBlock || application.createdAtBlock;
       await this.models.Application.update(application, {
         where: {applicationId: application.applicationId, contractAddress: application.contractAddress}
       });
