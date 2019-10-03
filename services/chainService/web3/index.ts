@@ -221,6 +221,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
       result.id = applicationId.toString(10);
       result.spaceTokenId = result.spaceTokenId.toString(10);
+      if(result.spaceTokenId === '0') {
+        result.spaceTokenId = null;
+      }
       result.currency = result.currency.toString(10);
       result.assignedOracleTypes = result.assignedOracleTypes.map(typeHex => Web3Utils.hexToUtf8(typeHex));
 
