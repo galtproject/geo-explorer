@@ -565,6 +565,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(spaceTokensQuery[field])
         allWheres[field] = spaceTokensQuery[field];
     });
+    
+    ['owner'].forEach((field) => {
+      if(spaceTokensQuery[field])
+        allWheres[field] = {[Op.like]: spaceTokensQuery[field]};
+    });
 
     console.log('allWheres', allWheres);
 
