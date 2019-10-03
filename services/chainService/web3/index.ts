@@ -108,7 +108,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
     const contract = this.getContractByEvent(eventName);
 
-    contract.events[eventName]({fromBlock: blockNumber}, (e) => {
+    contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       e.contractAddress = e.address;
       callback(e);
