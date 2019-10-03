@@ -217,7 +217,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       //TODO: get currency address of GALT
       feeCurrencyAddress: '',
       feeCurrencyName: application.currency == '0' ? 'ETH' : 'GALT',
-      statusName: application.status,
+      statusName: application.statusName,
       contractType: 'newPropertyManager',
       contractAddress,
       //TODO: fee amount

@@ -37,7 +37,7 @@ export default interface IExplorerChainService {
 
   getSaleOrder(orderId): Promise<ChainServiceSaleOrder>;
 
-  getNewPropertyApplication(applicationId): Promise<{ spaceTokenId: string, id: string, applicant: string, currency: string, status: string, assignedOracleTypes: string[] }>;
+  getNewPropertyApplication(applicationId): Promise<{ spaceTokenId: string, id: string, applicant: string, currency: string, statusName: string, assignedOracleTypes: string[] }>;
 
   getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
   
