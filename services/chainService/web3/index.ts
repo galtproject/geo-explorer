@@ -111,7 +111,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       e.contractAddress = e.address;
-      callback(e);
+      callback(error, e);
     });
   }
 
