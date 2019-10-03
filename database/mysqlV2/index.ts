@@ -586,20 +586,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.limit = spaceTokensQuery.limit || 20;
     findAllParam.offset = spaceTokensQuery.offset || 0;
 
-    const sapceTokens = await this.models.SpaceTokenGeoData.findAll(findAllParam);
-
-    findAllParam.where = { id: { [ Op.in]: sapceTokens.map(o => o.id) } };
-    findAllParam.include.forEach(i => {
-      i.where = null;
-    });
-
     findAllParam.order = [
       [spaceTokensQuery.sortBy || 'createdAt', spaceTokensQuery.sortDir || 'DESC']
     ];
-
-    delete findAllParam.limit;
-    delete findAllParam.offset;
-
+    
     return this.models.SpaceTokenGeoData.findAll(findAllParam);
   }
 
