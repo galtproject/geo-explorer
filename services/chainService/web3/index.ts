@@ -259,6 +259,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         geohashContour,
         heightsContour,
         ledgerIdentifier,
+        credentialsHash: result.credentialsHash,
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
         spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType.toString(10)]
