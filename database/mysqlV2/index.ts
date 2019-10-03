@@ -596,8 +596,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async filterSpaceTokensCount(spaceTokensQuery: SpaceTokensQuery) {
     const findAllParam: any = this.spaceTokensQueryToFindAllParam(spaceTokensQuery);
 
-    findAllParam.distinct = true;
-
     return this.models.SpaceTokenGeoData.count(findAllParam);
   }
   
