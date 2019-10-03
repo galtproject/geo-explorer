@@ -8,7 +8,14 @@
  */
 
 import {IExplorerGeoDataEvent, IExplorerNewApplicationEvent, IExplorerSaleOrderEvent} from "../interfaces";
-import {SaleOrdersQuery, ISaleOrder, ApplicationsQuery, IApplication} from "../../database/interface";
+import {
+  SaleOrdersQuery,
+  ISaleOrder,
+  ApplicationsQuery,
+  IApplication,
+  SpaceTokensQuery,
+  ISpaceTokenGeoData
+} from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
   handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent): Promise<void>;
@@ -24,6 +31,10 @@ export default interface IExplorerGeoDataService {
   filterApplications(applicationsQuery: FilterApplicationsGeoQuery): Promise<IApplicationsListResponse>;
 
   getApplicationById(applicationId, contractAddress): Promise<IApplication>;
+
+  filterSpaceTokens(spaceTokensQuery: FilterSpaceTokensGeoQuery): Promise<ISpaceTokensListResponse>;
+
+  getSpaceTokenById(spaceTokenId): Promise<ISpaceTokenGeoData>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -41,5 +52,14 @@ export interface FilterApplicationsGeoQuery extends ApplicationsQuery {
 
 export interface IApplicationsListResponse {
   list: IApplication[];
+  total: number;
+}
+
+export interface FilterSpaceTokensGeoQuery extends SpaceTokensQuery {
+  surroundingsGeohashBox?: string[];
+}
+
+export interface ISpaceTokensListResponse {
+  list: ISpaceTokenGeoData[];
   total: number;
 }

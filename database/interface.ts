@@ -195,3 +195,27 @@ export interface ApplicationsQuery {
   areaMin?: number;
   areaMax?: number;
 }
+
+export interface SpaceTokensQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  tokensIds?: string[];
+  tokenType?: string;
+
+  features?: string[];
+
+  regions?: string[];
+  types?: string[];
+  subtypes?: string[];
+
+  geohashesCountMin?: number;
+  geohashesCountMax?: number;
+
+  areaMin?: number;
+  areaMax?: number;
+}
+

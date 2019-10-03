@@ -59,6 +59,14 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geohashService.getContoursByParentGeohashArray(geohashes));
   });
 
+  service.post('/v1/space-tokens/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterSpaceTokens(req.body));
+  });
+
+  service.post('/v1/space-tokens/get-by-id/:id', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getSpaceTokenById(req.params.id));
+  });
+
   service.post('/v1/orders/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterOrders(req.body));
   });

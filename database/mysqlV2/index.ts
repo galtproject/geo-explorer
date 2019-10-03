@@ -12,7 +12,7 @@ import IExplorerDatabase, {
   ISaleOrder,
   SaleOrdersQuery,
   IApplication,
-  ApplicationsQuery
+  ApplicationsQuery, SpaceTokensQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -273,22 +273,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     console.log('allWheres', allWheres);
     
-    function resultWhere(sourceWhere, fields, relation?) {
-      const res = {};
-      _.forEach(fields, (key) => {
-        const value = sourceWhere[key];
-        // console.log('key', key);
-        if(_.isUndefined(value))
-          return;
-        
-        if(relation) {
-          key = `$${relation}.${key}$`;
-        }
-        res[key] = value;
-      });
-      console.log('resultWhere', res);
-      return res;
-    }
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
     //   include : {//[this.models.SaleOrder._conformInclude({
@@ -457,22 +441,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     console.log('allWheres', allWheres);
 
-    function resultWhere(sourceWhere, fields, relation?) {
-      const res = {};
-      _.forEach(fields, (key) => {
-        const value = sourceWhere[key];
-        // console.log('key', key);
-        if(_.isUndefined(value))
-          return;
-
-        if(relation) {
-          key = `$${relation}.${key}$`;
-        }
-        res[key] = value;
-      });
-      console.log('resultWhere', res);
-      return res;
-    }
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
     //   include : {//[this.models.SaleOrder._conformInclude({
@@ -557,6 +525,93 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.Application.count(findAllParam);
   }
 
+  spaceTokensQueryToFindAllParam(spaceTokensQuery: SpaceTokensQuery) {
+    const allWheres: any = {};
+
+    ['bedroomsCount', 'bathroomsCount', 'area', 'geohashesCount'].forEach(field => {
+      const minVal = parseFloat(spaceTokensQuery[field + 'Min']);
+      const maxVal = parseFloat(spaceTokensQuery[field + 'Max']);
+      if(!minVal && !maxVal)
+        return;
+
+      const fieldWhereObj = {};
+      if(minVal)
+        fieldWhereObj[Op.gte] = minVal;
+
+      if(maxVal)
+        fieldWhereObj[Op.lte] = maxVal;
+
+      allWheres[field] = fieldWhereObj;
+    });
+
+    if(spaceTokensQuery.regions && spaceTokensQuery.regions.length) {
+      for(let i = 1; i <= 9; i++) {
+        allWheres['regionLvl' + i] = {[Op.in]: spaceTokensQuery.regions};
+      }
+    }
+
+    if(spaceTokensQuery.types && spaceTokensQuery.types.length) {
+      allWheres['type'] = {[Op.in]: spaceTokensQuery.types};
+    }
+    if(spaceTokensQuery.subtypes && spaceTokensQuery.subtypes.length) {
+      allWheres['subtype'] = {[Op.in]: spaceTokensQuery.subtypes};
+    }
+
+    if(spaceTokensQuery.tokensIds) {
+      allWheres['spaceTokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
+    }
+
+    ['tokenType'].forEach((field) => {
+      if(spaceTokensQuery[field])
+        allWheres[field] = spaceTokensQuery[field];
+    });
+
+    console.log('allWheres', allWheres);
+
+    return {
+      where: _.extend(
+        resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', Op.and]),
+        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
+      )
+    }
+  }
+
+
+  async filterSpaceTokens(spaceTokensQuery: SpaceTokensQuery) {
+    if(spaceTokensQuery.limit > 1000) {
+      spaceTokensQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.spaceTokensQueryToFindAllParam(spaceTokensQuery);
+
+    findAllParam.limit = spaceTokensQuery.limit || 20;
+    findAllParam.offset = spaceTokensQuery.offset || 0;
+
+    const sapceTokens = await this.models.SpaceTokenGeoData.findAll(findAllParam);
+
+    findAllParam.where = { id: { [ Op.in]: sapceTokens.map(o => o.id) } };
+    findAllParam.include.forEach(i => {
+      i.where = null;
+    });
+
+    findAllParam.order = [
+      [spaceTokensQuery.sortBy || 'createdAt', spaceTokensQuery.sortDir || 'DESC']
+    ];
+
+    delete findAllParam.limit;
+    delete findAllParam.offset;
+
+    return this.models.SpaceTokenGeoData.findAll(findAllParam);
+  }
+
+  async filterSpaceTokensCount(spaceTokensQuery: SpaceTokensQuery) {
+    const findAllParam: any = this.spaceTokensQueryToFindAllParam(spaceTokensQuery);
+
+    findAllParam.distinct = true;
+
+    return this.models.SpaceTokenGeoData.count(findAllParam);
+  }
+
   async getValue(key: string) {
     const valueObj = await this.models.Value.findOne({where: {key}});
     return valueObj ? valueObj.content : null;
@@ -574,4 +629,21 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async clearValue(key: string) {
     return this.models.Value.destroy({where: {key}});
   }
+}
+
+function resultWhere(sourceWhere, fields, relation?) {
+  const res = {};
+  _.forEach(fields, (key) => {
+    const value = sourceWhere[key];
+    // console.log('key', key);
+    if(_.isUndefined(value))
+      return;
+
+    if(relation) {
+      key = `$${relation}.${key}$`;
+    }
+    res[key] = value;
+  });
+  console.log('resultWhere', res);
+  return res;
 }
