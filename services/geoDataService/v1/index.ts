@@ -213,6 +213,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const dbApplication = await this.database.addOrUpdateApplication({
       applicationId,
       applicantAddress: applicant,
+      credentialsHash: application.credentialsHash,
       feeCurrency: application.currency == '0' ? 'eth' : 'erc20',
       //TODO: get currency address of GALT
       feeCurrencyAddress: '',
