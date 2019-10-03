@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     statusName: {
       type: Sequelize.STRING(100)
     },
+    credentialsHash:{
+      type: Sequelize.STRING(100)
+    },
     contractType: {
       type: Sequelize.STRING(100)
     },
