@@ -36,6 +36,12 @@ export default interface IExplorerDatabase {
 
   filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
   
+  getSpaceToken(spaceTokenId): Promise<ISpaceTokenGeoData>;
+
+  filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
+
+  filterSpaceTokensCount(filterQuery: SpaceTokensQuery): Promise<number>;
+  
   getValue(key: string): Promise<string>;
 
   setValue(key: string, content: string): Promise<void>;

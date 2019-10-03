@@ -576,7 +576,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
   }
 
-
   async filterSpaceTokens(spaceTokensQuery: SpaceTokensQuery) {
     if(spaceTokensQuery.limit > 1000) {
       spaceTokensQuery.limit = 1000;
@@ -610,6 +609,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.distinct = true;
 
     return this.models.SpaceTokenGeoData.count(findAllParam);
+  }
+  
+  async getSpaceToken(spaceTokenId) {
+    return this.models.SpaceToken.findOne({
+      where: { spaceTokenId }
+    });
   }
 
   async getValue(key: string) {

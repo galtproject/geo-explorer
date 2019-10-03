@@ -8,7 +8,12 @@
  */
 
 import IExplorerDatabase, {SaleOrdersQuery} from "../../../database/interface";
-import {default as IExplorerGeoDataService, FilterApplicationsGeoQuery, FilterSaleOrdersGeoQuery} from "../interface";
+import {
+  default as IExplorerGeoDataService,
+  FilterApplicationsGeoQuery,
+  FilterSaleOrdersGeoQuery,
+  FilterSpaceTokensGeoQuery
+} from "../interface";
 import {
   IExplorerChainContourEvent,
   IExplorerGeoDataEvent, IExplorerNewApplicationEvent,
@@ -258,5 +263,20 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async getApplicationById(applicationId, contractAddress) {
     return this.database.getApplication(applicationId, contractAddress);
+  }
+
+  async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
+    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
+    }
+    console.log('filterQuery.tokensIds', filterQuery.tokensIds);
+    return {
+      list: await this.database.filterSpaceTokens(filterQuery),
+      total: await this.database.filterSpaceTokensCount(filterQuery)
+    };
+  }
+
+  async getSpaceTokenById(spaceTokenId) {
+    return this.database.getSpaceToken(spaceTokenId);
   }
 }
