@@ -88,6 +88,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(eventName === ChainServiceEvents.NewPropertyValidationStatusChanged) {
       return this.newPropertyManager;
     }
+    if(eventName === ChainServiceEvents.NewPropertyApplicationStatusChanged) {
+      return this.newPropertyManager;
+    }
     return null;
   }
 

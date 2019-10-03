@@ -49,7 +49,8 @@ export enum ChainServiceEvents {
   SetSpaceTokenDataLink = 'SetSpaceTokenDataLink',
   SaleOrderStatusChanged = 'SaleOrderStatusChanged',
   NewPropertyApplication = 'NewApplication',
-  NewPropertyValidationStatusChanged = 'ValidationStatusChanged'
+  NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
+  NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
 }
 
 export interface ChainServiceSaleOrder {
