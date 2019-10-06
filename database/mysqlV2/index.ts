@@ -380,7 +380,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         where: {applicationId: application.applicationId, contractAddress: application.contractAddress}
       });
     } else {
-      return this.models.Application.create(application);
+      return this.models.Application.create(application).catch(() => {});
     }
     return this.getApplication(application.applicationId, application.contractAddress);
   }
