@@ -88,10 +88,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
       currentBlockNumber: await chainService.getCurrentBlock(),
       data
-    }, 200, {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "X-Requested-With"
-    });
+    }, 200);
   }
   
   function setHeaders(res) {
