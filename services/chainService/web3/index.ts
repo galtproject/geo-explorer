@@ -168,7 +168,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   public async getLockerOwner(address) {
     const contract = new this.web3.eth.Contract(this.contractsConfig['spaceLockerAbi'], address);
-    return contract.owner().call({}).catch(() => null);
+    // console.log(this.contractsConfig['spaceLockerAbi']);
+    return contract.methods.owner().call({}).catch(() => null);
   }
 
   public async getSpaceTokenOwner(spaceTokenId) {
