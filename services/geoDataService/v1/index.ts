@@ -55,7 +55,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent) {
-    let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'];
+    let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'];
     await this.saveSpaceTokenById(spaceTokenId, { createdAtBlock: event.blockNumber });
   };
   
