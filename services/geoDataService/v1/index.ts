@@ -64,6 +64,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
     
     const lockerOwner = await this.chainService.getLockerOwner(owner);
+    if(spaceTokenId.toString() === '126') {
+      console.log('126 owner', owner)
+      console.log('126 lockerOwner', lockerOwner)
+    }
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
@@ -247,16 +251,26 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     console.log('dbApplication.applicationId', dbApplication.applicationId);
     
-    const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, {
-      spaceTokenId: application.spaceTokenId || 'application_' + contractAddress + '_' + applicationId,
-      createdAtBlock: event.blockNumber,
-      ...applicationDetails
-    });
+    if(parseInt(application.spaceTokenId)) {
+      const spaceToken = await this.saveSpaceTokenById(application.spaceTokenId, {
+        createdAtBlock: event.blockNumber,
+        ...applicationDetails
+      });
+      if(spaceToken) {
+        await dbApplication.addSpaceTokens([spaceToken]);
+      }
+    } else {
+      const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, {
+        spaceTokenId: application.spaceTokenId || 'application_' + contractAddress + '_' + applicationId,
+        createdAtBlock: event.blockNumber,
+        ...applicationDetails
+      });
+      if(spaceToken) {
+        await dbApplication.addSpaceTokens([spaceToken]);
+      }
+    }
     // console.log('spaceToken', spaceToken);
     
-    if(spaceToken) {
-      await dbApplication.addSpaceTokens([spaceToken]);
-    }
   };
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {

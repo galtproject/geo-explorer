@@ -113,7 +113,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
-    // console.log('geoData', geoData);
+    if(geoData.spaceTokenId === '126') {
+      console.log('geoData', geoData);
+    }
     let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
 
     if(dbObject) {
