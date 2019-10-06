@@ -117,6 +117,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
 
     if(dbObject) {
+      geoData.createdAtBlock = dbObject.createdAtBlock || geoData.createdAtBlock;
       await this.models.SpaceTokenGeoData.update(geoData, {
         where: {spaceTokenId: geoData.spaceTokenId}
       });
@@ -141,6 +142,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     let dbObject = await this.getSaleOrder(saleOrder.orderId);
 
     if(dbObject) {
+      saleOrder.createdAtBlock = dbObject.createdAtBlock || saleOrder.createdAtBlock;
       await this.models.SaleOrder.update(saleOrder, {
         where: {orderId: saleOrder.orderId}
       });

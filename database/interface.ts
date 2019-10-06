@@ -71,6 +71,8 @@ export interface ISpaceTokenGeoData {
   yearBuilt;
   area;
   owner;
+  locker;
+  inLocker;
   areaSource;
   ledgerIdentifier;
   dataLink;
@@ -80,6 +82,7 @@ export interface ISpaceTokenGeoData {
   heightsContourJson;
   featureArray;
   createdAtBlock;
+  updatedAtBlock;
 }
 
 export interface ISaleOrder {
@@ -92,6 +95,7 @@ export interface ISaleOrder {
   description?;
   lastBuyer?;
   createdAtBlock;
+  updatedAtBlock;
   dataJson?;
 
   featureArray?;
@@ -130,6 +134,7 @@ export interface IApplication {
   oraclesArray;
   totalOraclesReward;
   createdAtBlock;
+  updatedAtBlock;
   dataJson;
 
   addSpaceTokens?(tokensObjects);

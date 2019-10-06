@@ -28,6 +28,8 @@ export default interface IExplorerChainService {
   onReconnect(callback): void;
   
   getSpaceTokenOwner(spaceTokenId): Promise<string>;
+  
+  getLockerOwner(address): Promise<string>;
 
   getSpaceTokenArea(spaceTokenId): Promise<number>;
 
@@ -45,6 +47,7 @@ export default interface IExplorerChainService {
 }
 
 export enum ChainServiceEvents {
+  SpaceTokenTransfer = 'Transfer',
   SetSpaceTokenContour = 'SetSpaceTokenContour',
   SetSpaceTokenDataLink = 'SetSpaceTokenDataLink',
   SaleOrderStatusChanged = 'SaleOrderStatusChanged',

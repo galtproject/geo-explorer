@@ -75,6 +75,12 @@ module.exports = async function (sequelize, models) {
     owner: {
       type: Sequelize.STRING(100)
     },
+    locker: {
+      type: Sequelize.STRING(100)
+    },
+    inLocker: {
+      type: Sequelize.BOOLEAN,
+    },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)
     },
@@ -100,6 +106,9 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.TEXT
     },
     createdAtBlock: {
+      type: Sequelize.INTEGER
+    },
+    updatedAtBlock: {
       type: Sequelize.INTEGER
     },
   }, {

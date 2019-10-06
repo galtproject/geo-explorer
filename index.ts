@@ -68,6 +68,12 @@ const config = require('./config');
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
 
+    chainService.subscribeForNewEvents(ChainServiceEvents.SpaceTokenTransfer, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New SpaceTokenTransfer event, blockNumber:', currentBlockNumber);
+      await geoDataService.handleChangeSpaceTokenDataEvent(newEvent);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
+
     await chainService.getEventsFromBlock(ChainServiceEvents.SetSpaceTokenDataLink, parseInt(prevBlockNumber)).then(async (events) => {
       await pIteration.forEach(events, geoDataService.handleChangeSpaceTokenDataEvent.bind(geoDataService));
     });

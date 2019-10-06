@@ -77,6 +77,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
   
   getContractByEvent(eventName) {
+    if(eventName === ChainServiceEvents.SpaceTokenTransfer) {
+      return this.spaceToken;
+    }
     if(eventName === ChainServiceEvents.SetSpaceTokenContour) {
       return this.spaceGeoData;
     }
@@ -161,6 +164,11 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
     this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
     this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
+  }
+
+  public async getLockerOwner(address) {
+    const contract = new this.web3.eth.Contract(this.contractsConfig['spaceLockerAbi'], address);
+    return contract.owner().call({}).catch(() => null);
   }
 
   public async getSpaceTokenOwner(spaceTokenId) {

@@ -62,12 +62,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async saveSpaceTokenById(spaceTokenId, additionalData = {}) {
     const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
     const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
+    
+    const lockerOwner = await this.chainService.getLockerOwner(owner);
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
     return this.saveSpaceTokenByDataLink(dataLink, {
       spaceTokenId: spaceTokenId,
-      owner: owner,
+      owner: lockerOwner ? lockerOwner : owner,
+      locker: lockerOwner ? owner : null,
+      inLocker: !!lockerOwner,
       ...geoData,
       ...additionalData
     })
@@ -110,6 +114,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
       owner: geoData.owner,
+      locker: geoData.locker,
+      inLocker: geoData.inLocker,
       area: geoData.area,
       areaSource: geoData.areaSource,
       dataLink: dataLink,
@@ -119,7 +125,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       heightsContourJson: JSON.stringify(geoData.heightsContour),
       ledgerIdentifier: ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : '',
-      createdAtBlock: geoData.createdAtBlock
+      createdAtBlock: geoData.createdAtBlock,
+      updatedAtBlock: geoData.createdAtBlock
     });
   }
 
@@ -170,7 +177,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       sumBuildingArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'building'}), 'bedroomsCount'),
       featureArray: '|' + allFeatures.join('|') + '|',
       typesSubtypesArray: '|' + allTypesSubTypes.join('|') + '|',
-      createdAtBlock: event.blockNumber
+      createdAtBlock: event.blockNumber,
+      updatedAtBlock: event.blockNumber
     });
     
     console.log('order saved', dbOrder.orderId);
@@ -233,6 +241,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       oraclesArray: '|' + oracles.join('|') + '|',
       dataJson: '',
       createdAtBlock: event.blockNumber,
+      updatedAtBlock: event.blockNumber,
       totalOraclesReward
     });
     

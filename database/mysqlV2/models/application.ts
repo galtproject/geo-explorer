@@ -57,6 +57,9 @@ module.exports = async function (sequelize, models) {
     createdAtBlock: {
       type: Sequelize.INTEGER
     },
+    updatedAtBlock: {
+      type: Sequelize.INTEGER
+    },
     dataJson: {
       type: Sequelize.TEXT
     }
