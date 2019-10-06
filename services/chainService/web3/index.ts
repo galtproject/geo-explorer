@@ -28,7 +28,11 @@ module.exports = async (extendConfig) => {
 
   const netId = await web3.eth.net.getId();
 
-  let contractsConfigUrl = _.template(config.contractsConfigUrl)({env: extendConfig.env || config.env});
+  let env = extendConfig.env || config.env;
+  if(env === 'develop') {
+    env = 'dev';
+  }
+  let contractsConfigUrl = _.template(config.contractsConfigUrl)({ env });
 
   contractsConfigUrl += netId + '.json';
   console.log('📄 contractsConfigUrl', contractsConfigUrl);
