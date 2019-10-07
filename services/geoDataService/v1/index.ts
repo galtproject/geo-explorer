@@ -97,7 +97,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return;
     }
 
-    return this.database.addOrUpdateGeoData({
+    const geoDataToSave = {
       spaceTokenId: geoData.spaceTokenId,
       tokenType: geoData.spaceTokenType,
       type: details.type,
@@ -131,6 +131,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       featureArray: details.features ? '|' + details.features.join('|') + '|' : '',
       createdAtBlock: geoData.createdAtBlock,
       updatedAtBlock: geoData.createdAtBlock
+    };
+    return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
+      return this.database.addOrUpdateGeoData(geoDataToSave);
     });
   }
 

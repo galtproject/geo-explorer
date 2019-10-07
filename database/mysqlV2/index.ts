@@ -124,7 +124,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         where: {spaceTokenId: geoData.spaceTokenId}
       });
     } else {
-      return this.models.SpaceTokenGeoData.create(geoData);
+      return this.models.SpaceTokenGeoData.create(geoData).catch(() => {});
     }
     return this.getSpaceTokenGeoData(geoData.spaceTokenId);
   }
