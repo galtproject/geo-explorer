@@ -227,7 +227,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       totalOraclesReward += roleOracle.reward;
     });
     
-    const dbApplication = await this.database.addOrUpdateApplication({
+    const applicationData = {
       applicationId,
       applicantAddress: applicant,
       credentialsHash: applicationDetails.credentialsHash,
@@ -247,7 +247,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       createdAtBlock: event.blockNumber,
       updatedAtBlock: event.blockNumber,
       totalOraclesReward
-    });
+    };
+    
+    let dbApplication = await this.database.addOrUpdateApplication(applicationData);
+    
+    if(!dbApplication) {
+      dbApplication = await this.database.addOrUpdateApplication(applicationData);
+    }
     
     console.log('dbApplication.applicationId', dbApplication.applicationId);
     
