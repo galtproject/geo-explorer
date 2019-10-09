@@ -31,6 +31,8 @@ export default interface IExplorerChainService {
   
   getLockerOwner(address): Promise<string>;
 
+  getContractSymbol(address): Promise<string>;
+
   getSpaceTokenArea(spaceTokenId): Promise<number>;
 
   getSpaceTokenContourData(spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;

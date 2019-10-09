@@ -292,4 +292,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       };
     })
   }
+
+  public async getContractSymbol(address) {
+    const contract = new this.web3.eth.Contract([{"constant":true,"inputs":[],"name":"_symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xb09f1266"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}], address);
+    // console.log(this.contractsConfig['spaceLockerAbi']);
+    return contract.methods.symbol().call({})
+      .catch(() => 
+        contract.methods._symbol().call({}).catch(() => null)
+      );
+  }
 }
