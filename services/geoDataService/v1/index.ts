@@ -158,8 +158,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     allFeatures = _.uniq(allFeatures);
-
-
+    
     let allTypesSubTypes = [];
     dbSpaceTokens.forEach(token => {
       allTypesSubTypes = allTypesSubTypes.concat([token.type, token.subtype].filter(s => s));
@@ -167,12 +166,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     allTypesSubTypes = _.uniq(allTypesSubTypes);
     
+    const currency = chainOrder.escrowCurrency.toString(10) == '0' ? 'eth' : 'erc20';
+    let currencyName = 'ETH';
+    if(currency === 'erc20') {
+      currencyName = await this.chainService.getContractSymbol(chainOrder.tokenContract);
+    }
+    
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
-      currency: chainOrder.escrowCurrency.toString(10) == '0' ? 'eth' : 'erc20',
+      currency,
+      currencyName,
       currencyAddress: chainOrder.tokenContract,
-      //TODO: get currencyName from contract
-      currencyName: 'DAI',
       ask: chainOrder.ask,
       seller: chainOrder.seller,
       description: orderData.description,
