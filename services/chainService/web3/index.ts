@@ -24,7 +24,7 @@ if (!config.wsServer) {
 }
 
 module.exports = async (extendConfig) => {
-  const web3 = new Web3(new Web3.providers.WebsocketProvider(config.wsServer));
+  const web3 = new Web3(new Web3.providers.WebsocketProvider(extendConfig.wsServer || config.wsServer));
 
   // const netId = await web3.eth.net.getId();
 
