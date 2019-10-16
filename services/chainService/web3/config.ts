@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  'contractsConfigUrl': 'https://galt-<%= env %>-app-v1-contracts.surge.sh/',
+  'contractsConfigUrl': 'https://geesome-node.galtproject.io:7722/ipns/QmZfEdFR7AYkbbukfoXYzuE4N21RtYzU1VfC887EZQRtN9/<%= configFile %>',
   'env': 'local',
   'wsServer': 'ws://localhost:8546',
   'geoDataContractName': 'spaceGeoDataRegistry',

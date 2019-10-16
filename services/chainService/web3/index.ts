@@ -26,15 +26,11 @@ if (!config.wsServer) {
 module.exports = async (extendConfig) => {
   const web3 = new Web3(new Web3.providers.WebsocketProvider(config.wsServer));
 
-  const netId = await web3.eth.net.getId();
+  // const netId = await web3.eth.net.getId();
 
-  let env = extendConfig.env || config.env;
-  if(env === 'develop') {
-    env = 'dev';
-  }
-  let contractsConfigUrl = _.template(config.contractsConfigUrl)({ env });
+  let configFile = extendConfig.configFile || config.configFile;
+  let contractsConfigUrl = _.template(config.contractsConfigUrl)({ configFile });
 
-  contractsConfigUrl += netId + '.json';
   console.log('📄 contractsConfigUrl', contractsConfigUrl);
 
   const {data: contractsConfig} = await axios.get(contractsConfigUrl);
