@@ -24,7 +24,7 @@ const config = require('./config');
   const database: IExplorerDatabase = await require('./database/' + config.database)(databaseConfig);
 
   const chainService: IExplorerChainService = await require('./services/chainService/' + config.chainService)({
-    env: process.env.CHAIN_ENV || config.chainEnv,
+    configFile: process.env.CONTRACTS_CONFIG || config.configFile,
     lastBlockNumber: await database.getValue('lastBlockNumber')
   });
 
