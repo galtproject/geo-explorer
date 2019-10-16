@@ -26,8 +26,8 @@ if (!config.wsServer) {
 module.exports = async (extendConfig) => {
   const wsServer = extendConfig.wsServer || config.wsServer;
   console.log('wsServer', wsServer);
-  const web3 = new Web3(new Web3.providers.WebsocketProvider(wsServer));
-
+  // const web3 = new Web3(new Web3.providers.WebsocketProvider(wsServer));
+  //
   // const netId = await web3.eth.net.getId();
 
   let configFile = extendConfig.configFile || config.configFile;
@@ -37,7 +37,7 @@ module.exports = async (extendConfig) => {
 
   const {data: contractsConfig} = await axios.get(contractsConfigUrl);
 
-  const serviceInstance = new ExplorerChainWeb3Service(contractsConfig);
+  const serviceInstance = new ExplorerChainWeb3Service(contractsConfig, wsServer);
 
   setInterval(async () => {
     const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
@@ -53,6 +53,7 @@ module.exports = async (extendConfig) => {
 class ExplorerChainWeb3Service implements IExplorerChainService {
   websocketProvider: any;
   web3: any;
+  wsServer: string;
 
   spaceGeoData: any;
   propertyMarket: any;
@@ -63,8 +64,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   callbackOnReconnect: any;
 
-  constructor(_contractsConfig) {
-    this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
+  constructor(_contractsConfig, _wsServer) {
+    this.wsServer = _wsServer;
+    this.websocketProvider = new Web3.providers.WebsocketProvider(this.wsServer);
     this.web3 = new Web3(this.websocketProvider);
 
     this.contractsConfig = _contractsConfig;
@@ -135,7 +137,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       setTimeout(() => {
         console.log('🔁 Websocket reconnect');
 
-        this.websocketProvider = new Web3.providers.WebsocketProvider(config.wsServer);
+        this.websocketProvider = new Web3.providers.WebsocketProvider(this.wsServer);
         this.web3 = new Web3(this.websocketProvider);
         this.createContractInstance();
 
