@@ -113,9 +113,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
-    if(geoData.spaceTokenId === '126') {
-      console.log('geoData', geoData);
-    }
     let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
 
     if(dbObject) {
@@ -275,7 +272,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = ordersQuery[field];
     });
 
-    console.log('allWheres', allWheres);
+    // console.log('allWheres', allWheres);
     
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
@@ -443,7 +440,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       }
     }
 
-    console.log('allWheres', allWheres);
+    // console.log('allWheres', allWheres);
 
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
@@ -575,7 +572,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: spaceTokensQuery[field]};
     });
 
-    console.log('allWheres', allWheres);
+    // console.log('allWheres', allWheres);
 
     return {
       where: _.extend(
@@ -646,6 +643,6 @@ function resultWhere(sourceWhere, fields, relation?) {
     }
     res[key] = value;
   });
-  console.log('resultWhere', res);
+  // console.log('resultWhere', res);
   return res;
 }
