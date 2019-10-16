@@ -111,7 +111,7 @@ const config = require('./config');
       await pIteration.forEach(events, geoDataService.handleNewApplicationEvent.bind(geoDataService));
     });
     
-    const orders = await geoDataService.filterOrders({
+    // const orders = await geoDataService.filterOrders({
     //   // landAreaMin: 3000,
     //   // surroundingsGeohashBox: ['dpzpufr']
     //   // surroundingsGeohashBox: ['9q598'],
@@ -120,24 +120,24 @@ const config = require('./config');
     //    
     //   subtypes: ['beachLot'],
     //   bedroomsCountMin: 3,
-      features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
-    });
-    console.log('found orders', orders.list.length, orders.total);
+    //   features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
+    // });
+    // console.log('found orders', orders.list.length, orders.total);
 
 
-    const applications = await geoDataService.filterApplications({
+    // const applications = await geoDataService.filterApplications({
       //   // landAreaMin: 3000,
       //   // surroundingsGeohashBox: ['dpzpufr']
       //   // surroundingsGeohashBox: ['9q598'],
       //   // limit: 2
       //   types: ['land'],
       //    
-        availableRoles: ['PM_LAWYER_ORACLE_TYPE', 'PM_SURVEYOR_ORACLE_TYPE'],
+      //   availableRoles: ['PM_LAWYER_ORACLE_TYPE', 'PM_SURVEYOR_ORACLE_TYPE'],
       //   bedroomsCountMin: 3,
       // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
-      applicantAddress: '0xf0430bbb78C3c359c22d4913484081A563B86170'
-    });
-    console.log('found orders', applications.list.length, applications.total);
+      // applicantAddress: '0xf0430bbb78C3c359c22d4913484081A563B86170'
+    // });
+    // console.log('found orders', applications.list.length, applications.total);
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 

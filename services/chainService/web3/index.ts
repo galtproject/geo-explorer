@@ -135,7 +135,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   private subscribeForReconnect() {
     this.websocketProvider.on('end', () => {
       setTimeout(() => {
-        console.log('🔁 Websocket reconnect');
+        console.log(new Date().toISOString().slice(0, 19).replace('T', ' '), '🔁 Websocket reconnect');
 
         this.websocketProvider = new Web3.providers.WebsocketProvider(this.wsServer);
         this.web3 = new Web3(this.websocketProvider);
