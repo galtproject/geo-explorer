@@ -117,6 +117,8 @@ const config = require('./config');
       // surroundingsGeohashBox: ['9q598'],
       // limit: 2
       types: ['land'],
+      sortBy: 'createdAt',
+      sortDir: 'desc',
 
       // subtypes: ['beachLot'],
       // bedroomsCountMin: 3,
