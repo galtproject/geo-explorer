@@ -112,17 +112,17 @@ const config = require('./config');
     });
     
     // const orders = await geoDataService.filterOrders({
-    //   // landAreaMin: 3000,
-    //   // surroundingsGeohashBox: ['dpzpufr']
-    //   // surroundingsGeohashBox: ['9q598'],
-    //   // limit: 2
-    //   types: ['land'],
-    //    
-    //   subtypes: ['beachLot'],
-    //   bedroomsCountMin: 3,
-    //   features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
+      // landAreaMin: 3000,
+      // surroundingsGeohashBox: ['dpzpufr']
+      // surroundingsGeohashBox: ['9q598'],
+      // limit: 2
+      // types: ['land'],
+
+      // subtypes: ['beachLot'],
+      // bedroomsCountMin: 3,
+      // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
     // });
-    // console.log('found orders', orders.list.length, orders.total);
+    // console.log('found orders', orders.list.map(order => order.spaceTokens[0].tokenType));
 
 
     // const applications = await geoDataService.filterApplications({

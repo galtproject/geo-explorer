@@ -116,7 +116,8 @@ export interface ISaleOrder {
   maxBedroomsCount?;
   minBathroomsCount?;
   minBedroomsCount?;
-  
+
+  spaceTokens?;
   addSpaceTokens?(tokensObjects);
   setSpaceTokens?(tokensObjects);
 }

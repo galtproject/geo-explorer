@@ -149,7 +149,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, async (id, position) => {
       const spaceToken = await this.database.getSpaceTokenGeoData(id);
-      spaceToken.spaceTokensOrders = {position};
+      if(spaceToken) {
+        spaceToken.spaceTokensOrders = {position};
+      }
       return spaceToken;
     });
 

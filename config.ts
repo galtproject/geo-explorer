@@ -13,5 +13,5 @@ module.exports = {
   'geohashService': 'v1',
   'geoDataService': 'v1',
   'apiPort': 3344,
-  'chainEnv': 'local'
+  'configFile': 'testnet58-local.json'
 };

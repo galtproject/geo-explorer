@@ -135,6 +135,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       }]
     });
 
+    if(!saleOrder) {
+      return null;
+    }
     saleOrder.spaceTokens = _.orderBy(saleOrder.spaceTokens, [(spaceToken) => {
       return spaceToken.spaceTokensOrders.position;
     }], ['asc']);
