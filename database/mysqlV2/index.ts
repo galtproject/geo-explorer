@@ -127,13 +127,22 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async getSaleOrder(orderId) {
-    return this.models.SaleOrder.findOne({
+    const saleOrder = await this.models.SaleOrder.findOne({
       where: {orderId},
       include: [{
         model: this.models.SpaceTokenGeoData,
         as: 'spaceTokens',
       }]
     });
+
+    if(!saleOrder) {
+      return null;
+    }
+    saleOrder.spaceTokens = _.orderBy(saleOrder.spaceTokens, [(spaceToken) => {
+      return spaceToken.spaceTokensOrders.position;
+    }], ['asc']);
+    
+    return saleOrder;
   }
   
   async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
@@ -347,7 +356,14 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     delete findAllParam.limit;
     delete findAllParam.offset;
     
-    return this.models.SaleOrder.findAll(findAllParam);
+    const saleOrders = await this.models.SaleOrder.findAll(findAllParam);
+
+    return saleOrders.map(saleOrder => {
+      saleOrder.spaceTokens = _.orderBy(saleOrder.spaceTokens, [(spaceToken) => {
+        return spaceToken.spaceTokensOrders.position;
+      }], ['asc']);
+      return saleOrder;
+    });
   }
 
   async filterSaleOrdersCount(ordersQuery: SaleOrdersQuery) {

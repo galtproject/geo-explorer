@@ -103,7 +103,9 @@ module.exports = async function (sequelize, models) {
     ]
   });
   
-  models.SpaceTokensOrders = sequelize.define('spaceTokensOrders', {} as any, {} as any);
+  models.SpaceTokensOrders = sequelize.define('spaceTokensOrders', {
+    position: {type: Sequelize.INTEGER},
+  } as any, {} as any);
 
   SaleOrder.belongsToMany(models.SpaceTokenGeoData, {as: 'spaceTokens', through: models.SpaceTokensOrders});
   models.SpaceTokenGeoData.belongsToMany(SaleOrder, {as: 'orders', through: models.SpaceTokensOrders});

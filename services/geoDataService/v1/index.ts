@@ -147,7 +147,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const chainOrder = await this.chainService.getSaleOrder(orderId);
     
-    const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, (id) => this.database.getSpaceTokenGeoData(id));
+    const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, async (id, position) => {
+      const spaceToken = await this.database.getSpaceTokenGeoData(id);
+      if(spaceToken) {
+        spaceToken.spaceTokensOrders = {position};
+      }
+      return spaceToken;
+    });
 
     const orderData = await this.geesome.getObject(chainOrder.details.dataAddress);
 
@@ -193,8 +199,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
     
     console.log('order saved', dbOrder.orderId);
-
-    await dbOrder.addSpaceTokens(dbSpaceTokens);
+    
+    await dbOrder.setSpaceTokens(dbSpaceTokens);
   };
   
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
