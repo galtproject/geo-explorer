@@ -83,6 +83,8 @@ export interface ISpaceTokenGeoData {
   featureArray;
   createdAtBlock;
   updatedAtBlock;
+
+  spaceTokensOrders?;
 }
 
 export interface ISaleOrder {
@@ -116,6 +118,7 @@ export interface ISaleOrder {
   minBedroomsCount?;
   
   addSpaceTokens?(tokensObjects);
+  setSpaceTokens?(tokensObjects);
 }
 
 export interface IApplication {
