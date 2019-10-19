@@ -220,6 +220,7 @@ export interface SpaceTokensQuery {
 
   tokensIds?: string[];
   tokenType?: string;
+  inLocker?: boolean;
 
   features?: string[];
 

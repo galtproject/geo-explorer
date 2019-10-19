@@ -578,8 +578,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['spaceTokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
     }
 
-    ['tokenType'].forEach((field) => {
-      if(spaceTokensQuery[field])
+    ['tokenType', 'inLocker'].forEach((field) => {
+      if(!_.isUndefined(spaceTokensQuery[field]) && !_.isNull(spaceTokensQuery[field]))
         allWheres[field] = spaceTokensQuery[field];
     });
     
