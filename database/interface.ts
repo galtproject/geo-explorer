@@ -233,5 +233,7 @@ export interface SpaceTokensQuery {
 
   areaMin?: number;
   areaMax?: number;
+
+  owner?: string;
 }
 

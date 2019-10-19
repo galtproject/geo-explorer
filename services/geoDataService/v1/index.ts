@@ -82,8 +82,25 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
   
   async saveSpaceTokenByDataLink(dataLink, geoData) {
+    
+    let geoDataToSave = {
+      spaceTokenId: geoData.spaceTokenId,
+      tokenType: geoData.spaceTokenType,
+      owner: geoData.owner,
+      locker: geoData.locker,
+      inLocker: geoData.inLocker,
+      area: geoData.area,
+      areaSource: geoData.areaSource,
+      dataLink: dataLink,
+      geohashContourJson: JSON.stringify(geoData.geohashContour),
+      geohashesCount: geoData.geohashContour.length,
+      heightsContourJson: JSON.stringify(geoData.heightsContour),
+      createdAtBlock: geoData.createdAtBlock,
+      updatedAtBlock: geoData.createdAtBlock
+    };
+    
     if(!isIpldHash(dataLink)) {
-      return;
+      return this.addOrUpdateGeoData(geoDataToSave);
     }
     
     const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
@@ -93,45 +110,42 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       details = spaceData.data;
     }
 
-    if(!details || !details.region) {
-      return;
+    if(!details) {
+      return this.addOrUpdateGeoData(geoDataToSave);
+    }
+    
+    if(details.region) {
+      geoDataToSave = _.extend({
+        fullRegion: details.region.join(', '),
+        regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
+        regionLvl2: details.region[1] || '',
+        regionLvl3: details.region[2] || '',
+        regionLvl4: details.region[3] || '',
+        regionLvl5: details.region[4] || '',
+        regionLvl6: details.region[5] || '',
+        regionLvl7: details.region[6] || '',
+        regionLvl8: details.region[7] || '',
+        regionLvl9: details.region[8] || '',
+      }, geoDataToSave);
     }
 
-    const geoDataToSave = {
-      spaceTokenId: geoData.spaceTokenId,
-      tokenType: geoData.spaceTokenType,
+    geoDataToSave = _.extend({
       type: details.type,
       subtype: details.subtype,
-      fullRegion: details.region.join(', '),
-      regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
-      regionLvl2: details.region[1] || '',
-      regionLvl3: details.region[2] || '',
-      regionLvl4: details.region[3] || '',
-      regionLvl5: details.region[4] || '',
-      regionLvl6: details.region[5] || '',
-      regionLvl7: details.region[6] || '',
-      regionLvl8: details.region[7] || '',
-      regionLvl9: details.region[8] || '',
       photosCount: photos.length,
       floorPlansCount: floorPlans.length,
       bathroomsCount: details.bathrooms,
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
-      owner: geoData.owner,
-      locker: geoData.locker,
-      inLocker: geoData.inLocker,
-      area: geoData.area,
-      areaSource: geoData.areaSource,
-      dataLink: dataLink,
       dataJson: JSON.stringify(spaceData),
-      geohashContourJson: JSON.stringify(geoData.geohashContour),
-      geohashesCount: geoData.geohashContour.length,
-      heightsContourJson: JSON.stringify(geoData.heightsContour),
       ledgerIdentifier: ledgerIdentifier,
-      featureArray: details.features ? '|' + details.features.join('|') + '|' : '',
-      createdAtBlock: geoData.createdAtBlock,
-      updatedAtBlock: geoData.createdAtBlock
-    };
+      featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
+    }, geoDataToSave);
+    
+    return this.addOrUpdateGeoData(geoDataToSave);
+  }
+
+  addOrUpdateGeoData(geoDataToSave) {
     return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
       return this.database.addOrUpdateGeoData(geoDataToSave);
     });
