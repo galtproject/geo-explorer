@@ -106,24 +106,24 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
   
-  async getSpaceTokenGeoData(spaceTokenId) {
+  async getSpaceTokenGeoData(spaceTokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
-      where: { spaceTokenId }
+      where: { spaceTokenId, contractAddress }
     });
   }
 
   async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
-    let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
+    let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId, geoData.contractAddress);
 
     if(dbObject) {
       geoData.createdAtBlock = dbObject.createdAtBlock || geoData.createdAtBlock;
       await this.models.SpaceTokenGeoData.update(geoData, {
-        where: {spaceTokenId: geoData.spaceTokenId}
+        where: {spaceTokenId: geoData.spaceTokenId, contractAddress: geoData.contractAddress}
       });
     } else {
       return this.models.SpaceTokenGeoData.create(geoData).catch(() => {});
     }
-    return this.getSpaceTokenGeoData(geoData.spaceTokenId);
+    return this.getSpaceTokenGeoData(geoData.spaceTokenId, geoData.contractAddress);
   }
 
   async getSaleOrder(orderId) {

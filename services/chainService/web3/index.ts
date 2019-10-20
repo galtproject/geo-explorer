@@ -59,6 +59,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   propertyMarket: any;
   spaceToken: any;
   newPropertyManager: any;
+
+  privatePropertyGlobalRegistry: any;
   
   contractsConfig: any;
 
@@ -136,6 +138,11 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
     this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
     this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
+    this.privatePropertyGlobalRegistry = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Abi'], this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']);
+  }
+  
+  getPrivatePropertyContract(address) {
+    return new this.web3.eth.Contract(this.contractsConfig['privatePropertyTokenAbi'], address);
   }
 
   public async getLockerOwner(address) {

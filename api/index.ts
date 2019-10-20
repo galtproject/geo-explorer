@@ -63,16 +63,16 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterSpaceTokens(req.body));
   });
 
-  service.post('/v1/space-tokens/get-by-id/:id', async (req, res) => {
-    await respondByScheme(res, await geoDataService.getSpaceTokenById(req.params.id));
+  service.post('/v1/space-tokens/get-by-id/:contractAddress/:id', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getSpaceTokenById(req.params.id, req.params.contractAddress));
   });
 
   service.post('/v1/orders/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterOrders(req.body));
   });
 
-  service.post('/v1/orders/get-by-id/:id', async (req, res) => {
-    await respondByScheme(res, await geoDataService.getOrderById(req.params.id));
+  service.post('/v1/orders/get-by-id/:contractAddress/:id', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getOrderById(req.params.id, req.params.contractAddress));
   });
 
   service.post('/v1/applications/search', async (req, res) => {

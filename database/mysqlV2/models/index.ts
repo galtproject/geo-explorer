@@ -15,6 +15,8 @@ module.exports = async function (sequelize) {
   models.SaleOrder = await require('./saleOrder')(sequelize, models);
   models.Application = await require('./application')(sequelize, models);
   models.Value = await require('./value')(sequelize, models);
+  
+  models.PrivatePropertyRegistry = await require('./privatePropertyRegistry')(sequelize, models);
 
   return models;
 };

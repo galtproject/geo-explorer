@@ -19,6 +19,8 @@ export default interface IExplorerChainService {
   spaceToken: any;
   newPropertyManager: any;
 
+  privatePropertyGlobalRegistry: any;
+
   callbackOnReconnect: any;
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
@@ -48,6 +50,9 @@ export default interface IExplorerChainService {
   getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[], credentialsHash: string }>;
   
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
+
+
+  getPrivatePropertyContract(address): Promise<any>;
 }
 
 export enum ChainServiceEvents {
@@ -58,6 +63,9 @@ export enum ChainServiceEvents {
   NewPropertyApplication = 'NewApplication',
   NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
+  
+  NewPrivatePropertyRegistry = 'Add',
+  SetPrivatePropertyDetails = 'SetDetails'
 }
 
 export interface ChainServiceSaleOrder {

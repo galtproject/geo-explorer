@@ -34,3 +34,9 @@ export interface IExplorerNewApplicationEvent {
   contractAddress;
   blockNumber;
 }
+
+export interface IExplorerNewPrivatePropertyRegistryEvent {
+  returnValues: { token: string, applicant: string };
+  contractAddress;
+  blockNumber;
+}

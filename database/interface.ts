@@ -16,11 +16,11 @@ export default interface IExplorerDatabase {
 
   getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], spaceTokenId: number }]>;
 
-  getSpaceTokenGeoData(spaceTokenId): Promise<ISpaceTokenGeoData>;
+  getSpaceTokenGeoData(spaceTokenId, contractAddress): Promise<ISpaceTokenGeoData>;
   
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
 
-  getSaleOrder(orderId): Promise<ISaleOrder>;
+  getSaleOrder(orderId, contractAddress): Promise<ISaleOrder>;
   
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
@@ -36,7 +36,7 @@ export default interface IExplorerDatabase {
 
   filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
   
-  getSpaceToken(spaceTokenId): Promise<ISpaceTokenGeoData>;
+  getSpaceToken(spaceTokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
 
@@ -153,6 +153,7 @@ export interface SaleOrdersQuery {
   sortBy?: string;
   sortDir?: string;
   
+  contractAddress: string;
   tokensIds?: string[];
   
   features?: string[];
@@ -220,6 +221,7 @@ export interface SpaceTokensQuery {
   sortBy?: string;
   sortDir?: string;
 
+  contractAddress: string;
   tokensIds?: string[];
   tokenType?: string;
   inLocker?: boolean;
