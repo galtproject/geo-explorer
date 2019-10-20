@@ -33,8 +33,8 @@ Indexing changes of contours and providing api for getting:
 
 | Uri | Description | Output example |
 |-----|-------------|----------------|
-| /v1/contours/by/inner-geohash/:geohash | get contours list by inner geohash | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
-| /v1/contours/by/parent-geohash/:geohashes | get by contours list by parent geohash or list separated by "," | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"spaceTokenId":"2"}]} |
+| /v1/contours/by/inner-geohash/:geohash | get contours list by inner geohash | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"tokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"tokenId":"2"}]} |
+| /v1/contours/by/parent-geohash/:geohashes | get by contours list by parent geohash or list separated by "," | {"lastChangeBlockNumber":"965112","currentBlockNumber":965114,"data":[{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"tokenId":"1"},{"contour":["w24q8xwf4uq0","w24q8xwfjuk0","w24q8xwfvfk0","w24q8xwfffq0"],"tokenId":"2"}]} |
 
 
 ## Use pm2 example

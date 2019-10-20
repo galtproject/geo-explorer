@@ -39,7 +39,7 @@ export default interface IExplorerGeoDataService {
 
   filterSpaceTokens(spaceTokensQuery: FilterSpaceTokensGeoQuery): Promise<ISpaceTokensListResponse>;
 
-  getSpaceTokenById(spaceTokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+  getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 }

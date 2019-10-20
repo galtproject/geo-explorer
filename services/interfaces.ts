@@ -8,17 +8,17 @@
  */
 
 export interface IExplorerChainContourEvent {
-  returnValues: { contour: number[], spaceTokenId: string };
+  returnValues: { contour: number[], tokenId: string };
   contractAddress;
 }
 
 export interface IExplorerResultContour {
   contour: string[];
-  spaceTokenId: number;
+  tokenId: number;
 }
 
 export interface IExplorerGeoDataEvent {
-  returnValues: { dataLink: string, spaceTokenId: string };
+  returnValues: { dataLink: string, tokenId: string };
   contractAddress;
   blockNumber;
 }

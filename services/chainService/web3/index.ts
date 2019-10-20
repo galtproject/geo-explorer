@@ -151,18 +151,18 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return contract.methods.owner().call({}).catch(() => null);
   }
 
-  public async getSpaceTokenOwner(contractAddress, spaceTokenId) {
-    return this.spaceToken.methods.ownerOf(spaceTokenId).call({});
+  public async getSpaceTokenOwner(contractAddress, tokenId) {
+    return this.spaceToken.methods.ownerOf(tokenId).call({});
   }
   
-  public async getSpaceTokenArea(contractAddress, spaceTokenId) {
-    return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
+  public async getSpaceTokenArea(contractAddress, tokenId) {
+    return this.spaceGeoData.methods.getArea(tokenId).call({}).then(result => {
       return Web3Utils.fromWei(result.toString(10), 'ether');
     })
   }
 
-  public async getSpaceTokenContourData(contractAddress, spaceTokenId) {
-    return this.spaceGeoData.methods.getSpaceTokenContour(spaceTokenId).call({}).then(result => {
+  public async getSpaceTokenContourData(contractAddress, tokenId) {
+    return this.spaceGeoData.methods.getContour(tokenId).call({}).then(result => {
       const geohashContour = [];
       const heightsContour = [];
       result.map((geohash5z) => {
@@ -177,8 +177,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
-  public async getSpaceTokenData(contractAddress, spaceTokenId) {
-    return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
+  public async getSpaceTokenData(contractAddress, tokenId) {
+    return this.spaceGeoData.methods.getDetails(tokenId).call({}).then(result => {
       
       const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
       
@@ -190,6 +190,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         heightsContour.push(height / 100);
         geohashContour.push(galtUtils.numberToGeohash(geohash5));
       });
+      const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
       return {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
         geohashContour,
@@ -197,7 +198,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         ledgerIdentifier,
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
-        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType.toString(10)]
+        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[tokenType]
       };
     })
   }
@@ -205,6 +206,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   getSaleOrder(orderId) {
     return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
+      result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
+
       return result;
     })
   }
@@ -212,9 +215,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   getNewPropertyApplication(applicationId) {
     return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
       result.id = applicationId.toString(10);
-      result.spaceTokenId = result.spaceTokenId.toString(10);
-      if(result.spaceTokenId === '0') {
-        result.spaceTokenId = null;
+      result.tokenId = result.tokenId || result.spaceTokenId || result._tokenId || result._spaceTokenId;
+      result.tokenId = result.tokenId.toString(10);
+      if(result.tokenId === '0') {
+        result.tokenId = null;
       }
       result.currency = result.currency.toString(10);
       result.assignedOracleTypes = result.assignedOracleTypes.map(typeHex => Web3Utils.hexToUtf8(typeHex));

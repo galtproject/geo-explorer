@@ -12,7 +12,7 @@ module.exports = async function (sequelize, models) {
 
   const SpaceTokenGeoData = sequelize.define('spaceTokenGeoData', {
     // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types
-    spaceTokenId: {
+    tokenId: {
       type: Sequelize.STRING(100)
     },
     tokenType: {
@@ -117,7 +117,7 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      {fields: ['spaceTokenId'], unique: true},
+      {fields: ['tokenId'], unique: true},
       // {fields: ['owner']}
     ]
   });

@@ -34,7 +34,7 @@ const config = require('./config');
 
   chainService.onReconnect(fetchAndSubscribe);
 
-  let prevBlockNumber = parseInt(await database.getValue('lastBlockNumber'));
+  let prevBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
   await fetchAndSubscribe(chainService.contractsConfig.blockNumber > prevBlockNumber);
 
@@ -42,11 +42,13 @@ const config = require('./config');
     if (needFlushing) {
       await database.flushDatabase();
     }
-    prevBlockNumber = parseInt(await database.getValue('lastBlockNumber'));
+    prevBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
     const currentBlockNumber = await chainService.getCurrentBlock();
 
+    console.log('chainService.getEventsFromBlock(chainService.spaceGeoData', chainService.spaceGeoData._address, 'prevBlockNumber', prevBlockNumber);
     await chainService.getEventsFromBlock(chainService.spaceGeoData, ChainServiceEvents.SetSpaceTokenContour, prevBlockNumber).then(async (events) => {
+      console.log(events);
       await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
     });
 

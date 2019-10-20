@@ -12,7 +12,7 @@ module.exports = async function (sequelize, models) {
 
   const SpaceToken = sequelize.define('spaceToken', {
     // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types
-    spaceTokenId: {
+    tokenId: {
       type: Sequelize.STRING(100)
     },
     owner: {
@@ -21,7 +21,7 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      {fields: ['spaceTokenId']},
+      {fields: ['tokenId']},
       {fields: ['owner']}
     ]
   });

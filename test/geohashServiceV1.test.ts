@@ -101,7 +101,7 @@ describe("geohashServiceV1", function () {
         await geohashService.handleChangeContourEvent({
           returnValues: {
             contour: [],
-            spaceTokenId: byInnerGeohashResult[0].spaceTokenId.toString()
+            tokenId: byInnerGeohashResult[0].tokenId.toString()
           },
           contractAddress: ''
         });
@@ -145,7 +145,7 @@ describe("geohashServiceV1", function () {
           responseData.forEach((item) => {
             assert.notStrictEqual(item.contour, undefined);
             assert.notStrictEqual(item.contour.length, 0);
-            assert.notStrictEqual(item.spaceTokenId, undefined);
+            assert.notStrictEqual(item.tokenId, undefined);
           });
         }
       });

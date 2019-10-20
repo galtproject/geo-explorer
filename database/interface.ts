@@ -10,13 +10,13 @@
 export default interface IExplorerDatabase {
   flushDatabase(): Promise<void>;
 
-  addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number): Promise<void>;
+  addOrUpdateContour(contourGeohashes: string[], tokenId: number): Promise<void>;
 
-  getContourBySpaceTokenId(spaceTokenId): Promise<string[]>;
+  getContourBySpaceTokenId(tokenId): Promise<string[]>;
 
-  getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], spaceTokenId: number }]>;
+  getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], tokenId: number }]>;
 
-  getSpaceTokenGeoData(spaceTokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+  getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
   
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
 
@@ -36,7 +36,7 @@ export default interface IExplorerDatabase {
 
   filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
   
-  getSpaceToken(spaceTokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+  getSpaceToken(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
 
@@ -50,7 +50,7 @@ export default interface IExplorerDatabase {
 }
 
 export interface ISpaceTokenGeoData {
-  spaceTokenId;
+  tokenId;
   tokenType;
   type;
   subtype;

@@ -55,7 +55,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent) {
-    let tokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'];
+    let tokenId: string = event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'] || event.returnValues['_spaceTokenId'] || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'];
     await this.saveSpaceTokenById(spaceGeoDataAddress, tokenId, { createdAtBlock: event.blockNumber });
   };
   
@@ -162,8 +162,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const chainOrder = await this.chainService.getSaleOrder(orderId);
     
-    const dbSpaceTokens = await pIteration.map(chainOrder.details.spaceTokenIds, async (id, position) => {
-      const spaceToken = await this.database.getSpaceTokenGeoData(id, contractAddress);
+    const dbSpaceTokens = await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
+      const geoDataAddress = chainOrder.details.propertyToken || this.chainService.spaceGeoData._address;
+      const spaceToken = await this.database.getSpaceTokenGeoData(id, geoDataAddress);
       if(spaceToken) {
         spaceToken.spaceTokensOrders = {position};
       }
@@ -174,8 +175,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let allFeatures = [];
     dbSpaceTokens.forEach(token => {
-      const spaceData = JSON.parse(token.dataJson);
-      allFeatures = allFeatures.concat((spaceData.details || {}).features || []);
+      try {
+        const spaceData = JSON.parse(token.dataJson);
+        if(spaceData) {
+          allFeatures = allFeatures.concat((spaceData.details || {}).features || []);
+        }
+      } catch (e) {}
     });
 
     allFeatures = _.uniq(allFeatures);
@@ -221,7 +226,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
@@ -288,8 +293,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     console.log('dbApplication.applicationId', dbApplication.applicationId);
     
-    if(parseInt(application.spaceTokenId)) {
-      const spaceToken = await this.saveSpaceTokenById(spaceGeoDataAddress, application.spaceTokenId, {
+    if(parseInt(application.tokenId)) {
+      const spaceToken = await this.saveSpaceTokenById(spaceGeoDataAddress, application.tokenId, {
         createdAtBlock: event.blockNumber,
         ...applicationDetails
       });
@@ -298,7 +303,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     } else {
       const spaceToken = await this.saveSpaceTokenByDataLink(spaceGeoDataAddress, applicationDetails.dataLink, {
-        spaceTokenId: application.spaceTokenId || 'application_' + contractAddress + '_' + applicationId,
+        tokenId: application.tokenId || 'application_' + contractAddress + '_' + applicationId,
         createdAtBlock: event.blockNumber,
         ...applicationDetails
       });
@@ -312,7 +317,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
@@ -327,7 +332,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.spaceTokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     return {
       list: await this.database.filterSpaceTokens(filterQuery),
@@ -335,8 +340,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     };
   }
 
-  async getSpaceTokenById(spaceTokenId, contractAddress) {
-    return this.database.getSpaceToken(spaceTokenId, contractAddress);
+  async getSpaceTokenById(tokenId, contractAddress) {
+    return this.database.getSpaceToken(tokenId, contractAddress);
   }
 
   async handleNewPrivatePropertyRegistryEvent(event) {
