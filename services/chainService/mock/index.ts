@@ -43,8 +43,8 @@ class ExplorerChainMockService implements IExplorerChainService {
       ['w24q8r9f3sgd', 'w24q8r9g3879', 'w24q8r9v9x7d', 'w24q8r9txx24', 'w24q8r9er821', 'w24q8r9e2brc', 'w24q8r9s2brf', 'w24q8r9kqbk6', 'w24q8r96quu6']
     ].map((stringContour, numberId) => {
       let contour: number[] = stringContour.map(galtUtils.geohashToGeohash5);
-      let spaceTokenId = numberId.toString();
-      return {returnValues: {contour, spaceTokenId}};
+      let tokenId = numberId.toString();
+      return {returnValues: {contour, tokenId}};
     });
   }
 
@@ -66,19 +66,19 @@ class ExplorerChainMockService implements IExplorerChainService {
   public async getSaleOrder(orderId) {
     return null;
   }
-  public async getSpaceTokenOwner(spaceTokenId) {
+  public async getSpaceTokenOwner(tokenId) {
     return null;
   }
-  public async getSpaceTokenArea(spaceTokenId) {
+  public async getSpaceTokenArea(tokenId) {
     return 0;
   }
-  public async getSpaceTokenContour(spaceTokenId) {
+  public async getSpaceTokenContour(tokenId) {
     return [];
   }
-  public async getSpaceTokenContourData(spaceTokenId) {
+  public async getSpaceTokenContourData(tokenId) {
     return null;
   }
-  public async getSpaceTokenData(spaceTokenId) {
+  public async getSpaceTokenData(tokenId) {
     return null;
   }
 }

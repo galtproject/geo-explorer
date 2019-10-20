@@ -16,46 +16,56 @@ export default interface IExplorerChainService {
   spaceGeoData: any;
   propertyMarket: any;
   contractsConfig: any;
+  spaceToken: any;
+  newPropertyManager: any;
+
+  privatePropertyGlobalRegistry: any;
 
   callbackOnReconnect: any;
 
-  getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
+  getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
 
-  subscribeForNewEvents(eventName: string, blockNumber: number, callback): void;
+  subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback): void;
 
   getCurrentBlock(): Promise<number>;
 
   onReconnect(callback): void;
   
-  getSpaceTokenOwner(spaceTokenId): Promise<string>;
-  
   getLockerOwner(address): Promise<string>;
 
   getContractSymbol(address): Promise<string>;
+  
+  getSpaceTokenOwner(contractAddress, tokenId): Promise<string>;
 
-  getSpaceTokenArea(spaceTokenId): Promise<number>;
+  getSpaceTokenArea(contractAddress, tokenId): Promise<number>;
 
-  getSpaceTokenContourData(spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
+  getSpaceTokenContourData(contractAddress, tokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
 
-  getSpaceTokenData(spaceTokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
+  getSpaceTokenData(contractAddress, tokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
 
   getSaleOrder(orderId): Promise<ChainServiceSaleOrder>;
 
-  getNewPropertyApplication(applicationId): Promise<{ spaceTokenId: string, id: string, applicant: string, currency: string, statusName: string, assignedOracleTypes: string[] }>;
+  getNewPropertyApplication(applicationId): Promise<{ tokenId: string, id: string, applicant: string, currency: string, statusName: string, assignedOracleTypes: string[] }>;
 
   getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[], credentialsHash: string }>;
   
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
+
+
+  getPrivatePropertyContract(address): Promise<any>;
 }
 
 export enum ChainServiceEvents {
   SpaceTokenTransfer = 'Transfer',
-  SetSpaceTokenContour = 'SetSpaceTokenContour',
-  SetSpaceTokenDataLink = 'SetSpaceTokenDataLink',
+  SetSpaceTokenContour = 'SetContour',
+  SetSpaceTokenDataLink = 'SetDataLink',
   SaleOrderStatusChanged = 'SaleOrderStatusChanged',
   NewPropertyApplication = 'NewApplication',
   NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
+  
+  NewPrivatePropertyRegistry = 'Add',
+  SetPrivatePropertyDetails = 'SetDetails'
 }
 
 export interface ChainServiceSaleOrder {
@@ -74,6 +84,7 @@ export interface ChainServiceSaleOrder {
 }
 
 export interface ChainServiceSaleOrderDetails {
-  spaceTokenIds: string[];
+  tokenIds: string[];
   dataAddress: string;
+  propertyToken?: string;
 }

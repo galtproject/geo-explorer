@@ -59,6 +59,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   propertyMarket: any;
   spaceToken: any;
   newPropertyManager: any;
+
+  privatePropertyGlobalRegistry: any;
   
   contractsConfig: any;
 
@@ -75,34 +77,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
-  
-  getContractByEvent(eventName) {
-    if(eventName === ChainServiceEvents.SpaceTokenTransfer) {
-      return this.spaceToken;
-    }
-    if(eventName === ChainServiceEvents.SetSpaceTokenContour) {
-      return this.spaceGeoData;
-    }
-    if(eventName === ChainServiceEvents.SetSpaceTokenDataLink) {
-      return this.spaceGeoData;
-    }
-    if(eventName === ChainServiceEvents.SaleOrderStatusChanged) {
-      return this.propertyMarket;
-    }
-    if(eventName === ChainServiceEvents.NewPropertyApplication) {
-      return this.newPropertyManager;
-    }
-    if(eventName === ChainServiceEvents.NewPropertyValidationStatusChanged) {
-      return this.newPropertyManager;
-    }
-    if(eventName === ChainServiceEvents.NewPropertyApplicationStatusChanged) {
-      return this.newPropertyManager;
-    }
-    return null;
-  }
 
-  getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
-    const contract = this.getContractByEvent(eventName);
+  getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     return contract.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber}).then(events => {
       return events.map(e => {
         // console.log('event', e);
@@ -112,9 +88,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
   }
 
-  subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
-    const contract = this.getContractByEvent(eventName);
-
+  subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback) {
     contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
@@ -164,6 +138,11 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
     this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
     this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
+    this.privatePropertyGlobalRegistry = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Abi'], this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']);
+  }
+  
+  getPrivatePropertyContract(address) {
+    return new this.web3.eth.Contract(this.contractsConfig['privatePropertyTokenAbi'], address);
   }
 
   public async getLockerOwner(address) {
@@ -172,18 +151,18 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return contract.methods.owner().call({}).catch(() => null);
   }
 
-  public async getSpaceTokenOwner(spaceTokenId) {
-    return this.spaceToken.methods.ownerOf(spaceTokenId).call({});
+  public async getSpaceTokenOwner(contractAddress, tokenId) {
+    return this.spaceToken.methods.ownerOf(tokenId).call({});
   }
   
-  public async getSpaceTokenArea(spaceTokenId) {
-    return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
+  public async getSpaceTokenArea(contractAddress, tokenId) {
+    return this.spaceGeoData.methods.getArea(tokenId).call({}).then(result => {
       return Web3Utils.fromWei(result.toString(10), 'ether');
     })
   }
 
-  public async getSpaceTokenContourData(spaceTokenId) {
-    return this.spaceGeoData.methods.getSpaceTokenContour(spaceTokenId).call({}).then(result => {
+  public async getSpaceTokenContourData(contractAddress, tokenId) {
+    return this.spaceGeoData.methods.getContour(tokenId).call({}).then(result => {
       const geohashContour = [];
       const heightsContour = [];
       result.map((geohash5z) => {
@@ -198,8 +177,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
-  public async getSpaceTokenData(spaceTokenId) {
-    return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
+  public async getSpaceTokenData(contractAddress, tokenId) {
+    return this.spaceGeoData.methods.getDetails(tokenId).call({}).then(result => {
       
       const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
       
@@ -211,6 +190,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         heightsContour.push(height / 100);
         geohashContour.push(galtUtils.numberToGeohash(geohash5));
       });
+      const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
       return {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
         geohashContour,
@@ -218,7 +198,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         ledgerIdentifier,
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
-        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[result.spaceTokenType.toString(10)]
+        spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[tokenType]
       };
     })
   }
@@ -226,6 +206,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   getSaleOrder(orderId) {
     return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
+      result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
+
       return result;
     })
   }
@@ -233,9 +215,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   getNewPropertyApplication(applicationId) {
     return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
       result.id = applicationId.toString(10);
-      result.spaceTokenId = result.spaceTokenId.toString(10);
-      if(result.spaceTokenId === '0') {
-        result.spaceTokenId = null;
+      result.tokenId = result.tokenId || result.spaceTokenId || result._tokenId || result._spaceTokenId;
+      result.tokenId = result.tokenId.toString(10);
+      if(result.tokenId === '0') {
+        result.tokenId = null;
       }
       result.currency = result.currency.toString(10);
       result.assignedOracleTypes = result.assignedOracleTypes.map(typeHex => Web3Utils.hexToUtf8(typeHex));

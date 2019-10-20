@@ -10,21 +10,32 @@
 module.exports = async function (sequelize, models) {
   const Sequelize = require('sequelize');
 
-  const SpaceToken = sequelize.define('spaceToken', {
+  const PrivatePropertyRegistry = sequelize.define('privatePropertyRegistry', {
     // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types
-    tokenId: {
+    address: {
       type: Sequelize.STRING(100)
     },
-    owner: {
+    name: {
       type: Sequelize.STRING(100)
     },
+    symbol: {
+      type: Sequelize.STRING(100)
+    }
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      {fields: ['tokenId']},
-      {fields: ['owner']}
+      // {fields: ['tokenId']},
+      // {fields: ['owner']}
     ]
   });
+  
+  //
+  // PrivatePropertyRegistry.belongsTo(models.SpaceTokenGeoData, {as: 'tokenGeoData', foreignKey: 'tokenGeoDataId'});
+  // models.SpaceTokenGeoData.hasMany(PrivatePropertyRegistry, {as: 'orders', foreignKey: 'tokenGeoDataId'});
 
-  return SpaceToken.sync({});
+  // await PrivatePropertyRegistry.sync({});
+  //
+  // await models.SpaceTokensOrders.sync({});
+  
+  return PrivatePropertyRegistry;
 };

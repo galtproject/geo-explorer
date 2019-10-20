@@ -57,11 +57,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     await this.models.Value.destroy({where: {}});
   }
 
-  async addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number) {
+  async addOrUpdateContour(contourGeohashes: string[], tokenId: number) {
     // find contour object with included geohashes
 
     let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
-      where: {spaceTokenId}, attributes: ['contourGeohash']
+      where: {tokenId}, attributes: ['contourGeohash']
     });
 
     // remove excluded geohashes and mark exists
@@ -69,61 +69,61 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       const contourGeohash = geohashObj.contourGeohash;
 
       if (!_.includes(contourGeohashes, contourGeohash)) {
-        await this.models.GeohashSpaceToken.destroy({where: {spaceTokenId, contourGeohash}});
+        await this.models.GeohashSpaceToken.destroy({where: {tokenId, contourGeohash}});
       }
     });
 
     await pIteration.forEach(contourGeohashes, async (contourGeohash, position) => {
       // bind geohash to contour
-      await this.models.GeohashSpaceToken.create({spaceTokenId, contourGeohash, position}).catch(e => {
+      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, position}).catch(e => {
         // it exists so update it
-        return this.models.GeohashSpaceToken.update({position}, {where: {spaceTokenId, contourGeohash}});
+        return this.models.GeohashSpaceToken.update({position}, {where: {tokenId, contourGeohash}});
       });
     });
   }
 
-  async getContourBySpaceTokenId(spaceTokenId) {
+  async getContourBySpaceTokenId(tokenId) {
     return this.models.GeohashSpaceToken.findAll({
-      where: {spaceTokenId}, order: [['position', 'ASC']]
+      where: {tokenId}, order: [['position', 'ASC']]
     }).then(spaceTokenGeohashes => {
       return spaceTokenGeohashes.map(geohashObj => geohashObj.contourGeohash);
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], spaceTokenId: number }]> {
+  async getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], tokenId: number }]> {
     let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({
       where: {contourGeohash: {[Op.like]: parentGeohash + '%'}}
     });
 
-    foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'spaceTokenId');
+    foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'tokenId');
 
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
-      const spaceTokenId = geohashObj.spaceTokenId;
+      const tokenId = geohashObj.tokenId;
 
-      let contour = await this.getContourBySpaceTokenId(spaceTokenId);
+      let contour = await this.getContourBySpaceTokenId(tokenId);
 
-      return {contour, spaceTokenId};
+      return {contour, tokenId};
     });
   }
   
-  async getSpaceTokenGeoData(spaceTokenId) {
+  async getSpaceTokenGeoData(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
-      where: { spaceTokenId }
+      where: { tokenId, contractAddress }
     });
   }
 
   async addOrUpdateGeoData(geoData: ISpaceTokenGeoData) {
-    let dbObject = await this.getSpaceTokenGeoData(geoData.spaceTokenId);
+    let dbObject = await this.getSpaceTokenGeoData(geoData.tokenId, geoData.contractAddress);
 
     if(dbObject) {
       geoData.createdAtBlock = dbObject.createdAtBlock || geoData.createdAtBlock;
       await this.models.SpaceTokenGeoData.update(geoData, {
-        where: {spaceTokenId: geoData.spaceTokenId}
+        where: {tokenId: geoData.tokenId, contractAddress: geoData.contractAddress}
       });
     } else {
       return this.models.SpaceTokenGeoData.create(geoData).catch(() => {});
     }
-    return this.getSpaceTokenGeoData(geoData.spaceTokenId);
+    return this.getSpaceTokenGeoData(geoData.tokenId, geoData.contractAddress);
   }
 
   async getSaleOrder(orderId) {
@@ -259,7 +259,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     
     if(ordersQuery.tokensIds) {
-      allWheres['spaceTokenId'] = {[Op.in]: ordersQuery.tokensIds};
+      allWheres['tokenId'] = {[Op.in]: ordersQuery.tokensIds};
     }
     
     if(ordersQuery.features && ordersQuery.features.length) {
@@ -289,7 +289,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     //     association: 'spaceTokens',
     //     required: true,
     //     attributes: _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key),
-    //     where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    //     where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
     //   }//, this.models.SaleOrder)]
     // };
     //
@@ -316,7 +316,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return {
       where: _.extend(
         resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', Op.and]),
-        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
+        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
         model: this.models.SpaceTokenGeoData,
@@ -327,7 +327,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+        where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
       }]
     }
   }
@@ -431,7 +431,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     if(applicationsQuery.tokensIds) {
-      allWheres['spaceTokenId'] = {[Op.in]: applicationsQuery.tokensIds};
+      allWheres['tokenId'] = {[Op.in]: applicationsQuery.tokensIds};
     }
 
     ['feeCurrency', 'contractType', 'tokenType', 'feeCurrencyName'].forEach((field) => {
@@ -464,7 +464,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     //     association: 'spaceTokens',
     //     required: true,
     //     attributes: _.map(this.models.SpaceTokenGeoData.rawAttributes, (value, key) => key),
-    //     where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    //     where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
     //   }//, this.models.SaleOrder)]
     // };
     //
@@ -491,7 +491,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return {
       where: _.extend(
         resultWhere(allWheres, ['feeAmount', 'feeCurrency', 'feeCurrencyName', 'feeCurrencyAddress', 'applicantAddress', 'contractAddress', 'contractType', 'availableRolesArray', 'totalOraclesReward', Op.or]),
-        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
+        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
         model: this.models.SpaceTokenGeoData,
@@ -502,7 +502,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         // required: false
         // association: 'spaceTokens',
         // required: true,
-        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', Op.and])
+        where: resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', Op.and])
       }]
     }
   }
@@ -575,7 +575,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     if(spaceTokensQuery.tokensIds) {
-      allWheres['spaceTokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
+      allWheres['tokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
     }
 
     ['tokenType', 'inLocker'].forEach((field) => {
@@ -592,8 +592,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', Op.and]),
-        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'spaceTokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
+        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', Op.and]),
+        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     }
   }
@@ -621,9 +621,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.SpaceTokenGeoData.count(findAllParam);
   }
   
-  async getSpaceToken(spaceTokenId) {
+  async getSpaceToken(tokenId) {
     return this.models.SpaceToken.findOne({
-      where: { spaceTokenId }
+      where: { tokenId }
     });
   }
 

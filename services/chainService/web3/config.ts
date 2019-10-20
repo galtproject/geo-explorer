@@ -14,5 +14,6 @@ module.exports = {
   'geoDataContractName': 'spaceGeoDataRegistry',
   'propertyMarketContractName': 'propertyMarket',
   'spaceTokenContractName': 'spaceToken',
-  'newPropertyManagerName': 'newPropertyManager'
+  'newPropertyManagerName': 'newPropertyManager',
+  'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry'
 };

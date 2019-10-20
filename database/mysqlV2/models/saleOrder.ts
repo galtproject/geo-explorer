@@ -24,6 +24,9 @@ module.exports = async function (sequelize, models) {
     currencyName: {
       type: Sequelize.STRING(100)
     },
+    contractAddress: {
+      type: Sequelize.STRING(100)
+    },
     ask: {
       type: Sequelize.FLOAT
     },
@@ -98,7 +101,7 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      // {fields: ['spaceTokenId']},
+      // {fields: ['tokenId']},
       // {fields: ['owner']}
     ]
   });

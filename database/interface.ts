@@ -10,17 +10,17 @@
 export default interface IExplorerDatabase {
   flushDatabase(): Promise<void>;
 
-  addOrUpdateContour(contourGeohashes: string[], spaceTokenId: number): Promise<void>;
+  addOrUpdateContour(contourGeohashes: string[], tokenId: number): Promise<void>;
 
-  getContourBySpaceTokenId(spaceTokenId): Promise<string[]>;
+  getContourBySpaceTokenId(tokenId): Promise<string[]>;
 
-  getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], spaceTokenId: number }]>;
+  getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], tokenId: number }]>;
 
-  getSpaceTokenGeoData(spaceTokenId): Promise<ISpaceTokenGeoData>;
+  getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
   
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
 
-  getSaleOrder(orderId): Promise<ISaleOrder>;
+  getSaleOrder(orderId, contractAddress): Promise<ISaleOrder>;
   
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
@@ -36,7 +36,7 @@ export default interface IExplorerDatabase {
 
   filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
   
-  getSpaceToken(spaceTokenId): Promise<ISpaceTokenGeoData>;
+  getSpaceToken(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
 
@@ -50,10 +50,11 @@ export default interface IExplorerDatabase {
 }
 
 export interface ISpaceTokenGeoData {
-  spaceTokenId;
+  tokenId;
   tokenType;
   type;
   subtype;
+  contractAddress;
   fullRegion;
   regionLvl1?;
   regionLvl2?;
@@ -99,6 +100,7 @@ export interface ISaleOrder {
   createdAtBlock;
   updatedAtBlock;
   dataJson?;
+  contractAddress;
 
   featureArray?;
   typesSubtypesArray?;
@@ -151,6 +153,7 @@ export interface SaleOrdersQuery {
   sortBy?: string;
   sortDir?: string;
   
+  contractAddress: string;
   tokensIds?: string[];
   
   features?: string[];
@@ -218,6 +221,7 @@ export interface SpaceTokensQuery {
   sortBy?: string;
   sortDir?: string;
 
+  contractAddress: string;
   tokensIds?: string[];
   tokenType?: string;
   inLocker?: boolean;

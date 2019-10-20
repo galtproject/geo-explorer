@@ -58,7 +58,7 @@ describe("geohashServiceV1", function () {
         const initialResultByParentGeohash = await geohashService.getContoursByParentGeohash(parentGeohash);
         assert.strictEqual(initialResultByParentGeohash.length, 0, "initial data not empty");
 
-        const contoursEvents = await chainService.getEventsFromBlock('SetSpaceTokenContour');
+        const contoursEvents = await chainService.getEventsFromBlock(chainService.spaceGeoData, 'SetSpaceTokenContour');
 
         await pIteration.forEach(contoursEvents, geohashService.handleChangeContourEvent.bind(geohashService));
 
@@ -101,8 +101,9 @@ describe("geohashServiceV1", function () {
         await geohashService.handleChangeContourEvent({
           returnValues: {
             contour: [],
-            id: byInnerGeohashResult[0].spaceTokenId.toString()
-          }
+            tokenId: byInnerGeohashResult[0].tokenId.toString()
+          },
+          contractAddress: ''
         });
 
         const byInnerGeohashNewResult = await geohashService.getContoursByInnerGeohash(innerGeohash);
@@ -144,7 +145,7 @@ describe("geohashServiceV1", function () {
           responseData.forEach((item) => {
             assert.notStrictEqual(item.contour, undefined);
             assert.notStrictEqual(item.contour.length, 0);
-            assert.notStrictEqual(item.spaceTokenId, undefined);
+            assert.notStrictEqual(item.tokenId, undefined);
           });
         }
       });

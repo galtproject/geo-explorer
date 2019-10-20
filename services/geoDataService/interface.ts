@@ -7,7 +7,12 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import {IExplorerGeoDataEvent, IExplorerNewApplicationEvent, IExplorerSaleOrderEvent} from "../interfaces";
+import {
+  IExplorerGeoDataEvent,
+  IExplorerNewApplicationEvent,
+  IExplorerNewPrivatePropertyRegistryEvent,
+  IExplorerSaleOrderEvent
+} from "../interfaces";
 import {
   SaleOrdersQuery,
   ISaleOrder,
@@ -18,13 +23,13 @@ import {
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
-  handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent): Promise<void>;
+  handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
   
-  handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
+  handleSaleOrderEvent(propertyMarketAddress, event: IExplorerSaleOrderEvent): Promise<void>;
 
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
 
-  getOrderById(orderId): Promise<ISaleOrder>;
+  getOrderById(orderId, contractAddress): Promise<ISaleOrder>;
 
   handleNewApplicationEvent(event: IExplorerNewApplicationEvent): Promise<void>;
 
@@ -34,7 +39,9 @@ export default interface IExplorerGeoDataService {
 
   filterSpaceTokens(spaceTokensQuery: FilterSpaceTokensGeoQuery): Promise<ISpaceTokensListResponse>;
 
-  getSpaceTokenById(spaceTokenId): Promise<ISpaceTokenGeoData>;
+  getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+
+  handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
