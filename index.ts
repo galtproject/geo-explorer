@@ -37,6 +37,10 @@ const config = require('./config');
   let prevBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
   await fetchAndSubscribe(chainService.contractsConfig.blockNumber > prevBlockNumber);
+  
+  setInterval(() => {
+    chainService.getCurrentBlock();
+  }, 30 * 1000);
 
   async function fetchAndSubscribe(needFlushing = false) {
     if (needFlushing) {
