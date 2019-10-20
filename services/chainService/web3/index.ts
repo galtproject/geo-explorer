@@ -75,34 +75,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
-  
-  getContractByEvent(eventName) {
-    if(eventName === ChainServiceEvents.SpaceTokenTransfer) {
-      return this.spaceToken;
-    }
-    if(eventName === ChainServiceEvents.SetSpaceTokenContour) {
-      return this.spaceGeoData;
-    }
-    if(eventName === ChainServiceEvents.SetSpaceTokenDataLink) {
-      return this.spaceGeoData;
-    }
-    if(eventName === ChainServiceEvents.SaleOrderStatusChanged) {
-      return this.propertyMarket;
-    }
-    if(eventName === ChainServiceEvents.NewPropertyApplication) {
-      return this.newPropertyManager;
-    }
-    if(eventName === ChainServiceEvents.NewPropertyValidationStatusChanged) {
-      return this.newPropertyManager;
-    }
-    if(eventName === ChainServiceEvents.NewPropertyApplicationStatusChanged) {
-      return this.newPropertyManager;
-    }
-    return null;
-  }
 
-  getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
-    const contract = this.getContractByEvent(eventName);
+  getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     return contract.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber}).then(events => {
       return events.map(e => {
         // console.log('event', e);
@@ -112,9 +86,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
   }
 
-  subscribeForNewEvents(eventName: string, blockNumber: number, callback) {
-    const contract = this.getContractByEvent(eventName);
-
+  subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback) {
     contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
@@ -172,17 +144,17 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return contract.methods.owner().call({}).catch(() => null);
   }
 
-  public async getSpaceTokenOwner(spaceTokenId) {
+  public async getSpaceTokenOwner(contractAddress, spaceTokenId) {
     return this.spaceToken.methods.ownerOf(spaceTokenId).call({});
   }
   
-  public async getSpaceTokenArea(spaceTokenId) {
+  public async getSpaceTokenArea(contractAddress, spaceTokenId) {
     return this.spaceGeoData.methods.getSpaceTokenArea(spaceTokenId).call({}).then(result => {
       return Web3Utils.fromWei(result.toString(10), 'ether');
     })
   }
 
-  public async getSpaceTokenContourData(spaceTokenId) {
+  public async getSpaceTokenContourData(contractAddress, spaceTokenId) {
     return this.spaceGeoData.methods.getSpaceTokenContour(spaceTokenId).call({}).then(result => {
       const geohashContour = [];
       const heightsContour = [];
@@ -198,7 +170,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
-  public async getSpaceTokenData(spaceTokenId) {
+  public async getSpaceTokenData(contractAddress, spaceTokenId) {
     return this.spaceGeoData.methods.getSpaceTokenDetails(spaceTokenId).call({}).then(result => {
       
       const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);

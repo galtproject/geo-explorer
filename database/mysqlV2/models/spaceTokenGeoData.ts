@@ -24,6 +24,9 @@ module.exports = async function (sequelize, models) {
     subtype: {
       type: Sequelize.STRING(100)
     },
+    contractAddress: {
+      type: Sequelize.STRING(100)
+    },
     fullRegion: {
       type: Sequelize.TEXT
     },

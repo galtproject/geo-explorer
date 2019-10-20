@@ -18,9 +18,9 @@ import {
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
-  handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent): Promise<void>;
+  handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
   
-  handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
+  handleSaleOrderEvent(propertyMarketAddress, event: IExplorerSaleOrderEvent): Promise<void>;
 
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
 

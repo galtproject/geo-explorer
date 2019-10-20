@@ -54,6 +54,7 @@ export interface ISpaceTokenGeoData {
   tokenType;
   type;
   subtype;
+  contractAddress;
   fullRegion;
   regionLvl1?;
   regionLvl2?;
@@ -99,6 +100,7 @@ export interface ISaleOrder {
   createdAtBlock;
   updatedAtBlock;
   dataJson?;
+  contractAddress;
 
   featureArray?;
   typesSubtypesArray?;

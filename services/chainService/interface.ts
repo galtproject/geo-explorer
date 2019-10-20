@@ -16,28 +16,30 @@ export default interface IExplorerChainService {
   spaceGeoData: any;
   propertyMarket: any;
   contractsConfig: any;
+  spaceToken: any;
+  newPropertyManager: any;
 
   callbackOnReconnect: any;
 
-  getEventsFromBlock(eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
+  getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
 
-  subscribeForNewEvents(eventName: string, blockNumber: number, callback): void;
+  subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback): void;
 
   getCurrentBlock(): Promise<number>;
 
   onReconnect(callback): void;
   
-  getSpaceTokenOwner(spaceTokenId): Promise<string>;
-  
   getLockerOwner(address): Promise<string>;
 
   getContractSymbol(address): Promise<string>;
+  
+  getSpaceTokenOwner(contractAddress, spaceTokenId): Promise<string>;
 
-  getSpaceTokenArea(spaceTokenId): Promise<number>;
+  getSpaceTokenArea(contractAddress, spaceTokenId): Promise<number>;
 
-  getSpaceTokenContourData(spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
+  getSpaceTokenContourData(contractAddress, spaceTokenId): Promise<{ geohashContour: string[], heightsContour: number[] }>;
 
-  getSpaceTokenData(spaceTokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
+  getSpaceTokenData(contractAddress, spaceTokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
 
   getSaleOrder(orderId): Promise<ChainServiceSaleOrder>;
 

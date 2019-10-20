@@ -54,24 +54,24 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     this.chainService = _chainService;
   }
 
-  async handleChangeSpaceTokenDataEvent(event: IExplorerGeoDataEvent) {
+  async handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent) {
     let spaceTokenId: string = event.returnValues.spaceTokenId || event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'];
-    await this.saveSpaceTokenById(spaceTokenId, { createdAtBlock: event.blockNumber });
+    await this.saveSpaceTokenById(spaceGeoDataAddress, spaceTokenId, { createdAtBlock: event.blockNumber });
   };
   
-  async saveSpaceTokenById(spaceTokenId, additionalData = {}) {
-    const geoData = await this.chainService.getSpaceTokenData(spaceTokenId);
-    const owner = await this.chainService.getSpaceTokenOwner(spaceTokenId);
+  async saveSpaceTokenById(contractAddress, spaceTokenId, additionalData = {}) {
+    const geoData = await this.chainService.getSpaceTokenData(contractAddress, spaceTokenId);
+    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, spaceTokenId);
     
     const lockerOwner = await this.chainService.getLockerOwner(owner);
     if(spaceTokenId.toString() === '126') {
-      console.log('126 owner', owner)
-      console.log('126 lockerOwner', lockerOwner)
+      console.log('126 owner', owner);
+      console.log('126 lockerOwner', lockerOwner);
     }
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
-    return this.saveSpaceTokenByDataLink(dataLink, {
+    return this.saveSpaceTokenByDataLink(contractAddress, dataLink, {
       spaceTokenId: spaceTokenId,
       owner: lockerOwner ? lockerOwner : owner,
       locker: lockerOwner ? owner : null,
@@ -81,9 +81,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     })
   }
   
-  async saveSpaceTokenByDataLink(dataLink, geoData) {
+  async saveSpaceTokenByDataLink(contractAddress, dataLink, geoData) {
     
     let geoDataToSave = {
+      contractAddress,
       spaceTokenId: geoData.spaceTokenId,
       tokenType: geoData.spaceTokenType,
       owner: geoData.owner,
@@ -151,7 +152,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
   }
 
-  async handleSaleOrderEvent(event: IExplorerSaleOrderEvent) {
+  async handleSaleOrderEvent(contractAddress, event: IExplorerSaleOrderEvent) {
     let orderId: string = event.returnValues.orderId;
     let status: string = event.returnValues.status;
     
@@ -196,6 +197,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       orderId,
       currency,
       currencyName,
+      contractAddress,
       currencyAddress: chainOrder.tokenContract,
       ask: chainOrder.ask,
       seller: chainOrder.seller,
@@ -235,6 +237,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async handleNewApplicationEvent(event: IExplorerNewApplicationEvent) {
     const {contractAddress} = event;
     const {applicationId, applicant} = event.returnValues;
+    
+    const spaceGeoDataAddress = this.chainService.spaceGeoData._address;
 
     const application = await this.chainService.getNewPropertyApplication(applicationId);
     const applicationDetails = await this.chainService.getNewPropertyApplicationDetails(applicationId);
@@ -285,7 +289,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     console.log('dbApplication.applicationId', dbApplication.applicationId);
     
     if(parseInt(application.spaceTokenId)) {
-      const spaceToken = await this.saveSpaceTokenById(application.spaceTokenId, {
+      const spaceToken = await this.saveSpaceTokenById(spaceGeoDataAddress, application.spaceTokenId, {
         createdAtBlock: event.blockNumber,
         ...applicationDetails
       });
@@ -293,7 +297,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         await dbApplication.addSpaceTokens([spaceToken]);
       }
     } else {
-      const spaceToken = await this.saveSpaceTokenByDataLink(applicationDetails.dataLink, {
+      const spaceToken = await this.saveSpaceTokenByDataLink(spaceGeoDataAddress, applicationDetails.dataLink, {
         spaceTokenId: application.spaceTokenId || 'application_' + contractAddress + '_' + applicationId,
         createdAtBlock: event.blockNumber,
         ...applicationDetails
