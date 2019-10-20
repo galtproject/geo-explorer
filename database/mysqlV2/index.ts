@@ -276,7 +276,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['featureArray'] = { [Op.and]: featureQueryRoot};
     }
 
-    ['currency', 'currencyAddress'].forEach((field) => {
+    ['currency', 'currencyAddress', 'contractAddress'].forEach((field) => {
       if(ordersQuery[field])
         allWheres[field] = ordersQuery[field];
     });
@@ -315,7 +315,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     return {
       where: _.extend(
-        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', Op.and]),
+        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       ),
       include : [{
@@ -583,7 +583,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = spaceTokensQuery[field];
     });
     
-    ['owner'].forEach((field) => {
+    ['owner', 'contractAddress'].forEach((field) => {
       if(spaceTokensQuery[field])
         allWheres[field] = {[Op.like]: spaceTokensQuery[field]};
     });
@@ -592,7 +592,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     }
