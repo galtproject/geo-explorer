@@ -84,6 +84,7 @@ export interface ISpaceTokenGeoData {
   featureArray;
   createdAtBlock;
   updatedAtBlock;
+  isPrivate;
 
   spaceTokensOrders?;
 }
@@ -101,6 +102,7 @@ export interface ISaleOrder {
   updatedAtBlock;
   dataJson?;
   contractAddress;
+  isPrivate;
 
   featureArray?;
   typesSubtypesArray?;

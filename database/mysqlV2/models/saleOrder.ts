@@ -27,6 +27,9 @@ module.exports = async function (sequelize, models) {
     contractAddress: {
       type: Sequelize.STRING(100)
     },
+    isPrivate: {
+      type: Sequelize.BOOLEAN,
+    },
     ask: {
       type: Sequelize.FLOAT
     },
