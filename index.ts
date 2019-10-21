@@ -52,7 +52,6 @@ const config = require('./config');
 
     console.log('chainService.getEventsFromBlock(chainService.spaceGeoData', chainService.spaceGeoData._address, 'prevBlockNumber', prevBlockNumber);
     await chainService.getEventsFromBlock(chainService.spaceGeoData, ChainServiceEvents.SetSpaceTokenContour, prevBlockNumber).then(async (events) => {
-      console.log('events', events);
       await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
     });
 
