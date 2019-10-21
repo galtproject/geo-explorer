@@ -183,6 +183,15 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return privatePropertyContract;
   }
 
+  getPropertyMarketContract(address) {
+    if(address.toLowerCase() === this.propertyMarket._address.toLowerCase()) {
+      return this.propertyMarket;
+    }
+    if(address.toLowerCase() === this.privatePropertyMarket._address.toLowerCase()) {
+      return this.privatePropertyMarket;
+    }
+  }
+
   public async getLockerOwner(address) {
     const contract = new this.web3.eth.Contract(this.contractsConfig['spaceLockerAbi'], address);
     // console.log(this.contractsConfig['spaceLockerAbi']);
@@ -258,9 +267,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
-  getSaleOrder(orderId) {
-    return this.propertyMarket.methods.saleOrders(orderId).call({}).then(result => {
+  getSaleOrder(contractAddress, orderId) {
+    const propertyMarketContract = this.getPropertyMarketContract(contractAddress);
+    return propertyMarketContract.methods.saleOrders(orderId).call({}).then(async result => {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
+      if(!result.details) {
+        if(propertyMarketContract.methods.getSaleOrderSpaceTokenIds) {
+          result.details = await propertyMarketContract.methods.saleOrderDetails(orderId).call({});
+          result.details.tokenIds = await propertyMarketContract.methods.getSaleOrderSpaceTokenIds().call({});
+        } else {
+          result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
+        }
+      }
+      console.log('getSaleOrder result', result);
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
 
       return result;
