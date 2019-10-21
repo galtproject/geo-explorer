@@ -29,7 +29,7 @@ const config = require('./config');
     lastBlockNumber: await database.getValue('lastBlockNumber')
   });
 
-  const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database);
+  const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database, chainService);
   const geoDataService: IExplorerGeoDataService = await require('./services/geoDataService/' + config.geoDataService)(database, geohashService, chainService);
 
   chainService.onReconnect(fetchAndSubscribe);
@@ -138,12 +138,12 @@ const config = require('./config');
       console.log('📢 Subscribed to Private Property Registry:', address);
       
       subscribedToPrivatePropertyRegistry[address] = true;
-      const contract = chainService.getPrivatePropertyContract(address);
+      const contract = chainService.getPropertyRegistryContract(address);
 
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetSpaceTokenContour, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
       });
-      
+
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetPrivatePropertyDetails, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, (e) => {
           return geoDataService.handleChangeSpaceTokenDataEvent(address, e);
@@ -155,7 +155,7 @@ const config = require('./config');
         await geohashService.handleChangeContourEvent(newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
-      
+
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetPrivatePropertyDetails, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New SetPrivatePropertyDetails event, blockNumber:', currentBlockNumber);
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);

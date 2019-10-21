@@ -52,7 +52,7 @@ export default interface IExplorerChainService {
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
 
 
-  getPrivatePropertyContract(address): Promise<any>;
+  getPropertyRegistryContract(address): Promise<any>;
 }
 
 export enum ChainServiceEvents {

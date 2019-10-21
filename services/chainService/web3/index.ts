@@ -66,6 +66,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   callbackOnReconnect: any;
 
+  pprCache: any = {};
+
   constructor(_contractsConfig, _wsServer) {
     this.wsServer = _wsServer;
     this.websocketProvider = new Web3.providers.WebsocketProvider(this.wsServer);
@@ -144,8 +146,21 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.privatePropertyGlobalRegistry = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Abi'], this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']);
   }
   
-  getPrivatePropertyContract(address) {
-    return new this.web3.eth.Contract(this.contractsConfig['privatePropertyTokenAbi'], address);
+  getPropertyRegistryContract(address) {
+    if(address.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+      return this.spaceToken;
+    }
+    if(address.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
+      return this.spaceGeoData;
+    }
+    
+    if(this.pprCache[address]) {
+      return this.pprCache[address];
+    }
+    
+    const privatePropertyContract = new this.web3.eth.Contract(this.contractsConfig['privatePropertyTokenAbi'], address);
+    this.pprCache[address] = privatePropertyContract;
+    return privatePropertyContract;
   }
 
   public async getLockerOwner(address) {
@@ -155,17 +170,26 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenOwner(contractAddress, tokenId) {
-    return this.spaceToken.methods.ownerOf(tokenId).call({});
+    if(contractAddress.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
+      contractAddress = this.spaceToken._address;
+    }
+    return this.getPropertyRegistryContract(contractAddress).methods.ownerOf(tokenId).call({});
   }
   
   public async getSpaceTokenArea(contractAddress, tokenId) {
-    return this.spaceGeoData.methods.getArea(tokenId).call({}).then(result => {
+    if(contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+      contractAddress = this.spaceGeoData._address;
+    }
+    return this.getPropertyRegistryContract(contractAddress).methods.getArea(tokenId).call({}).then(result => {
       return Web3Utils.fromWei(result.toString(10), 'ether');
     })
   }
 
   public async getSpaceTokenContourData(contractAddress, tokenId) {
-    return this.spaceGeoData.methods.getContour(tokenId).call({}).then(result => {
+    if(contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+      contractAddress = this.spaceGeoData._address;
+    }
+    return this.getPropertyRegistryContract(contractAddress).methods.getContour(tokenId).call({}).then(result => {
       const geohashContour = [];
       const heightsContour = [];
       result.map((geohash5z) => {
@@ -181,7 +205,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenData(contractAddress, tokenId) {
-    return this.spaceGeoData.methods.getDetails(tokenId).call({}).then(result => {
+    if(contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+      contractAddress = this.spaceGeoData._address;
+    }
+    return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
       
       const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
       
