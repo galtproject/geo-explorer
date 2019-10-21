@@ -79,7 +79,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
-    return contract.getPastEvents(eventName, {fromBlock: blockNumber || this.contractsConfig.blockNumber}).then(events => {
+    if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
+      blockNumber = this.contractsConfig.blockNumber;
+    }
+    return contract.getPastEvents(eventName, {fromBlock: blockNumber}).then(events => {
       return events.map(e => {
         // console.log('event', e);
         e.contractAddress = e.address;

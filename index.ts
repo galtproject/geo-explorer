@@ -162,6 +162,13 @@ const config = require('./config');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
     }
+
+    console.log('events finish');
+    const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);
+    console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
+
+    const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3', chainService.spaceGeoData._address);
+    console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
     
     // const spaceTokens = await geoDataService.filterSpaceTokens({
     //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170"
