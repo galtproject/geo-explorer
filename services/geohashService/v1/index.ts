@@ -41,24 +41,24 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       spaceTokenNumberId = parseInt(tokenId);
     }
 
-    await this.database.addOrUpdateContour(contour, spaceTokenNumberId);
+    await this.database.addOrUpdateContour(contour, spaceTokenNumberId, event.contractAddress);
   };
 
-  async getContoursByParentGeohash(parentGeohash: string) {
-    return this.database.getContoursByParentGeohash(parentGeohash);
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress: string) {
+    return this.database.getContoursByParentGeohash(parentGeohash, contractAddress);
   }
 
-  async getContoursByParentGeohashArray(parentGeohashArray: string[]) {
+  async getContoursByParentGeohashArray(parentGeohashArray: string[], contractAddress: string) {
     let resultContours = [];
     await pIteration.forEach(parentGeohashArray, async (parentGeohash) => {
-      const contoursByParent = await this.getContoursByParentGeohash(parentGeohash);
+      const contoursByParent = await this.getContoursByParentGeohash(parentGeohash, contractAddress);
       // console.log('contoursByParent', parentGeohash, contoursByParent);
       resultContours = resultContours.concat(contoursByParent);
     });
     return _.uniqBy(resultContours, 'tokenId');
   }
 
-  async getContoursByInnerGeohash(innerGeohash: string): Promise<[IExplorerResultContour]> {
+  async getContoursByInnerGeohash(innerGeohash: string, contractAddress: string): Promise<[IExplorerResultContour]> {
     let resultContours = [];
 
     const cachedIsGeohashInsideResultContour = {};
@@ -66,7 +66,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     let parentGeohash = innerGeohash;
     while (parentGeohash.length > config.maxParentGeohashToFindInner) {
       parentGeohash = parentGeohash.slice(0, -1);
-      const contoursOfParentGeohash = await this.getContoursByParentGeohash(parentGeohash);
+      const contoursOfParentGeohash = await this.getContoursByParentGeohash(parentGeohash, contractAddress);
 
       const contoursThatContentsInnerGeohash = _.filter(contoursOfParentGeohash, (resultContour) => {
         const tokenId = resultContour.tokenId;

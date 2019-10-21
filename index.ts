@@ -139,6 +139,10 @@ const config = require('./config');
       
       subscribedToPrivatePropertyRegistry[address] = true;
       const contract = chainService.getPrivatePropertyContract(address);
+
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetSpaceTokenContour, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
+      });
       
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetPrivatePropertyDetails, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, (e) => {
@@ -146,6 +150,12 @@ const config = require('./config');
         });
       });
 
+      chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
+        await geohashService.handleChangeContourEvent(newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+      
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetPrivatePropertyDetails, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New Add PrivatePropertyRegistry event, blockNumber:', currentBlockNumber);
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);

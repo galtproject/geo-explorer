@@ -57,11 +57,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     await this.models.Value.destroy({where: {}});
   }
 
-  async addOrUpdateContour(contourGeohashes: string[], tokenId: number) {
+  async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string) {
     // find contour object with included geohashes
 
     let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
-      where: {tokenId}, attributes: ['contourGeohash']
+      where: {tokenId, contractAddress}, attributes: ['contourGeohash']
     });
 
     // remove excluded geohashes and mark exists
@@ -69,30 +69,30 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       const contourGeohash = geohashObj.contourGeohash;
 
       if (!_.includes(contourGeohashes, contourGeohash)) {
-        await this.models.GeohashSpaceToken.destroy({where: {tokenId, contourGeohash}});
+        await this.models.GeohashSpaceToken.destroy({where: {tokenId, contractAddress, contourGeohash}});
       }
     });
 
     await pIteration.forEach(contourGeohashes, async (contourGeohash, position) => {
       // bind geohash to contour
-      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, position}).catch(e => {
+      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position}).catch(e => {
         // it exists so update it
-        return this.models.GeohashSpaceToken.update({position}, {where: {tokenId, contourGeohash}});
+        return this.models.GeohashSpaceToken.update({position}, {where: {tokenId, contourGeohash, contractAddress}});
       });
     });
   }
 
-  async getContourBySpaceTokenId(tokenId) {
+  async getContourBySpaceTokenId(tokenId, contractAddress) {
     return this.models.GeohashSpaceToken.findAll({
-      where: {tokenId}, order: [['position', 'ASC']]
+      where: {tokenId, contractAddress}, order: [['position', 'ASC']]
     }).then(spaceTokenGeohashes => {
       return spaceTokenGeohashes.map(geohashObj => geohashObj.contourGeohash);
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], tokenId: number }]> {
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress): Promise<[{ contour: string[], tokenId: number }]> {
     let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({
-      where: {contourGeohash: {[Op.like]: parentGeohash + '%'}}
+      where: {contourGeohash: {[Op.like]: parentGeohash + '%'}, contractAddress}
     });
 
     foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'tokenId');
@@ -100,7 +100,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
       const tokenId = geohashObj.tokenId;
 
-      let contour = await this.getContourBySpaceTokenId(tokenId);
+      let contour = await this.getContourBySpaceTokenId(tokenId, contractAddress);
 
       return {contour, tokenId};
     });

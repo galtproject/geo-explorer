@@ -47,16 +47,12 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     res.send(200);
   });
   
-  service.get('/v1/contours/by/inner-geohash/:geohash', async (req, res) => {
-    const innerGeohash = req.params.geohash;
-
-    await respondByScheme(res, await geohashService.getContoursByInnerGeohash(innerGeohash));
+  service.post('/v1/contours/by/inner-geohash/', async (req, res) => {
+    await respondByScheme(res, await geohashService.getContoursByInnerGeohash(req.body.geohash, req.body.contractAddress));
   });
 
-  service.get('/v1/contours/by/parent-geohash/:geohashes', async (req, res) => {
-    const geohashes = req.params.geohashes.split(',');
-
-    await respondByScheme(res, await geohashService.getContoursByParentGeohashArray(geohashes));
+  service.post('/v1/contours/by/parent-geohash/:geohashes', async (req, res) => {
+    await respondByScheme(res, await geohashService.getContoursByParentGeohashArray(req.body.geohashes, req.body.contractAddress));
   });
 
   service.post('/v1/space-tokens/search', async (req, res) => {
