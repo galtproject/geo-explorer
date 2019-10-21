@@ -10,30 +10,34 @@
 import IExplorerDatabase from "../../../database/interface";
 import IExplorerGeohashService from "../interface";
 import {IExplorerChainContourEvent, IExplorerResultContour} from "../../interfaces";
+import IExplorerChainService from "../../chainService/interface";
 
 const config = require("./config");
 const galtUtils = require('@galtproject/utils');
 const _ = require("lodash");
 const pIteration = require("p-iteration");
 
-module.exports = async (database: IExplorerDatabase) => {
-  return new ExplorerGeohashV1Service(database);
+module.exports = async (database: IExplorerDatabase, chainService: IExplorerChainService) => {
+  return new ExplorerGeohashV1Service(database, chainService);
 };
 
 class ExplorerGeohashV1Service implements IExplorerGeohashService {
   database: IExplorerDatabase;
+  chainService: IExplorerChainService;
 
-  constructor(_database) {
+  constructor(_database, _chainService) {
     this.database = _database;
+    this.chainService = _chainService;
   }
 
   async handleChangeContourEvent(event: IExplorerChainContourEvent) {
-    const contour: string[] = event.returnValues.contour.map((geohash5z) => {
-      const { geohash5 } = galtUtils.geohash5zToGeohash5(geohash5z);
-      return galtUtils.numberToGeohash(geohash5);
-    });
     let tokenId: string = event.returnValues.tokenId || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'] || event.returnValues['id'];
-
+    
+    const {geohashContour} = await this.chainService.getSpaceTokenContourData(event.contractAddress, tokenId).catch(() => {
+      console.log('contour error', event.contractAddress, tokenId);
+      return {geohashContour: []};
+    });
+    
     let spaceTokenNumberId: number;
     if (_.startsWith(tokenId, '0x')) {
       spaceTokenNumberId = parseInt(galtUtils.tokenIdHexToTokenId(tokenId));
@@ -41,7 +45,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       spaceTokenNumberId = parseInt(tokenId);
     }
 
-    await this.database.addOrUpdateContour(contour, spaceTokenNumberId, event.contractAddress);
+    await this.database.addOrUpdateContour(geohashContour, spaceTokenNumberId, event.contractAddress);
   };
 
   async getContoursByParentGeohash(parentGeohash: string, contractAddress: string) {
