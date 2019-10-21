@@ -85,6 +85,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     
     let geoDataToSave = {
       contractAddress,
+      isPrivate: contractAddress.toLowerCase() !== this.chainService.spaceGeoData._address.toLowerCase(),
       tokenId: geoData.tokenId,
       tokenType: geoData.spaceTokenType,
       owner: geoData.owner,
@@ -203,6 +204,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       currency,
       currencyName,
       contractAddress,
+      isPrivate: contractAddress.toLowerCase() !== this.chainService.propertyMarket._address.toLowerCase(),
       currencyAddress: chainOrder.tokenContract,
       ask: chainOrder.ask,
       seller: chainOrder.seller,

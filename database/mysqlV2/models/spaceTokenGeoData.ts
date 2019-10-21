@@ -84,6 +84,9 @@ module.exports = async function (sequelize, models) {
     inLocker: {
       type: Sequelize.BOOLEAN,
     },
+    isPrivate: {
+      type: Sequelize.BOOLEAN,
+    },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)
     },
