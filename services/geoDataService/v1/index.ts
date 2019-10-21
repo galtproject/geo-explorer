@@ -161,7 +161,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return;
     }
 
-    const chainOrder = await this.chainService.getSaleOrder(orderId);
+    const chainOrder = await this.chainService.getSaleOrder(contractAddress, orderId);
     
     const dbSpaceTokens = await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
       const geoDataAddress = chainOrder.details.propertyToken || this.chainService.spaceGeoData._address;
@@ -172,7 +172,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return spaceToken;
     });
 
-    const orderData = await this.geesome.getObject(chainOrder.details.dataAddress);
+    let orderData: any = {};
+    if(chainOrder.details.dataAddress) {
+      orderData = await this.geesome.getObject(chainOrder.details.dataAddress);
+    }
 
     let allFeatures = [];
     dbSpaceTokens.forEach(token => {
