@@ -15,5 +15,6 @@ module.exports = {
   'propertyMarketContractName': 'propertyMarket',
   'spaceTokenContractName': 'spaceToken',
   'newPropertyManagerName': 'newPropertyManager',
-  'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry'
+  'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry',
+  'privatePropertyMarketContractName': 'privatePropertyMarket'
 };

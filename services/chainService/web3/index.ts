@@ -61,6 +61,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   newPropertyManager: any;
 
   privatePropertyGlobalRegistry: any;
+  privatePropertyMarket: any;
   
   contractsConfig: any;
 
@@ -81,6 +82,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
+    if(!contract) {
+      return;
+    }
     if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
       blockNumber = this.contractsConfig.blockNumber;
     }
@@ -94,6 +98,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback) {
+    if(!contract) {
+      return;
+    }
     contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
@@ -139,11 +146,24 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   private createContractInstance() {
-    this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
-    this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
-    this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
-    this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
-    this.privatePropertyGlobalRegistry = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Abi'], this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']);
+    if(this.contractsConfig[config.geoDataContractName + 'Address']) {
+      this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
+    }
+    if(this.contractsConfig[config.propertyMarketContractName + 'Address']) {
+      this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
+    }
+    if(this.contractsConfig[config.spaceTokenContractName + 'Address']) {
+      this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
+    }
+    if(this.contractsConfig[config.newPropertyManagerName + 'Address']) {
+      this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
+    }
+    if(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']) {
+      this.privatePropertyGlobalRegistry = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Abi'], this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']);
+    }
+    if(this.contractsConfig[config.privatePropertyMarketContractName + 'Address']) {
+      this.privatePropertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyMarketContractName + 'Abi'], this.contractsConfig[config.privatePropertyMarketContractName + 'Address']);
+    }
   }
   
   getPropertyRegistryContract(address) {

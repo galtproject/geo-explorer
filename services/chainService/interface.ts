@@ -20,6 +20,7 @@ export default interface IExplorerChainService {
   newPropertyManager: any;
 
   privatePropertyGlobalRegistry: any;
+  privatePropertyMarket: any;
 
   callbackOnReconnect: any;
 
