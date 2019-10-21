@@ -83,24 +83,30 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async getContourBySpaceTokenId(tokenId, contractAddress) {
+    const where: any = { tokenId };
+    if(contractAddress) {
+      where.contractAddress = contractAddress;
+    }
     return this.models.GeohashSpaceToken.findAll({
-      where: {tokenId, contractAddress}, order: [['position', 'ASC']]
+      where, order: [['position', 'ASC']]
     }).then(spaceTokenGeohashes => {
       return spaceTokenGeohashes.map(geohashObj => geohashObj.contourGeohash);
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress): Promise<[{ contour: string[], tokenId: number }]> {
-    let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({
-      where: {contourGeohash: {[Op.like]: parentGeohash + '%'}, contractAddress}
-    });
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?): Promise<[{ contour: string[], tokenId: number }]> {
+    const where: any = { contourGeohash: {[Op.like]: parentGeohash + '%'} };
+    if(contractAddress) {
+      where.contractAddress = contractAddress;
+    }
+    let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({ where });
 
     foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'tokenId');
 
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
       const tokenId = geohashObj.tokenId;
 
-      let contour = await this.getContourBySpaceTokenId(tokenId, contractAddress);
+      let contour = await this.getContourBySpaceTokenId(tokenId, geohashObj.contractAddress);
 
       return {contour, tokenId};
     });
@@ -278,7 +284,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     ['currency', 'currencyAddress', 'contractAddress'].forEach((field) => {
       if(ordersQuery[field])
-        allWheres[field] = ordersQuery[field];
+        allWheres[field] = { [Op.like]: ordersQuery[field]};
     });
 
     // console.log('allWheres', allWheres);

@@ -221,14 +221,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       updatedAtBlock: event.blockNumber
     });
     
-    console.log('order saved', dbOrder.orderId);
+    console.log('order saved', dbOrder.orderId, contractAddress);
     
     await dbOrder.setSpaceTokens(dbSpaceTokens);
   };
   
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
@@ -319,7 +319,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
