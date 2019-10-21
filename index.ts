@@ -117,7 +117,7 @@ const config = require('./config');
       // registryAddress => bool
     };
     
-    await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, prevBlockNumber).then(async (events) => {
+    await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
       await pIteration.forEach(events, (e) => {
         subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
@@ -163,12 +163,12 @@ const config = require('./config');
       });
     }
 
-    console.log('events finish');
-    const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);
-    console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
-
-    const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3', chainService.spaceGeoData._address);
-    console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
+    // console.log('events finish');
+    // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);
+    // console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
+    //
+    // const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3', chainService.spaceGeoData._address);
+    // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
     
     // const spaceTokens = await geoDataService.filterSpaceTokens({
     //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170"
