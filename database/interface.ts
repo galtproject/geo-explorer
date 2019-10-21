@@ -12,9 +12,9 @@ export default interface IExplorerDatabase {
 
   addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string): Promise<void>;
 
-  getContourBySpaceTokenId(tokenId, contractAddress: string): Promise<string[]>;
+  getContourBySpaceTokenId(tokenId, contractAddress?: string): Promise<string[]>;
 
-  getContoursByParentGeohash(parentGeohash: string, contractAddress: string): Promise<[{ contour: string[], tokenId: number }]>;
+  getContoursByParentGeohash(parentGeohash: string, contractAddress?: string): Promise<[{ contour: string[], tokenId: number }]>;
 
   getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
   

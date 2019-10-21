@@ -214,7 +214,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       try {
         ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
       } catch (e) {
-        console.warn(e);
+        console.warn('Web3Utils.hexToUtf8', e);
       }
       
       const geohashContour = [];
