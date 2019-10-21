@@ -10,11 +10,11 @@
 export default interface IExplorerDatabase {
   flushDatabase(): Promise<void>;
 
-  addOrUpdateContour(contourGeohashes: string[], tokenId: number): Promise<void>;
+  addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string): Promise<void>;
 
-  getContourBySpaceTokenId(tokenId): Promise<string[]>;
+  getContourBySpaceTokenId(tokenId, contractAddress: string): Promise<string[]>;
 
-  getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], tokenId: number }]>;
+  getContoursByParentGeohash(parentGeohash: string, contractAddress: string): Promise<[{ contour: string[], tokenId: number }]>;
 
   getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
   

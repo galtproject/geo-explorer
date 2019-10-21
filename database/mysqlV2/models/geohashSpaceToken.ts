@@ -14,6 +14,9 @@ module.exports = async function (sequelize, models) {
     tokenId: {
       type: Sequelize.STRING(100)
     },
+    contractAddress: {
+      type: Sequelize.STRING(100)
+    },
     contourGeohash: {
       type: Sequelize.STRING(12)
     },
@@ -23,9 +26,9 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      {fields: ['tokenId', 'contourGeohash'], unique: true},
-      {fields: ['tokenId']},
-      {fields: ['contourGeohash']}
+      {fields: ['tokenId', 'contourGeohash', 'contractAddress'], unique: true},
+      {fields: ['tokenId', 'contractAddress']},
+      {fields: ['contourGeohash', 'contractAddress']}
     ]
   });
 

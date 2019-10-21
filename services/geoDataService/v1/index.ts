@@ -226,7 +226,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
@@ -317,7 +317,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
     }
     console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
@@ -332,7 +332,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
     }
     return {
       list: await this.database.filterSpaceTokens(filterQuery),
