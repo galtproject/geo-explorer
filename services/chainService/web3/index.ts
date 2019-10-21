@@ -209,8 +209,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
-      
-      const ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
+
+      let ledgerIdentifier;
+      try {
+        ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
+      } catch (e) {
+        console.warn(e);
+      }
       
       const geohashContour = [];
       const heightsContour = [];
