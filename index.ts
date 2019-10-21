@@ -157,7 +157,7 @@ const config = require('./config');
       });
       
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetPrivatePropertyDetails, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New Add PrivatePropertyRegistry event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New SetPrivatePropertyDetails event, blockNumber:', currentBlockNumber);
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
