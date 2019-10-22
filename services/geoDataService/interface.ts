@@ -10,7 +10,7 @@
 import {
   IExplorerGeoDataEvent,
   IExplorerNewApplicationEvent,
-  IExplorerNewPrivatePropertyRegistryEvent,
+  IExplorerNewPrivatePropertyRegistryEvent, IExplorerSaleOfferEvent,
   IExplorerSaleOrderEvent
 } from "../interfaces";
 import {
@@ -19,17 +19,23 @@ import {
   ApplicationsQuery,
   IApplication,
   SpaceTokensQuery,
-  ISpaceTokenGeoData
+  ISpaceTokenGeoData, ISaleOffer, SaleOffersQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
   handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
   
-  handleSaleOrderEvent(propertyMarketAddress, event: IExplorerSaleOrderEvent): Promise<void>;
+  handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
+  
+  handleSaleOfferEvent(event: IExplorerSaleOfferEvent): Promise<void>;
 
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
 
   getOrderById(orderId, contractAddress): Promise<ISaleOrder>;
+
+  filterSaleOffers(offersQuery: SaleOffersQuery): Promise<ISaleOffersListResponse>;
+
+  getSaleOfferById(orderId, buyer, contractAddress): Promise<ISaleOffer>;
 
   handleNewApplicationEvent(event: IExplorerNewApplicationEvent): Promise<void>;
 
@@ -68,5 +74,10 @@ export interface FilterSpaceTokensGeoQuery extends SpaceTokensQuery {
 
 export interface ISpaceTokensListResponse {
   list: ISpaceTokenGeoData[];
+  total: number;
+}
+
+export interface ISaleOffersListResponse {
+  list: ISaleOffer[];
   total: number;
 }

@@ -62,7 +62,13 @@ const config = require('./config');
 
     await chainService.getEventsFromBlock(chainService.propertyMarket, ChainServiceEvents.SaleOrderStatusChanged, prevBlockNumber).then(async (events) => {
       await pIteration.forEach(events, (e) => {
-        return geoDataService.handleSaleOrderEvent(chainService.propertyMarket._address, e)
+        return geoDataService.handleSaleOrderEvent(e)
+      });
+    });
+    
+    await chainService.getEventsFromBlock(chainService.propertyMarket, ChainServiceEvents.SaleOfferStatusChanged, prevBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handleSaleOfferEvent(e)
       });
     });
     
@@ -90,10 +96,18 @@ const config = require('./config');
 
     chainService.subscribeForNewEvents(chainService.propertyMarket, ChainServiceEvents.SaleOrderStatusChanged, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New SaleOrderStatusChanged event, blockNumber:', currentBlockNumber);
-      await geoDataService.handleSaleOrderEvent(chainService.propertyMarket._address, newEvent);
+      await geoDataService.handleSaleOrderEvent(newEvent);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
 
+    ['SaleOfferAskChanged', 'SaleOfferBidChanged', 'SaleOfferStatusChanged'].map((eventName) => {
+      chainService.subscribeForNewEvents(chainService.propertyMarket, ChainServiceEvents[eventName], currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New ' + eventName + ' event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleSaleOfferEvent(newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+    });
+    
     chainService.subscribeForNewEvents(chainService.newPropertyManager, ChainServiceEvents.NewPropertyApplication, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New NewPropertyApplication event, blockNumber:', currentBlockNumber);
       await geoDataService.handleNewApplicationEvent(newEvent);
@@ -164,12 +178,26 @@ const config = require('./config');
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, prevBlockNumber).then(async (events) => {
       await pIteration.forEach(events, (e) => {
-        return geoDataService.handleSaleOrderEvent(chainService.privatePropertyMarket._address, e)
+        return geoDataService.handleSaleOrderEvent(e)
+      });
+    });
+
+    await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOfferStatusChanged, prevBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handleSaleOfferEvent(e)
       });
     });
     
     await chainService.subscribeForNewEvents(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, currentBlockNumber, async (err, newEvent) => {
-      return geoDataService.handleSaleOrderEvent(chainService.privatePropertyMarket._address, newEvent)
+      return geoDataService.handleSaleOrderEvent(newEvent)
+    });
+
+    ['SaleOfferAskChanged', 'SaleOfferBidChanged', 'SaleOfferStatusChanged'].map((eventName) => {
+      chainService.subscribeForNewEvents(chainService.privatePropertyMarket, ChainServiceEvents[eventName], currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New ' + eventName + ' event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleSaleOfferEvent(newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
     });
 
     // console.log('events finish');
@@ -180,7 +208,8 @@ const config = require('./config');
     // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
     
     // const spaceTokens = await geoDataService.filterSpaceTokens({
-    //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170"
+    //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170",
+    //   contractAddress: '0x7ef8678453B361394a4a8cD544D2E5eDAe674702'
     // });
     // console.log('spaceTokens.list.length', spaceTokens.list.length);
     //

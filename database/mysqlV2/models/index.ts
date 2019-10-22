@@ -13,6 +13,7 @@ module.exports = async function (sequelize) {
   models.GeohashSpaceToken = await require('./geohashSpaceToken')(sequelize, models);
   models.SpaceTokenGeoData = await require('./spaceTokenGeoData')(sequelize, models);
   models.SaleOrder = await require('./saleOrder')(sequelize, models);
+  models.SaleOffer = await require('./saleOffer')(sequelize, models);
   models.Application = await require('./application')(sequelize, models);
   models.Value = await require('./value')(sequelize, models);
   

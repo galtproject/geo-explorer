@@ -7,7 +7,7 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase, {SaleOrdersQuery} from "../../../database/interface";
+import IExplorerDatabase, {ISaleOffer, SaleOffersQuery, SaleOrdersQuery} from "../../../database/interface";
 import {
   default as IExplorerGeoDataService,
   FilterApplicationsGeoQuery,
@@ -153,7 +153,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
   }
 
-  async handleSaleOrderEvent(contractAddress, event: IExplorerSaleOrderEvent) {
+  async handleSaleOrderEvent(event: IExplorerSaleOrderEvent) {
     let orderId: string = event.returnValues.orderId;
     let status: string = event.returnValues.status;
     
@@ -161,7 +161,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return;
     }
 
-    const chainOrder = await this.chainService.getSaleOrder(contractAddress, orderId);
+    const chainOrder = await this.chainService.getSaleOrder(event.contractAddress, orderId);
     
     const dbSpaceTokens = await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
       const geoDataAddress = chainOrder.details.propertyToken || this.chainService.spaceGeoData._address;
@@ -206,8 +206,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       orderId,
       currency,
       currencyName,
-      contractAddress,
-      isPrivate: contractAddress.toLowerCase() !== this.chainService.propertyMarket._address.toLowerCase(),
+      contractAddress: event.contractAddress,
+      isPrivate: event.contractAddress.toLowerCase() !== this.chainService.propertyMarket._address.toLowerCase(),
       currencyAddress: chainOrder.tokenContract,
       ask: chainOrder.ask,
       seller: chainOrder.seller,
@@ -224,7 +224,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       updatedAtBlock: event.blockNumber
     });
     
-    console.log('order saved', dbOrder.orderId, contractAddress);
+    console.log('order saved', dbOrder.orderId, event.contractAddress);
     
     await dbOrder.setSpaceTokens(dbSpaceTokens);
   };
@@ -351,5 +351,38 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleNewPrivatePropertyRegistryEvent(event) {
 
+  }
+
+  async handleSaleOfferEvent(event) {
+    let { orderId, buyer } = event.returnValues;
+    if(!orderId) {
+      orderId = event.returnValues.saleOrderId;
+    }
+    
+    const saleOffer = await this.chainService.getSaleOffer(event.contractAddress, orderId, buyer);
+    
+    const saleOfferData: ISaleOffer = {
+      contractAddress: event.contractAddress,
+      orderId: orderId,
+      buyer,
+      ask: saleOffer.ask,
+      bid: saleOffer.bid,
+      lastOfferAskAt: new Date().setTime(saleOffer.lastAskAt),
+      lastOfferBidAt: new Date().setTime(saleOffer.lastBidAt),
+      createdOfferAt: new Date().setTime(saleOffer.createdAt)
+    };
+    
+    await this.database.addOrUpdateSaleOffer(saleOfferData);
+  }
+
+  async getSaleOfferById(orderId, buyer, contractAddress) {
+    return this.database.getSaleOffer(orderId, buyer, contractAddress);
+  }
+
+  async filterSaleOffers(filterQuery: SaleOffersQuery) {
+    return {
+      list: await this.database.filterSaleOffers(filterQuery),
+      total: await this.database.filterSaleOffersCount(filterQuery)
+    };
   }
 }
