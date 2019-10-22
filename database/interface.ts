@@ -296,5 +296,7 @@ export interface SaleOffersQuery {
   buyer?: string;
   seller?: string;
   status?: string;
+
+  includeOrders?: boolean;
 }
 
