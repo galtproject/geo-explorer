@@ -360,6 +360,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     
     const saleOffer = await this.chainService.getSaleOffer(event.contractAddress, orderId, buyer);
+
+    const dbOrder = await this.database.getSaleOrder(orderId, event.contractAddress);
     
     const saleOfferData: ISaleOffer = {
       contractAddress: event.contractAddress,
@@ -369,7 +371,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bid: saleOffer.bid,
       lastOfferAskAt: new Date().setTime(saleOffer.lastAskAt),
       lastOfferBidAt: new Date().setTime(saleOffer.lastBidAt),
-      createdOfferAt: new Date().setTime(saleOffer.createdAt)
+      createdOfferAt: new Date().setTime(saleOffer.createdAt),
+      dbOrderId: dbOrder ? dbOrder.id : null
     };
     
     await this.database.addOrUpdateSaleOffer(saleOfferData);

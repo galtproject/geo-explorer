@@ -58,5 +58,8 @@ module.exports = async function (sequelize, models) {
     ]
   });
   
+  SaleOffer.belongsTo(models.SaleOrder, {as: 'order', foreignKey: 'dbOrderId'});
+  models.SaleOrder.hasMany(SaleOffer, {as: 'offers', foreignKey: 'dbOrderId'});
+  
   return SaleOffer.sync({});
 };
