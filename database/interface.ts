@@ -41,6 +41,14 @@ export default interface IExplorerDatabase {
   filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
 
   filterSpaceTokensCount(filterQuery: SpaceTokensQuery): Promise<number>;
+
+  addOrUpdateSaleOffer(saleOffer: ISaleOffer): Promise<ISaleOffer>;
+  
+  getSaleOffer(orderId, buyer, contractAddress): Promise<ISaleOffer>;
+
+  filterSaleOffers(filterQuery: SaleOffersQuery): Promise<ISaleOffer[]>;
+
+  filterSaleOffersCount(filterQuery: SaleOffersQuery): Promise<number>;
   
   getValue(key: string): Promise<string>;
 
@@ -241,5 +249,48 @@ export interface SpaceTokensQuery {
   areaMax?: number;
 
   owner?: string;
+}
+
+export interface ISaleOffer {
+  contractAddress: string;
+  orderId?: string;
+
+  ask?: number;
+  bid?: number;
+  
+  buyer?: string;
+  seller?: string;
+  status?: string;
+  
+  createdAtBlock?;
+  updatedAtBlock?;
+
+  lastOfferAskAt;
+  lastOfferBidAt;
+  createdOfferAt;
+}
+
+export interface SaleOffersQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  contractAddress: string;
+  orderId?: string;
+
+  ask?: number;
+  bid?: number;
+
+  askMin?: number;
+  askMax?: number;
+
+  bidMin?: number;
+  bidMax?: number;
+
+  buyer?: string;
+  seller?: string;
+  status?: string;
 }
 

@@ -39,6 +39,9 @@ module.exports = async function (sequelize, models) {
     seller: {
       type: Sequelize.STRING(100)
     },
+    status: {
+      type: Sequelize.STRING(100)
+    },
     description: {
       type: Sequelize.TEXT
     },

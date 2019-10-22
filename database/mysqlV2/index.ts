@@ -12,7 +12,7 @@ import IExplorerDatabase, {
   ISaleOrder,
   SaleOrdersQuery,
   IApplication,
-  ApplicationsQuery, SpaceTokensQuery
+  ApplicationsQuery, SpaceTokensQuery, SaleOffersQuery, ISaleOffer
 } from "../interface";
 
 const _ = require("lodash");
@@ -57,6 +57,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     await this.models.Value.destroy({where: {}});
   }
 
+  // =============================================================
+  // Geohashes
+  // =============================================================
+  
   async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string) {
     // find contour object with included geohashes
 
@@ -111,6 +115,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return {contour, tokenId};
     });
   }
+
+  // =============================================================
+  // SpaceGeoData
+  // =============================================================
   
   async getSpaceTokenGeoData(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
@@ -380,6 +388,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.SaleOrder.count(findAllParam);
   }
   
+  // =============================================================
+  // Applications
+  // =============================================================
+
   async getApplication(applicationId, contractAddress) {
     return this.models.Application.findOne({
       where: {applicationId, contractAddress},
@@ -548,6 +560,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.Application.count(findAllParam);
   }
 
+  // =============================================================
+  // SpaceTokens
+  // =============================================================
+
   spaceTokensQueryToFindAllParam(spaceTokensQuery: SpaceTokensQuery) {
     const allWheres: any = {};
 
@@ -632,6 +648,93 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       where: { tokenId }
     });
   }
+
+  // =============================================================
+  // SaleOffers
+  // =============================================================
+
+  async addOrUpdateSaleOffer(saleOffer: ISaleOffer) {
+    let dbObject = await this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
+
+    if(dbObject) {
+      saleOffer.createdAtBlock = dbObject.createdAtBlock || saleOffer.createdAtBlock;
+      await this.models.SaleOffer.update(saleOffer, {
+        where: {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}}
+      });
+    } else {
+      return this.models.SaleOffer.create(saleOffer);
+    }
+    return this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
+  }
+
+  saleOffersQueryToFindAllParam(saleOffersQuery: SaleOffersQuery) {
+    const allWheres: any = {};
+
+    ['ask', 'bid'].forEach(field => {
+      const minVal = parseFloat(saleOffersQuery[field + 'Min']);
+      const maxVal = parseFloat(saleOffersQuery[field + 'Max']);
+      if(!minVal && !maxVal)
+        return;
+
+      const fieldWhereObj = {};
+      if(minVal)
+        fieldWhereObj[Op.gte] = minVal;
+
+      if(maxVal)
+        fieldWhereObj[Op.lte] = maxVal;
+
+      allWheres[field] = fieldWhereObj;
+    });
+
+    ['status', 'orderId'].forEach((field) => {
+      if(!_.isUndefined(saleOffersQuery[field]) && !_.isNull(saleOffersQuery[field]))
+        allWheres[field] = saleOffersQuery[field];
+    });
+
+    ['buyer', 'seller', 'contractAddress'].forEach((field) => {
+      if(saleOffersQuery[field])
+        allWheres[field] = {[Op.like]: saleOffersQuery[field]};
+    });
+
+    return {
+      where: _.extend(
+        resultWhere(allWheres, ['buyer', 'seller', 'contractAddress', 'status', 'orderId', 'ask', 'bid']),
+      )
+    }
+  }
+
+  async filterSaleOffers(saleOffersQuery: SaleOffersQuery) {
+    if(saleOffersQuery.limit > 1000) {
+      saleOffersQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.saleOffersQueryToFindAllParam(saleOffersQuery);
+
+    findAllParam.limit = saleOffersQuery.limit || 20;
+    findAllParam.offset = saleOffersQuery.offset || 0;
+
+    findAllParam.order = [
+      [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
+    ];
+
+    return this.models.SaleOffer.findAll(findAllParam);
+  }
+
+  async filterSaleOffersCount(saleOffersQuery: SaleOffersQuery) {
+    const findAllParam: any = this.saleOffersQueryToFindAllParam(saleOffersQuery);
+
+    return this.models.SaleOffer.count(findAllParam);
+  }
+
+  async getSaleOffer(orderId, buyer, contractAddress) {
+    return this.models.SaleOffer.findOne({
+      where: { orderId, buyer: {[Op.like]: buyer}, contractAddress: {[Op.like]: contractAddress} }
+    });
+  }
+  
+  // =============================================================
+  // Values
+  // =============================================================
 
   async getValue(key: string) {
     const valueObj = await this.models.Value.findOne({where: {key}});

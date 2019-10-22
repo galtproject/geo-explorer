@@ -45,6 +45,8 @@ export default interface IExplorerChainService {
   getSpaceTokenData(contractAddress, tokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[] }>;
 
   getSaleOrder(contractAddress, orderId): Promise<ChainServiceSaleOrder>;
+  
+  getSaleOffer(contractAddress, orderId, buyer): Promise<ChainServiceSaleOffer>;
 
   getNewPropertyApplication(applicationId): Promise<{ tokenId: string, id: string, applicant: string, currency: string, statusName: string, assignedOracleTypes: string[] }>;
 
@@ -61,6 +63,9 @@ export enum ChainServiceEvents {
   SetSpaceTokenContour = 'SetContour',
   SetSpaceTokenDataLink = 'SetDataLink',
   SaleOrderStatusChanged = 'SaleOrderStatusChanged',
+  SaleOfferStatusChanged = 'SaleOfferStatusChanged',
+  SaleOfferBidChanged = 'SaleOfferBidChanged',
+  SaleOfferAskChanged = 'SaleOfferAskChanged',
   NewPropertyApplication = 'NewApplication',
   NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
@@ -82,6 +87,17 @@ export interface ChainServiceSaleOrder {
 
   details: ChainServiceSaleOrderDetails;
   status: number;
+}
+
+export interface ChainServiceSaleOffer {
+  status: number;
+  buyer: string;
+  ask: number;
+  bid: number;
+
+  lastAskAt: number;
+  lastBidAt: number;
+  createdAt: number;
 }
 
 export interface ChainServiceSaleOrderDetails {

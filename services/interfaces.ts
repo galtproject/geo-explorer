@@ -28,6 +28,11 @@ export interface IExplorerSaleOrderEvent {
   contractAddress;
   blockNumber;
 }
+export interface IExplorerSaleOfferEvent {
+  returnValues: { orderId?: string, saleOrderId?: string, buyer: string };
+  contractAddress;
+  blockNumber;
+}
 
 export interface IExplorerNewApplicationEvent {
   returnValues: { applicationId: string, applicant: string };
