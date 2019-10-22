@@ -180,7 +180,8 @@ const config = require('./config');
     // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
     
     // const spaceTokens = await geoDataService.filterSpaceTokens({
-    //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170"
+    //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170",
+    //   contractAddress: '0x7ef8678453B361394a4a8cD544D2E5eDAe674702'
     // });
     // console.log('spaceTokens.list.length', spaceTokens.list.length);
     //
