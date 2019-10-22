@@ -732,7 +732,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getSaleOffer(orderId, buyer, contractAddress) {
     return this.models.SaleOffer.findOne({
-      where: { orderId, buyer: {[Op.like]: buyer}, contractAddress: {[Op.like]: contractAddress} }
+      where: { orderId, buyer: {[Op.like]: buyer}, contractAddress: {[Op.like]: contractAddress} },
+      include: [{ association: 'order', include: [{association: 'spaceTokens'}]}]
     });
   }
   
