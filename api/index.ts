@@ -67,16 +67,20 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterOrders(req.body));
   });
 
-  service.post('/v1/orders/get-by-id/:contractAddress/:id', async (req, res) => {
+  service.post('/v1/orders/get/:contractAddress/:id', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getOrderById(req.params.id, req.params.contractAddress));
+  });
+
+  service.post('/v1/orders/get/:contractAddress/:id', async (req, res) => {
     await respondByScheme(res, await geoDataService.getOrderById(req.params.id, req.params.contractAddress));
   });
 
   service.post('/v1/offers/search', async (req, res) => {
-    await respondByScheme(res, await geoDataService.filterOrders(req.body));
+    await respondByScheme(res, await geoDataService.filterSaleOffers(req.body));
   });
 
-  service.post('/v1/orders/get-by-id/:contractAddress/:id', async (req, res) => {
-    await respondByScheme(res, await geoDataService.getOrderById(req.params.id, req.params.contractAddress));
+  service.post('/v1/offers/get/:contractAddress/:orderId/:buyer', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getSaleOfferById(req.params.orderId, req.params.buyer, req.params.contractAddress));
   });
 
   service.post('/v1/applications/search', async (req, res) => {

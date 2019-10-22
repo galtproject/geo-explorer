@@ -98,6 +98,8 @@ export interface ISpaceTokenGeoData {
 }
 
 export interface ISaleOrder {
+  id?;
+  
   orderId;
   currency?;
   currencyAddress?;
@@ -268,6 +270,8 @@ export interface ISaleOffer {
   lastOfferAskAt;
   lastOfferBidAt;
   createdOfferAt;
+  
+  dbOrderId;
 }
 
 export interface SaleOffersQuery {

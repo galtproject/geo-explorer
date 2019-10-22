@@ -716,6 +716,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.order = [
       [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
     ];
+    
+    findAllParam.include = [{ association: 'order'}];
 
     return this.models.SaleOffer.findAll(findAllParam);
   }
