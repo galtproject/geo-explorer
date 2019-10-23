@@ -140,9 +140,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.getSpaceTokenGeoData(geoData.tokenId, geoData.contractAddress);
   }
 
-  async getSaleOrder(orderId) {
+  async getSaleOrder(orderId, contractAddress) {
     const saleOrder = await this.models.SaleOrder.findOne({
-      where: {orderId},
+      where: {orderId, contractAddress},
       include: [{
         model: this.models.SpaceTokenGeoData,
         as: 'spaceTokens',
@@ -161,7 +161,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   
   async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
     // console.log('addOrUpdateSaleOrder', saleOrder);
-    let dbObject = await this.getSaleOrder(saleOrder.orderId);
+    let dbObject = await this.getSaleOrder(saleOrder.orderId, saleOrder.contractAddress);
 
     if(dbObject) {
       saleOrder.createdAtBlock = dbObject.createdAtBlock || saleOrder.createdAtBlock;
@@ -171,7 +171,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     } else {
       return this.models.SaleOrder.create(saleOrder);
     }
-    return this.getSaleOrder(saleOrder.orderId);
+    return this.getSaleOrder(saleOrder.orderId, saleOrder.contractAddress);
   }
   
   saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
