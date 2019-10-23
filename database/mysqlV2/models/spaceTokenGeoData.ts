@@ -120,7 +120,7 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      {fields: ['tokenId'], unique: true},
+      {fields: ['tokenId', 'contractAddress'], unique: true},
       // {fields: ['owner']}
     ]
   });

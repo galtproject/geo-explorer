@@ -662,7 +662,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         where: {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}}
       });
     } else {
-      return this.models.SaleOffer.create(saleOffer);
+      return this.models.SaleOffer.create(saleOffer).catch(() => {
+        return this.models.SaleOffer.update(saleOffer, {
+          where: {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}}
+        });
+      });
     }
     return this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
   }
