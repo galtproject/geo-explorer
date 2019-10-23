@@ -122,7 +122,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   
   async getSpaceTokenGeoData(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
-      where: { tokenId, contractAddress }
+      where: { tokenId, contractAddress: {[Op.like]: contractAddress}  }
     });
   }
 

@@ -194,7 +194,7 @@ const config = require('./config');
 
     ['SaleOfferAskChanged', 'SaleOfferBidChanged', 'SaleOfferStatusChanged'].map((eventName) => {
       chainService.subscribeForNewEvents(chainService.privatePropertyMarket, ChainServiceEvents[eventName], currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New ' + eventName + ' event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New ' + eventName + ' event, blockNumber:', currentBlockNumber, 'contractAddress:', newEvent.contractAddress);
         await geoDataService.handleSaleOfferEvent(newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
