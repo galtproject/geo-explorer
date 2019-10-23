@@ -271,14 +271,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     const propertyMarketContract = this.getPropertyMarketContract(contractAddress);
     return propertyMarketContract.methods.saleOrders(orderId).call({}).then(async result => {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
-      if(!result.details) {
-        if(propertyMarketContract.methods.getSaleOrderSpaceTokenIds) {
-          result.details = await propertyMarketContract.methods.saleOrderDetails(orderId).call({});
-          result.details.tokenIds = await propertyMarketContract.methods.getSaleOrderSpaceTokenIds().call({});
-        } else {
-          result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
-        }
-      }
+      result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       console.log('getSaleOrder result', result);
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
 
