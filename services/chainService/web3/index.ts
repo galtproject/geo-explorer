@@ -283,7 +283,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     const propertyMarketContract = this.getPropertyMarketContract(contractAddress);
     return propertyMarketContract.methods.saleOffers(orderId, buyer).call({}).then(async result => {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
-      result.bid = Web3Utils.fromWei(result.ask.toString(10), 'ether');
+      result.bid = Web3Utils.fromWei(result.bid.toString(10), 'ether');
       result.status = {'0': 'inactive', '1': 'active'}[result.status.toString(10)];
       return result;
     })
