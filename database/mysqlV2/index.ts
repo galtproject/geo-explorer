@@ -643,9 +643,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.SpaceTokenGeoData.count(findAllParam);
   }
   
-  async getSpaceToken(tokenId) {
-    return this.models.SpaceToken.findOne({
-      where: { tokenId }
+  async getSpaceToken(tokenId, contractAddress) {
+    return this.models.SpaceTokenGeoData.findOne({
+      where: { tokenId, contractAddress }
     });
   }
 
