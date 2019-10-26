@@ -9,6 +9,7 @@
 
 import IExplorerChainService, {ChainServiceEvents} from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
+import Promise from "sequelize";
 
 const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
@@ -83,7 +84,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     if(!contract) {
-      return;
+      return new Promise((resolve) => resolve([]));
     }
     if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
       blockNumber = this.contractsConfig.blockNumber;
