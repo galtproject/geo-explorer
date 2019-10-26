@@ -132,6 +132,7 @@ const config = require('./config');
     
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
       await pIteration.forEach(events, async (e) => {
+        console.log('e.returnValues');
         await subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
