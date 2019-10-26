@@ -167,10 +167,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
   
   getPropertyRegistryContract(address) {
-    if(address.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.spaceToken && address.toLowerCase() === this.spaceToken._address.toLowerCase()) {
       return this.spaceToken;
     }
-    if(address.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
+    if(this.spaceGeoData && address.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
       return this.spaceGeoData;
     }
     
