@@ -234,7 +234,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenData(contractAddress, tokenId) {
-    if(contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.spaceToken && contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
