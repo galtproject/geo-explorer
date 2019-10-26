@@ -184,10 +184,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   getPropertyMarketContract(address) {
-    if(address.toLowerCase() === this.propertyMarket._address.toLowerCase()) {
+    if(this.propertyMarket && address.toLowerCase() === this.propertyMarket._address.toLowerCase()) {
       return this.propertyMarket;
     }
-    if(address.toLowerCase() === this.privatePropertyMarket._address.toLowerCase()) {
+    if(this.privatePropertyMarket && address.toLowerCase() === this.privatePropertyMarket._address.toLowerCase()) {
       return this.privatePropertyMarket;
     }
   }
@@ -199,14 +199,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenOwner(contractAddress, tokenId) {
-    if(contractAddress.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
+    if(this.spaceGeoData && contractAddress.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
       contractAddress = this.spaceToken._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.ownerOf(tokenId).call({});
   }
   
   public async getSpaceTokenArea(contractAddress, tokenId) {
-    if(contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.spaceToken && contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getArea(tokenId).call({}).then(result => {
@@ -215,7 +215,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenContourData(contractAddress, tokenId) {
-    if(contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.spaceToken && contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getContour(tokenId).call({}).then(result => {
