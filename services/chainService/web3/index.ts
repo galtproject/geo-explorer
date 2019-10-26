@@ -9,7 +9,6 @@
 
 import IExplorerChainService, {ChainServiceEvents} from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
-import Promise from "sequelize";
 
 const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
