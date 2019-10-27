@@ -11,10 +11,10 @@ module.exports = {
   'contractsConfigUrl': 'https://geesome-node.galtproject.io:7722/ipns/QmZfEdFR7AYkbbukfoXYzuE4N21RtYzU1VfC887EZQRtN9/<%= configFile %>',
   'env': 'local',
   'wsServer': 'ws://localhost:8546',
-  'geoDataContractName': 'spaceGeoDataRegistry',
-  'propertyMarketContractName': 'propertyMarket',
-  'spaceTokenContractName': 'spaceToken',
+  'spaceGeoDataName': 'spaceGeoDataRegistry',
+  'propertyMarketName': 'propertyMarket',
+  'spaceTokenName': 'spaceToken',
   'newPropertyManagerName': 'newPropertyManager',
   'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry',
-  'privatePropertyMarketContractName': 'privatePropertyMarket'
+  'privatePropertyMarketName': 'privatePropertyMarket'
 };

@@ -233,7 +233,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
       filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
-    console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
       list: await this.database.filterSaleOrders(filterQuery),
       total: await this.database.filterSaleOrdersCount(filterQuery)
@@ -296,8 +295,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dbApplication = await this.database.addOrUpdateApplication(applicationData);
     }
     
-    console.log('dbApplication.applicationId', dbApplication.applicationId);
-    
     if(parseInt(application.tokenId)) {
       const spaceToken = await this.saveSpaceTokenById(spaceGeoDataAddress, application.tokenId, {
         createdAtBlock: event.blockNumber,
@@ -324,7 +321,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
       filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
-    console.log('filterQuery.tokensIds', filterQuery.tokensIds);
     return {
       list: await this.database.filterApplications(filterQuery),
       total: await this.database.filterApplicationsCount(filterQuery)

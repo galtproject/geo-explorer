@@ -83,12 +83,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     if(!contract) {
+      console.log(`✖️ Event ${eventName} getting events ignored, contract not found`);
       return new Promise((resolve) => resolve([]));
     }
     if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
       blockNumber = this.contractsConfig.blockNumber;
     }
     return contract.getPastEvents(eventName, {fromBlock: blockNumber}).then(events => {
+      console.log(`✅️ Event ${eventName} got ${events.length} items, by contract ${contract._address}`);
       return events.map(e => {
         // console.log('event', e);
         e.contractAddress = e.address;
@@ -99,8 +101,11 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback) {
     if(!contract) {
+      console.log(`✖️ Event ${eventName} subscribing ignored, contract not found`);
       return;
     }
+    console.log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
+    
     contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
@@ -146,31 +151,26 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   private createContractInstance() {
-    if(this.contractsConfig[config.geoDataContractName + 'Address']) {
-      this.spaceGeoData = new this.web3.eth.Contract(this.contractsConfig[config.geoDataContractName + 'Abi'], this.contractsConfig[config.geoDataContractName + 'Address']);
-    }
-    if(this.contractsConfig[config.propertyMarketContractName + 'Address']) {
-      this.propertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.propertyMarketContractName + 'Abi'], this.contractsConfig[config.propertyMarketContractName + 'Address']);
-    }
-    if(this.contractsConfig[config.spaceTokenContractName + 'Address']) {
-      this.spaceToken = new this.web3.eth.Contract(this.contractsConfig[config.spaceTokenContractName + 'Abi'], this.contractsConfig[config.spaceTokenContractName + 'Address']);
-    }
-    if(this.contractsConfig[config.newPropertyManagerName + 'Address']) {
-      this.newPropertyManager = new this.web3.eth.Contract(this.contractsConfig[config.newPropertyManagerName + 'Abi'], this.contractsConfig[config.newPropertyManagerName + 'Address']);
-    }
-    if(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']) {
-      this.privatePropertyGlobalRegistry = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Abi'], this.contractsConfig[config.privatePropertyGlobalRegistryName + 'Address']);
-    }
-    if(this.contractsConfig[config.privatePropertyMarketContractName + 'Address']) {
-      this.privatePropertyMarket = new this.web3.eth.Contract(this.contractsConfig[config.privatePropertyMarketContractName + 'Abi'], this.contractsConfig[config.privatePropertyMarketContractName + 'Address']);
-    }
+    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket'].forEach(contractName => {
+      const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
+      const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
+      if(!contractAddress) {
+        return console.log(`✖️ Contract ${contractName} not found in config`);
+      }
+      this[contractName] = new this.web3.eth.Contract(contractAbi, contractAddress);
+      console.log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
+    });
+  }
+  
+  isContractAddress(contract, address) {
+    return contract && address.toLowerCase() === contract._address.toLowerCase()
   }
   
   getPropertyRegistryContract(address) {
-    if(this.spaceToken && address.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.isContractAddress(this.spaceToken, address)) {
       return this.spaceToken;
     }
-    if(this.spaceGeoData && address.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
+    if(this.isContractAddress(this.spaceGeoData, address)) {
       return this.spaceGeoData;
     }
     
@@ -184,10 +184,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   getPropertyMarketContract(address) {
-    if(this.propertyMarket && address.toLowerCase() === this.propertyMarket._address.toLowerCase()) {
+    if(this.isContractAddress(this.propertyMarket, address)) {
       return this.propertyMarket;
     }
-    if(this.privatePropertyMarket && address.toLowerCase() === this.privatePropertyMarket._address.toLowerCase()) {
+    if(this.isContractAddress(this.privatePropertyMarket, address)) {
       return this.privatePropertyMarket;
     }
   }
@@ -198,14 +198,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenOwner(contractAddress, tokenId) {
-    if(this.spaceGeoData && contractAddress.toLowerCase() === this.spaceGeoData._address.toLowerCase()) {
+    if(this.isContractAddress(this.spaceGeoData, contractAddress)) {
       contractAddress = this.spaceToken._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.ownerOf(tokenId).call({});
   }
   
   public async getSpaceTokenArea(contractAddress, tokenId) {
-    if(this.spaceToken && contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getArea(tokenId).call({}).then(result => {
@@ -214,7 +214,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenContourData(contractAddress, tokenId) {
-    if(this.spaceToken && contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getContour(tokenId).call({}).then(result => {
@@ -233,7 +233,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getSpaceTokenData(contractAddress, tokenId) {
-    if(this.spaceToken && contractAddress.toLowerCase() === this.spaceToken._address.toLowerCase()) {
+    if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
