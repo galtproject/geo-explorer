@@ -41,7 +41,6 @@ module.exports = async (extendConfig) => {
 
   setInterval(async () => {
     const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
-    console.log('newContractsConfig.blockNumber', newContractsConfig.blockNumber, 'serviceInstance.contractsConfig.blockNumber', serviceInstance.contractsConfig.blockNumber);
     if (newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
       console.log('😱 New contracts, reset database', contractsConfigUrl);
       serviceInstance.setContractsConfig(newContractsConfig, true);
