@@ -115,11 +115,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'tokenId');
 
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
-      const tokenId = geohashObj.tokenId;
+      const {tokenId, contractAddress} = geohashObj;
 
       let contour = await this.getContourBySpaceTokenId(tokenId, geohashObj.contractAddress);
 
-      return {contour, tokenId};
+      return {contour, tokenId, contractAddress};
     });
   }
 
