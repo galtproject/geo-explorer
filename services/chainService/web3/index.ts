@@ -147,7 +147,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.createContractInstance();
 
     console.log('this.websocketProvider.connection', this.websocketProvider.connection);
-    this.websocketProvider.connection.end();
+    this.websocketProvider.connection.close();
     // this.websocketProvider.connection._client.socket[0].end();
     // if (this.callbackOnReconnect) {
     //   this.callbackOnReconnect(redeployed);
