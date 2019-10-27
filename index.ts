@@ -79,6 +79,7 @@ const config = require('./config');
     chainService.subscribeForNewEvents(chainService.spaceGeoData, ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
       await geohashService.handleChangeContourEvent(newEvent);
+      await geoDataService.handleChangeSpaceTokenDataEvent(chainService.spaceGeoData._address, newEvent);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
 
@@ -166,6 +167,7 @@ const config = require('./config');
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
         await geohashService.handleChangeContourEvent(newEvent);
+        await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
