@@ -69,6 +69,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   callbackOnReconnect: any;
 
   pprCache: any = {};
+  
+  redeployed = false;
 
   constructor(_contractsConfig, _wsServer) {
     this.wsServer = _wsServer;
@@ -134,7 +136,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         this.createContractInstance();
 
         if (this.callbackOnReconnect) {
-          this.callbackOnReconnect();
+          this.callbackOnReconnect(this.redeployed);
+          this.redeployed = false;
         }
 
         this.subscribeForReconnect();
@@ -146,8 +149,11 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.contractsConfig = contractsConfig;
     this.createContractInstance();
 
-    console.log('this.websocketProvider.connection', this.websocketProvider.connection);
-    this.websocketProvider.connection.close();
+    if(redeployed) {
+      this.redeployed = true;
+      console.log('this.websocketProvider.connection', this.websocketProvider.connection);
+      this.websocketProvider.connection.close();
+    }
     // this.websocketProvider.connection._client.socket[0].end();
     // if (this.callbackOnReconnect) {
     //   this.callbackOnReconnect(redeployed);
