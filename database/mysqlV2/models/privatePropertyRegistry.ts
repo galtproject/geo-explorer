@@ -37,5 +37,5 @@ module.exports = async function (sequelize, models) {
   //
   // await models.SpaceTokensOrders.sync({});
   
-  return PrivatePropertyRegistry;
+  return PrivatePropertyRegistry.sync({});
 };
