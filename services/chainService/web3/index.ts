@@ -151,7 +151,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     if(redeployed) {
       this.redeployed = true;
-      console.log('this.websocketProvider.connection', this.websocketProvider.connection);
+      this.pprCache = {};
       this.websocketProvider.connection.close();
     }
     // this.websocketProvider.connection._client.socket[0].end();
