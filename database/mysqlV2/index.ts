@@ -181,7 +181,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.getSaleOrder(saleOrder.orderId, saleOrder.contractAddress);
   }
   
-  saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
+  prepareSaleOrdersWhere(ordersQuery) {
     const allWheres: any = {};
 
     ['ask', 'bedroomsCount', 'bathroomsCount'].forEach(field => {
@@ -201,12 +201,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         'bedroomsCount': 'sumBedroomsCount',
         'bathroomsCount': 'sumBathroomsCount'
       };
-      
+
       field = dbFields[field] || field;
-      
+
       allWheres[field] = fieldWhereObj;
     });
-    
+
     const filtersByTypes = {};
     ['land', 'building'].forEach(tokenType => {
       ['area'].forEach(field => {
@@ -215,27 +215,27 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         const maxVal = ordersQuery[filterField + 'Max'];
         if(!minVal && !maxVal)
           return;
-        
+
         if(!filtersByTypes[field])
           filtersByTypes[field] = [];
-        
+
         const fieldWhereObj = {
           type: tokenType,
           value: {}
         };
-        
+
         if(minVal)
           fieldWhereObj.value[Op.gte] = minVal;
 
         if(maxVal)
           fieldWhereObj.value[Op.lte] = maxVal;
-        
+
         filtersByTypes[field].push(fieldWhereObj)
       });
     });
 
     const orArray = [];
-    
+
     _.forEach(filtersByTypes, (whereArr, field) => {
       whereArr.forEach(whereItem => {
 
@@ -245,13 +245,13 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         if(whereItem.type === 'land') {
           field = 'sumLandArea';
         }
-        
+
         orArray.push({
           [field]: whereItem.value
         });
       });
     });
-    
+
     if(orArray.length > 0) {
       allWheres[Op.and] = {
         [Op.or]: orArray
@@ -278,11 +278,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
       allWheres['typesSubtypesArray'] = { [Op.and]: typeQueryRoot};
     }
-    
+
     if(ordersQuery.tokensIds) {
       allWheres['tokenId'] = {[Op.in]: ordersQuery.tokensIds};
     }
-    
+
     if(ordersQuery.features && ordersQuery.features.length) {
       let featureQueryRoot = { };
 
@@ -301,6 +301,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(ordersQuery[field])
         allWheres[field] = { [Op.like]: ordersQuery[field]};
     });
+    
+    return allWheres;
+  }
+  
+  saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
+    const allWheres = this.prepareSaleOrdersWhere(ordersQuery);
 
     // console.log('allWheres', allWheres);
     
@@ -335,10 +341,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     //https://github.com/sequelize/sequelize/issues/10582
     
     return {
-      where: _.extend(
-        resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
-        // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
-      ),
+      where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
       include : [{
         model: this.models.SpaceTokenGeoData,
         // association: this.models.SpaceTokenGeoData,
@@ -679,7 +682,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   saleOffersQueryToFindAllParam(saleOffersQuery: SaleOffersQuery) {
-    const allWheres: any = {};
+    let allWheres: any = {};
 
     ['ask', 'bid'].forEach(field => {
       const minVal = parseFloat(saleOffersQuery[field + 'Min']);
@@ -707,10 +710,21 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: saleOffersQuery[field]};
     });
 
+    allWheres = _.extend(this.prepareSaleOrdersWhere(saleOffersQuery), allWheres);
+    
     return {
       where: _.extend(
         resultWhere(allWheres, ['buyer', 'seller', 'contractAddress', 'status', 'orderId', 'ask', 'bid']),
-      )
+      ),
+      include: [{
+        association: 'order',
+        where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
+        include: [{
+          model: this.models.SpaceTokenGeoData,
+          as: 'spaceTokens',
+          where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+        }]
+      }]
     }
   }
 
@@ -728,8 +742,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
     ];
     
-    if(saleOffersQuery.includeOrders) {
-      findAllParam.include = [{ association: 'order', include: [{association: 'spaceTokens'}]}];
+    if(!saleOffersQuery.includeOrders) {
+      delete findAllParam.include;
     }
 
     return this.models.SaleOffer.findAll(findAllParam);

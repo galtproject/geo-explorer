@@ -297,6 +297,9 @@ export interface SaleOffersQuery {
   seller?: string;
   status?: string;
 
+  tokensIds?: [];
+  features?: [];
+
   includeOrders?: boolean;
 }
 
