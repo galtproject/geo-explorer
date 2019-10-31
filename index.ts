@@ -261,12 +261,13 @@ const config = require('./config');
     // });
     // console.log('found offers', offers.list.map(o => [o.orderId, o.order.typesSubtypesArray, o.order.sumLandArea]));
 
-    // const orders = await geoDataService.filterOrders({
-    //   contractAddress: "0xeECba3489A459c265047552f2AE71D3BdBD295dF",
-    //   buyer: "0xf0430bbb78C3c359c22d4913484081A563B86170",
-    //   includeOrderIds: ["1"]
-    // });
-    // console.log('found orders', orders.list.map(order => order.spaceTokens[0].tokenType));
+    const orders = await geoDataService.filterOrders({
+      statusName: 'active',
+      contractAddress: "0xeECba3489A459c265047552f2AE71D3BdBD295dF",
+      buyer: "0xf0430bbb78C3c359c22d4913484081A563B86170",
+      includeOrderIds: ["1"]
+    });
+    console.log('found orders', orders.list.map(order => order.spaceTokens[0].tokenType));
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 

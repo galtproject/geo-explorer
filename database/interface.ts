@@ -166,7 +166,7 @@ export interface SaleOrdersQuery {
   sortBy?: string;
   sortDir?: string;
 
-  statusName: string;
+  statusName?: string;
   contractAddress: string;
   tokensIds?: string[];
   
