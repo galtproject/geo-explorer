@@ -39,6 +39,10 @@ module.exports = async function (sequelize, models) {
     status: {
       type: Sequelize.STRING(100)
     },
+    
+    isFirstOffer: {
+      type: Sequelize.BOOLEAN,
+    },
 
     lastOfferAskAt: {
       type: Sequelize.DATE

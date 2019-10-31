@@ -249,10 +249,11 @@ const config = require('./config');
     const offers = await geoDataService.filterSaleOffers({
       seller: "0x24c03a7A07257231A6E3c941bCec54C039112af4",
       includeOrderIds: ['1'],
-      excludeOrderIds: ['2'],
-      includeOrders: true
+      // excludeOrderIds: ['2'],
+      // includeOrders: true
+      // limit: 100
     });
-    console.log('found offers', offers.list.map(o => o.orderId));
+    console.log('found offers', offers.list.map(o => [o.orderId, o.isFirstOffer]));
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 

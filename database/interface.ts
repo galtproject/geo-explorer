@@ -272,6 +272,8 @@ export interface ISaleOffer {
   createdOfferAt;
   
   dbOrderId;
+
+  isFirstOffer?: boolean;
 }
 
 export interface SaleOffersQuery {

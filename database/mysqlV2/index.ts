@@ -667,21 +667,48 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // SaleOffers
   // =============================================================
 
+  firstSaleOfferQueue = {};
+  
   async addOrUpdateSaleOffer(saleOffer: ISaleOffer) {
     let dbObject = await this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
-
+    
+    const saleOfferParams = {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}};
     if(dbObject) {
       saleOffer.createdAtBlock = dbObject.createdAtBlock || saleOffer.createdAtBlock;
       await this.models.SaleOffer.update(saleOffer, {
-        where: {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}}
+        where: saleOfferParams
       });
     } else {
-      return this.models.SaleOffer.create(saleOffer).catch(() => {
+      await this.models.SaleOffer.create(saleOffer).catch(() => {
         return this.models.SaleOffer.update(saleOffer, {
-          where: {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}}
+          where: saleOfferParams
         });
       });
     }
+
+    if(!this.firstSaleOfferQueue[saleOffer.contractAddress]) {
+      this.firstSaleOfferQueue[saleOffer.contractAddress] = {};
+    }
+    
+    if(!this.firstSaleOfferQueue[saleOffer.contractAddress][saleOffer.orderId]) {
+      this.firstSaleOfferQueue[saleOffer.contractAddress][saleOffer.orderId] = true;
+
+      setTimeout(async () => {
+        const firstSaleOffer = await this.models.SaleOffer.findOne({
+          where: {orderId: saleOffer.orderId, contractAddress: {[Op.like]: saleOffer.contractAddress}},
+          order: [ ['createdAtBlock', 'ASC'] ]
+        });
+
+        console.log('firstSaleOffer', firstSaleOffer.id, firstSaleOffer.orderId);
+
+        await this.models.SaleOffer.update({isFirstOffer: false}, { where: {orderId: saleOffer.orderId, contractAddress: {[Op.like]: saleOffer.contractAddress}} });
+
+        await this.models.SaleOffer.update({isFirstOffer: true}, { where: {id: firstSaleOffer.id} });
+
+        this.firstSaleOfferQueue[saleOffer.contractAddress][saleOffer.orderId] = false;
+      }, 1000);
+    }
+    
     return this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
   }
 
@@ -764,7 +791,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       const orderIds = _.uniq(result.map(o => o.orderId).concat(saleOffersQuery.includeOrderIds));
       
       // console.log('orderIds', orderIds);
-      findAllParam.where = { orderId: { [ Op.in]: orderIds } };
+      findAllParam.where = { orderId: { [ Op.in]: orderIds }, isFirstOffer: true };
       if(findAllParam.contractAddress) {
         findAllParam.where.contractAddress = findAllParam.contractAddress;
       }
