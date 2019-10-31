@@ -706,7 +706,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     ['status', 'orderId'].forEach((field) => {
       if(!_.isUndefined(saleOffersQuery[field]) && !_.isNull(saleOffersQuery[field]))
-        allWheres[field] = saleOffersQuery[field];
+        allWheres[field] = {[Op.eq]: saleOffersQuery[field]};
     });
 
     ['buyer', 'seller', 'contractAddress'].forEach((field) => {
@@ -714,14 +714,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: saleOffersQuery[field]};
     });
 
-    ['includeOrderIds'].forEach((field) => {
-      if(saleOffersQuery[field])
-        allWheres['orderId'] = {[Op.in]: allWheres['orderId'] ? saleOffersQuery[field] : saleOffersQuery[field].concat([allWheres['orderId']])};
-    });
-    
     ['excludeOrderIds'].forEach((field) => {
       if(saleOffersQuery[field])
-        allWheres['orderId'] = _.extend(allWheres['orderId'] || {}, {[Op.in]: saleOffersQuery[field]});
+        allWheres['orderId'] = _.extend(allWheres['orderId'] || {}, {[Op.notIn]: saleOffersQuery[field]});
     });
 
     allWheres = _.extend(this.prepareSaleOrdersWhere(saleOffersQuery), allWheres);
@@ -760,7 +755,27 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       delete findAllParam.include;
     }
 
-    return this.models.SaleOffer.findAll(findAllParam);
+    let result = await this.models.SaleOffer.findAll(findAllParam);
+    
+    if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
+      
+      const ids = _.uniq(result.map(o => o.id).concat(saleOffersQuery.includeOrderIds));
+      
+      findAllParam.where = { id: { [ Op.in]: ids } };
+      findAllParam.include.forEach(i => {
+        i.where = null;
+      });
+
+      findAllParam.order = [
+        [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
+      ];
+
+      delete findAllParam.limit;
+      delete findAllParam.offset;
+
+      result = await this.models.SaleOffer.findAll(findAllParam);
+    }
+    return result;
   }
 
   async filterSaleOffersCount(saleOffersQuery: SaleOffersQuery) {
