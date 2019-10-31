@@ -792,8 +792,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       
       // console.log('orderIds', orderIds);
       findAllParam.where = { orderId: { [ Op.in]: orderIds }, isFirstOffer: true };
-      if(findAllParam.contractAddress) {
-        findAllParam.where.contractAddress = findAllParam.contractAddress;
+      if(saleOffersQuery.contractAddress) {
+        findAllParam.where.contractAddress = saleOffersQuery.contractAddress;
       }
       if(findAllParam.include) {
         findAllParam.include.forEach(i => {
