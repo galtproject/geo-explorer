@@ -148,9 +148,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.contractsConfig = contractsConfig;
     this.createContractInstance();
 
+    this.pprCache = {};
     if(redeployed) {
       this.redeployed = true;
-      this.pprCache = {};
       this.websocketProvider.connection.close();
     }
     // this.websocketProvider.connection._client.socket[0].end();
@@ -160,6 +160,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   private createContractInstance() {
+    this.pprCache = {};
+    
     ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
