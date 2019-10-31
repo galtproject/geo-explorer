@@ -246,18 +246,20 @@ const config = require('./config');
     // });
     // console.log('found orders', applications.list.length, applications.total);
 
-    const offers = await geoDataService.filterSaleOffers({
-      seller: "0xf0430bbb78C3c359c22d4913484081A563B86170",
-      contractAddress: "0xeECba3489A459c265047552f2AE71D3BdBD295dF",
-      // excludeOrderIds: [],
-      // includeOrderIds: ["1"],
-      includeOrders: true,
-      sortBy: "createdAtBlock"
-      // excludeOrderIds: ['2'],
-      // includeOrders: true
-      // limit: 100
-    });
-    console.log('found offers', offers.list.map(o => [o.orderId, o.seller]));
+    // const offers = await geoDataService.filterSaleOffers({
+    //   // seller: "0xf0430bbb78C3c359c22d4913484081A563B86170",
+    //   contractAddress: "0xeECba3489A459c265047552f2AE71D3BdBD295dF",
+    //   // excludeOrderIds: [],
+    //   // includeOrderIds: ["1"],
+    //   includeOrders: true,
+    //   sortBy: "createdAtBlock",
+    //   // landAreaMin: 100
+    //  
+    //   // excludeOrderIds: ['2'],
+    //   // includeOrders: true
+    //   // limit: 100
+    // });
+    // console.log('found offers', offers.list.map(o => [o.orderId, o.order.sumLandArea]));
 
     // const orders = await geoDataService.filterOrders({
     //   contractAddress: "0xeECba3489A459c265047552f2AE71D3BdBD295dF",

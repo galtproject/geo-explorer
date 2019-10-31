@@ -278,6 +278,7 @@ export interface ISaleOffer {
   dbOrderId;
 
   isFirstOffer?: boolean;
+  order?: any;
 }
 
 export interface SaleOffersQuery {
@@ -310,5 +311,14 @@ export interface SaleOffersQuery {
 
   includeOrderIds?: string[];
   excludeOrderIds?: string[];
+
+  buildingAreaMin?: number;
+  buildingAreaMax?: number;
+
+  landAreaMin?: number;
+  landAreaMax?: number;
+
+  bedroomsCountMin?: number;
+  bathroomsCountMin?: number;
 }
 

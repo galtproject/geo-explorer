@@ -202,6 +202,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       currencyName = await this.chainService.getContractSymbol(chainOrder.tokenContract);
     }
     
+    // console.log('tokens types', dbSpaceTokens.map(s => s.tokenType), dbSpaceTokens.map(s => s.area));
+    
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
       currency,
@@ -216,8 +218,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       lastBuyer: chainOrder.lastBuyer,
       sumBathroomsCount: _.sumBy(dbSpaceTokens, 'bathroomsCount'),
       sumBedroomsCount: _.sumBy(dbSpaceTokens, 'bedroomsCount'),
-      sumLandArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'land'}), 'bathroomsCount'),
-      sumBuildingArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'building'}), 'bedroomsCount'),
+      sumLandArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'land'}), 'area'),
+      sumBuildingArea: _.sumBy(_.filter(dbSpaceTokens, {tokenType: 'building'}), 'area'),
       featureArray: '|' + allFeatures.join('|') + '|',
       typesSubtypesArray: '|' + allTypesSubTypes.join('|') + '|',
       createdAtBlock: event.blockNumber,
