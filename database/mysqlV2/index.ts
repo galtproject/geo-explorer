@@ -301,7 +301,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['featureArray'] = { [Op.and]: featureQueryRoot};
     }
 
-    ['currency', 'currencyAddress', 'contractAddress'].forEach((field) => {
+    ['currency', 'currencyAddress', 'contractAddress', 'statusName'].forEach((field) => {
       if(ordersQuery[field])
         allWheres[field] = { [Op.like]: ordersQuery[field]};
     });
@@ -385,7 +385,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     
     return {
-      where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
+      where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', 'statusName', Op.and]),
       include: include
     }
   }
@@ -777,7 +777,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.eq]: saleOffersQuery[field]};
     });
 
-    ['buyer', 'seller', 'contractAddress'].forEach((field) => {
+    ['buyer', 'seller', 'contractAddress', 'statusName'].forEach((field) => {
       if(saleOffersQuery[field])
         allWheres[field] = {[Op.like]: saleOffersQuery[field]};
     });
@@ -812,7 +812,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       where: offersWhere,
       include: [{
         association: 'order',
-        where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
+        where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', 'statusName', Op.and]),
         include: [{
           model: this.models.SpaceTokenGeoData,
           as: 'spaceTokens',

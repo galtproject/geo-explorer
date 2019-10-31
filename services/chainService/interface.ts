@@ -87,6 +87,7 @@ export interface ChainServiceSaleOrder {
 
   details: ChainServiceSaleOrderDetails;
   status: number;
+  statusName: string;
 }
 
 export interface ChainServiceSaleOffer {

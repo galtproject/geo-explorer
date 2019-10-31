@@ -155,12 +155,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleSaleOrderEvent(event: IExplorerSaleOrderEvent) {
     let orderId: string = event.returnValues.orderId;
-    let status: string = event.returnValues.status;
     
-    if(parseInt(status) === 0) {
-      return;
-    }
-
     const chainOrder = await this.chainService.getSaleOrder(event.contractAddress, orderId);
     
     const dbSpaceTokens = await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
@@ -208,6 +203,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       orderId,
       currency,
       currencyName,
+      statusName: chainOrder.statusName,
       contractAddress: event.contractAddress,
       isPrivate: !this.chainService.propertyMarket || event.contractAddress.toLowerCase() !== this.chainService.propertyMarket._address.toLowerCase(),
       currencyAddress: chainOrder.tokenContract,

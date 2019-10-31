@@ -283,7 +283,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
       result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
-
+      
+      result.statusName = {
+        '0': 'inactive',
+        '1': 'active'
+      }[result.status.toString(10)];
+      
       return result;
     })
   }

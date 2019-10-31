@@ -104,6 +104,7 @@ export interface ISaleOrder {
   currency?;
   currencyAddress?;
   currencyName?;
+  statusName?;
   seller?;
   ask?;
   description?;
@@ -164,7 +165,8 @@ export interface SaleOrdersQuery {
   
   sortBy?: string;
   sortDir?: string;
-  
+
+  statusName: string;
   contractAddress: string;
   tokensIds?: string[];
   
