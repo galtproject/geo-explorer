@@ -202,7 +202,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       currencyName = await this.chainService.getContractSymbol(chainOrder.tokenContract);
     }
     
-    // console.log('tokens types', dbSpaceTokens.map(s => s.tokenType), dbSpaceTokens.map(s => s.area));
+    console.log(orderId, 'tokens types', dbSpaceTokens.map(s => [s.tokenType, s.area]));
     
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,

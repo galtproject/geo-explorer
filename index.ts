@@ -254,12 +254,12 @@ const config = require('./config');
     //   includeOrders: true,
     //   sortBy: "createdAtBlock",
     //   // landAreaMin: 100
-    //  
+    //
     //   // excludeOrderIds: ['2'],
     //   // includeOrders: true
     //   // limit: 100
     // });
-    // console.log('found offers', offers.list.map(o => [o.orderId, o.order.sumLandArea]));
+    // console.log('found offers', offers.list.map(o => [o.orderId, o.order.typesSubtypesArray, o.order.sumLandArea]));
 
     // const orders = await geoDataService.filterOrders({
     //   contractAddress: "0xeECba3489A459c265047552f2AE71D3BdBD295dF",
