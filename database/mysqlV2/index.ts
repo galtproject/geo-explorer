@@ -149,7 +149,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getSaleOrder(orderId, contractAddress) {
     const saleOrder = await this.models.SaleOrder.findOne({
-      where: {orderId, contractAddress},
+      where: {orderId, contractAddress: {[Op.like]: contractAddress}},
       include: [{
         model: this.models.SpaceTokenGeoData,
         as: 'spaceTokens',
@@ -173,12 +173,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(dbObject) {
       saleOrder.createdAtBlock = dbObject.createdAtBlock || saleOrder.createdAtBlock;
       await this.models.SaleOrder.update(saleOrder, {
-        where: {orderId: saleOrder.orderId}
+        where: {orderId: saleOrder.orderId, contractAddress: {[Op.like]: saleOrder.contractAddress}}
       });
     } else {
       return this.models.SaleOrder.create(saleOrder).catch(() => {
         return this.models.SaleOrder.update(saleOrder, {
-          where: {orderId: saleOrder.orderId}
+          where: {orderId: saleOrder.orderId, contractAddress: {[Op.like]: saleOrder.contractAddress}}
         });
       });
     }
