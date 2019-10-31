@@ -715,7 +715,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
 
     ['excludeOrderIds'].forEach((field) => {
-      if(saleOffersQuery[field])
+      if(saleOffersQuery[field] && saleOffersQuery[field].length)
         allWheres['orderId'] = _.extend(allWheres['orderId'] || {}, {[Op.notIn]: saleOffersQuery[field]});
     });
 
