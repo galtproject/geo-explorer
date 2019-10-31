@@ -410,6 +410,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       [ordersQuery.sortBy || 'createdAt', ordersQuery.sortDir || 'DESC']
     ];
 
+    // TODO: fix by issue https://github.com/sequelize/sequelize/issues/10962
     if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
       findAllParam.limit = ordersQuery.limit || 20;
       findAllParam.offset = ordersQuery.offset || 0;
