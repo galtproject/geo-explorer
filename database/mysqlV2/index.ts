@@ -714,10 +714,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: saleOffersQuery[field]};
     });
 
-    ['excludeOrderIds'].forEach((field) => {
-      if(saleOffersQuery[field] && saleOffersQuery[field].length)
-        allWheres['orderId'] = _.extend(allWheres['orderId'] || {}, {[Op.notIn]: saleOffersQuery[field]});
-    });
+    if(saleOffersQuery.excludeOrderIds && saleOffersQuery.excludeOrderIds.length) {
+      if(!allWheres['orderId']) {
+        allWheres['orderId'] = {};
+      }
+      allWheres['orderId'][Op.notIn] = saleOffersQuery.excludeOrderIds;
+    }
 
     allWheres = _.extend(this.prepareSaleOrdersWhere(saleOffersQuery), allWheres);
     
