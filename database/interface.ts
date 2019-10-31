@@ -281,7 +281,7 @@ export interface SaleOffersQuery {
   sortBy?: string;
   sortDir?: string;
 
-  contractAddress: string;
+  contractAddress?: string;
   orderId?: string;
 
   ask?: number;
@@ -302,7 +302,7 @@ export interface SaleOffersQuery {
 
   includeOrders?: boolean;
 
-  includeOrderIds?: [];
-  excludeOrderIds?: [];
+  includeOrderIds?: string[];
+  excludeOrderIds?: string[];
 }
 

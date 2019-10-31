@@ -246,6 +246,13 @@ const config = require('./config');
     // });
     // console.log('found orders', applications.list.length, applications.total);
 
+    // const offers = await geoDataService.filterSaleOffers({
+    //   seller: "0x24c03a7A07257231A6E3c941bCec54C039112af4",
+    //   includeOrderIds: ['1'],
+    //   includeOrders: true
+    // });
+    // console.log('found offers', offers.list.map(o => o.orderId));
+
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 
     //todo: handle DeleteSpaceTokenGeoData

@@ -759,12 +759,23 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
       
-      const ids = _.uniq(result.map(o => o.id).concat(saleOffersQuery.includeOrderIds));
+      const orderIds = _.uniq(result.map(o => o.orderId).concat(saleOffersQuery.includeOrderIds));
       
-      findAllParam.where = { id: { [ Op.in]: ids } };
-      findAllParam.include.forEach(i => {
-        i.where = null;
-      });
+      // console.log('orderIds', orderIds);
+      findAllParam.where = { orderId: { [ Op.in]: orderIds } };
+      if(findAllParam.contractAddress) {
+        findAllParam.where.contractAddress = findAllParam.contractAddress;
+      }
+      if(findAllParam.include) {
+        findAllParam.include.forEach(i => {
+          i.where = null;
+          if(i.include) {
+            i.include.forEach(ii => {
+              ii.where = null;
+            });
+          }
+        });
+      }
 
       findAllParam.order = [
         [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
