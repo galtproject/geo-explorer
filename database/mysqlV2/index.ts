@@ -257,9 +257,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
 
     if(orArray.length > 0) {
-      allWheres[Op.and] = {
+      allWheres[Op.and] = [{
         [Op.or]: orArray
-      };
+      }];
     }
 
     if(ordersQuery.regions && ordersQuery.regions.length) {
@@ -344,19 +344,43 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     //https://github.com/sequelize/sequelize/issues/4880
     //https://github.com/sequelize/sequelize/issues/10582
     
+    const include: any = [{
+      model: this.models.SpaceTokenGeoData,
+      // association: this.models.SpaceTokenGeoData,
+      // association: this.models.SpaceTokensOrders,
+      as: 'spaceTokens',
+      // include: 'SpaceTokenGeoData',
+      // required: false
+      // association: 'spaceTokens',
+      // required: true,
+      where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    }];
+    
+    if(ordersQuery.buyer) {
+      include.push({
+        model: this.models.SaleOffer,
+        as: 'offers',
+        foreignKey: 'dbOrderId'
+      });
+      if(!allWheres[Op.and]) {
+        allWheres[Op.and] = [];
+      }
+      const orArray: any = [{
+        '$offers.buyer$': {[Op.like]: ordersQuery.buyer}
+      }];
+      if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
+        orArray.push({
+          'orderId': {[Op.in]: ordersQuery.includeOrderIds}
+        })
+      }
+      allWheres[Op.and].push({
+        [Op.or]: orArray
+      });
+    }
+    
     return {
       where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
-      include : [{
-        model: this.models.SpaceTokenGeoData,
-        // association: this.models.SpaceTokenGeoData,
-        // association: this.models.SpaceTokensOrders,
-        as: 'spaceTokens',
-        // include: 'SpaceTokenGeoData',
-        // required: false
-        // association: 'spaceTokens',
-        // required: true,
-        where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
-      }]
+      include: include
     }
   }
 
@@ -367,8 +391,13 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
 
-    findAllParam.limit = ordersQuery.limit || 20;
-    findAllParam.offset = ordersQuery.offset || 0;
+    if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
+      delete findAllParam.limit;
+      delete findAllParam.offset;
+    } else {
+      findAllParam.limit = ordersQuery.limit || 20;
+      findAllParam.offset = ordersQuery.offset || 0;
+    }
 
     const orders = await this.models.SaleOrder.findAll(findAllParam);
     
@@ -380,9 +409,14 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.order = [
       [ordersQuery.sortBy || 'createdAt', ordersQuery.sortDir || 'DESC']
     ];
-    
-    delete findAllParam.limit;
-    delete findAllParam.offset;
+
+    if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
+      findAllParam.limit = ordersQuery.limit || 20;
+      findAllParam.offset = ordersQuery.offset || 0;
+    } else {
+      delete findAllParam.limit;
+      delete findAllParam.offset;
+    }
     
     const saleOrders = await this.models.SaleOrder.findAll(findAllParam);
 

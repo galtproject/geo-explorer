@@ -173,6 +173,9 @@ export interface SaleOrdersQuery {
   currency?: string;
   currencyAddress?: string;
   
+  buyer?: string;
+  includeOrderIds?: string[];
+  
   regions?: string[];
   types?: string[];
   subtypes?: string[];
