@@ -175,6 +175,7 @@ export interface SaleOrdersQuery {
   
   buyer?: string;
   includeOrderIds?: string[];
+  excludeOrderIds?: string[];
   
   regions?: string[];
   types?: string[];
