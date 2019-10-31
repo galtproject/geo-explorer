@@ -402,7 +402,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     
     const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
 
-    if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
+    if(ordersQuery.buyer) {
       delete findAllParam.limit;
       delete findAllParam.offset;
     } else {
@@ -422,7 +422,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     ];
 
     // TODO: fix by issue https://github.com/sequelize/sequelize/issues/10962
-    if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
+    if(ordersQuery.buyer) {
       findAllParam.limit = ordersQuery.limit || 20;
       findAllParam.offset = ordersQuery.offset || 0;
     } else {
