@@ -176,7 +176,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         where: {orderId: saleOrder.orderId}
       });
     } else {
-      return this.models.SaleOrder.create(saleOrder);
+      return this.models.SaleOrder.create(saleOrder).catch(() => {
+        return this.models.SaleOrder.update(saleOrder, {
+          where: {orderId: saleOrder.orderId}
+        });
+      });
     }
     return this.getSaleOrder(saleOrder.orderId, saleOrder.contractAddress);
   }
