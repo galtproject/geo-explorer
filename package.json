@@ -23,6 +23,7 @@
     "sequelize": "5.19.0",
     "typescript": "^3.6.3",
     "web3": "^1.0.0-beta.52",
+    "websocket": "^1.0.30",
     "yaeti": "^1.0.2"
   },
   "devDependencies": {
