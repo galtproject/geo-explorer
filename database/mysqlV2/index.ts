@@ -365,23 +365,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(!allWheres[Op.and]) {
         allWheres[Op.and] = [];
       }
-      const orArray: any = [{
+      
+      const buyerWhere: any = {
         '$offers.buyer$': {[Op.like]: ordersQuery.buyer}
-      }];
-      
-      const orderIdWhere = {};
-      let isOrderIdWhere = false;
-      if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
-        orderIdWhere[Op.in] = ordersQuery.includeOrderIds;
-        isOrderIdWhere = true;
-      }
+      };
       if(ordersQuery.excludeOrderIds && ordersQuery.excludeOrderIds.length) {
-        orderIdWhere[Op.notIn] = ordersQuery.excludeOrderIds;
-        isOrderIdWhere = true;
+        buyerWhere['orderId'] = {[Op.notIn]: ordersQuery.excludeOrderIds};
       }
       
-      if(isOrderIdWhere) {
-        orArray.push({ 'orderId': orderIdWhere });
+      const orArray: any = [buyerWhere];
+      
+      if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
+        orArray.push({ 'orderId': {[Op.in]: ordersQuery.includeOrderIds }});
       }
       
       allWheres[Op.and].push({
