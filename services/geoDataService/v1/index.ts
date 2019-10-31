@@ -363,6 +363,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       contractAddress: event.contractAddress,
       orderId: orderId,
       buyer,
+      seller: dbOrder.seller,
       ask: saleOffer.ask,
       bid: saleOffer.bid,
       lastOfferAskAt: new Date().setTime(saleOffer.lastAskAt),
