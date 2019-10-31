@@ -714,6 +714,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: saleOffersQuery[field]};
     });
 
+    ['includeOrderIds'].forEach((field) => {
+      if(saleOffersQuery[field])
+        allWheres['orderId'] = {[Op.in]: allWheres['orderId'] ? saleOffersQuery[field] : saleOffersQuery[field].concat([allWheres['orderId']])};
+    });
+    
+    ['excludeOrderIds'].forEach((field) => {
+      if(saleOffersQuery[field])
+        allWheres['orderId'] = _.extend(allWheres['orderId'] || {}, {[Op.in]: saleOffersQuery[field]});
+    });
+
     allWheres = _.extend(this.prepareSaleOrdersWhere(saleOffersQuery), allWheres);
     
     return {

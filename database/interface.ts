@@ -301,5 +301,8 @@ export interface SaleOffersQuery {
   features?: [];
 
   includeOrders?: boolean;
+
+  includeOrderIds?: [];
+  excludeOrderIds?: [];
 }
 
