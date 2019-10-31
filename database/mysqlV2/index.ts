@@ -747,13 +747,28 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       }
       allWheres['orderId'][Op.notIn] = saleOffersQuery.excludeOrderIds;
     }
+    
+    let additionalWhere = {};
+    if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
+      const orArray = [];
+      if(allWheres['buyer']) {
+        orArray.push({ 'buyer': allWheres['buyer'] });
+        delete allWheres['buyer'];
+      }
+      orArray.push({'orderId': {[Op.in]: saleOffersQuery.includeOrderIds}, isFirstOffer: true});
+      additionalWhere[Op.or] = orArray;
+    }
 
     allWheres = _.extend(this.prepareSaleOrdersWhere(saleOffersQuery), allWheres);
     
+    const offersWhere = resultWhere(allWheres, ['buyer', 'seller', 'contractAddress', 'status', 'orderId', 'ask', 'bid'])
+    
+    if(additionalWhere[Op.or]) {
+      offersWhere[Op.and] = additionalWhere;
+    }
+    
     return {
-      where: _.extend(
-        resultWhere(allWheres, ['buyer', 'seller', 'contractAddress', 'status', 'orderId', 'ask', 'bid']),
-      ),
+      where: offersWhere,
       include: [{
         association: 'order',
         where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', Op.and]),
@@ -786,35 +801,35 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     let result = await this.models.SaleOffer.findAll(findAllParam);
     
-    if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
-      
-      const orderIds = _.uniq(result.map(o => o.orderId).concat(saleOffersQuery.includeOrderIds));
-      
-      // console.log('orderIds', orderIds);
-      findAllParam.where = { orderId: { [ Op.in]: orderIds }, isFirstOffer: true };
-      if(saleOffersQuery.contractAddress) {
-        findAllParam.where.contractAddress = {[Op.like]: saleOffersQuery.contractAddress};
-      }
-      if(findAllParam.include) {
-        findAllParam.include.forEach(i => {
-          i.where = null;
-          if(i.include) {
-            i.include.forEach(ii => {
-              ii.where = null;
-            });
-          }
-        });
-      }
-
-      findAllParam.order = [
-        [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
-      ];
-
-      delete findAllParam.limit;
-      delete findAllParam.offset;
-
-      result = await this.models.SaleOffer.findAll(findAllParam);
-    }
+    // if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
+    //  
+    //   const orderIds = _.uniq(result.map(o => o.orderId).concat(saleOffersQuery.includeOrderIds));
+    //  
+    //   // console.log('orderIds', orderIds);
+    //   findAllParam.where = { orderId: { [ Op.in]: orderIds }, isFirstOffer: true };
+    //   if(saleOffersQuery.contractAddress) {
+    //     findAllParam.where.contractAddress = {[Op.like]: saleOffersQuery.contractAddress};
+    //   }
+    //   if(findAllParam.include) {
+    //     findAllParam.include.forEach(i => {
+    //       i.where = null;
+    //       if(i.include) {
+    //         i.include.forEach(ii => {
+    //           ii.where = null;
+    //         });
+    //       }
+    //     });
+    //   }
+    //
+    //   findAllParam.order = [
+    //     [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
+    //   ];
+    //
+    //   delete findAllParam.limit;
+    //   delete findAllParam.offset;
+    //
+    //   result = await this.models.SaleOffer.findAll(findAllParam);
+    // }
     return result;
   }
 
