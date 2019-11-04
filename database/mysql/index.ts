@@ -7,7 +7,13 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase, {ApplicationsQuery, IApplication} from "../interface";
+import IExplorerDatabase, {
+  ApplicationsQuery,
+  IApplication, ISaleOffer,
+  ISpaceTokenGeoData,
+  SaleOffersQuery,
+  SpaceTokensQuery
+} from "../interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
@@ -49,7 +55,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     // await this.models.SpaceToken.destroy({ where: { } });
   }
 
-  async addOrUpdateContour(contourGeohashes: string[], tokenId: number) {
+  async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string) {
     // find contour object with included geohashes
 
     let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
@@ -85,7 +91,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     })
   }
 
-  async getContourBySpaceTokenId(tokenId) {
+  async getContourBySpaceTokenId(tokenId, contractAddress: string) {
     return this.models.GeohashSpaceToken.findAll({
       where: {tokenId}, order: [['position', 'ASC']]
     }).then((geohashes) => {
@@ -93,7 +99,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string): Promise<[{ contour: string[], tokenId: number }]> {
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress: string, level?): Promise<[{ contour: string[], tokenId: number, level: null }]> {
     let contourGeohashesObjs = await this.models.GeohashParent.findAll({where: {parentGeohash}});
 
     const geohashesOfContours = contourGeohashesObjs.map(obj => obj.contourGeohash);
@@ -107,9 +113,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
       const tokenId = geohashObj.tokenId;
 
-      let contour = await this.getContourBySpaceTokenId(tokenId);
+      let contour = await this.getContourBySpaceTokenId(tokenId, contractAddress);
 
-      return {contour, tokenId};
+      return {contour, tokenId, level: null};
     });
   }
 
@@ -168,6 +174,41 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return null;
   }
 
+  async getSpaceToken(tokenId, contractAddress) {
+    console.error("Not supported");
+    return null;
+  }
+
+  filterSpaceTokens(filterQuery: SpaceTokensQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  filterSpaceTokensCount(filterQuery: SpaceTokensQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  addOrUpdateSaleOffer(saleOffer: ISaleOffer) {
+    console.error("Not supported");
+    return null;
+  }
+
+  getSaleOffer(orderId, buyer, contractAddress) {
+    console.error("Not supported");
+    return null;
+  }
+
+  filterSaleOffers(filterQuery: SaleOffersQuery) {
+    console.error("Not supported");
+    return null;
+  }
+
+  filterSaleOffersCount(filterQuery: SaleOffersQuery) {
+    console.error("Not supported");
+    return null;
+  }
+  
   async getValue(key: string) {
     const valueObj = await this.models.Value.findOne({where: {key}});
     return valueObj ? valueObj.content : null;

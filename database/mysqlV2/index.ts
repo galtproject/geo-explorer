@@ -68,7 +68,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // Geohashes
   // =============================================================
   
-  async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string) {
+  async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string) {
     // find contour object with included geohashes
 
     let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
@@ -83,12 +83,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         await this.models.GeohashSpaceToken.destroy({where: {tokenId, contractAddress, contourGeohash}});
       }
     });
+    
+    if(!level) {
+      level = '0';
+    }
 
     await pIteration.forEach(contourGeohashes, async (contourGeohash, position) => {
       // bind geohash to contour
-      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position}).catch(e => {
+      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position, level}).catch(e => {
         // it exists so update it
-        return this.models.GeohashSpaceToken.update({position}, {where: {tokenId, contourGeohash, contractAddress}});
+        return this.models.GeohashSpaceToken.update({position, level}, {where: {tokenId, contourGeohash, contractAddress}});
       });
     });
   }
@@ -105,21 +109,24 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress?): Promise<[{ contour: string[], tokenId: number }]> {
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string): Promise<[{ contour: string[], tokenId: number, level: string }]> {
     const where: any = { contourGeohash: {[Op.like]: parentGeohash + '%'} };
     if(contractAddress) {
       where.contractAddress = contractAddress;
+    }
+    if(level) {
+      where.level = level;
     }
     let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({ where });
 
     foundContourGeohashes = _.uniqBy(foundContourGeohashes, 'tokenId');
 
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
-      const {tokenId, contractAddress} = geohashObj;
+      const {tokenId, contractAddress, level} = geohashObj;
 
       let contour = await this.getContourBySpaceTokenId(tokenId, geohashObj.contractAddress);
 
-      return {contour, tokenId, contractAddress};
+      return {contour, tokenId, contractAddress, level};
     });
   }
 
@@ -176,7 +183,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         where: {orderId: saleOrder.orderId, contractAddress: {[Op.like]: saleOrder.contractAddress}}
       });
     } else {
-      return this.models.SaleOrder.create(saleOrder).catch(() => {
+      await this.models.SaleOrder.create(saleOrder).catch(() => {
         return this.models.SaleOrder.update(saleOrder, {
           where: {orderId: saleOrder.orderId, contractAddress: {[Op.like]: saleOrder.contractAddress}}
         });
@@ -655,7 +662,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['tokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
     }
 
-    ['tokenType', 'inLocker'].forEach((field) => {
+    ['tokenType', 'inLocker', 'level'].forEach((field) => {
       if(!_.isUndefined(spaceTokensQuery[field]) && !_.isNull(spaceTokensQuery[field]))
         allWheres[field] = spaceTokensQuery[field];
     });
@@ -669,7 +676,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', 'level', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     }
