@@ -38,6 +38,12 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       return {geohashContour: []};
     });
     
+    let level;
+    const spaceGeoData = await this.database.getSpaceTokenGeoData(event.contractAddress, tokenId);
+    if(spaceGeoData && spaceGeoData.level) {
+      level = spaceGeoData.level;
+    }
+    
     let spaceTokenNumberId: number;
     if (_.startsWith(tokenId, '0x')) {
       spaceTokenNumberId = parseInt(galtUtils.tokenIdHexToTokenId(tokenId));
@@ -45,24 +51,24 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       spaceTokenNumberId = parseInt(tokenId);
     }
 
-    await this.database.addOrUpdateContour(geohashContour, spaceTokenNumberId, event.contractAddress);
+    await this.database.addOrUpdateContour(geohashContour, spaceTokenNumberId, event.contractAddress, level);
   };
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress?: string) {
-    return this.database.getContoursByParentGeohash(parentGeohash, contractAddress);
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string) {
+    return this.database.getContoursByParentGeohash(parentGeohash, contractAddress, level);
   }
 
-  async getContoursByParentGeohashArray(parentGeohashArray: string[], contractAddress?: string) {
+  async getContoursByParentGeohashArray(parentGeohashArray: string[], contractAddress?: string, level?: string) {
     let resultContours = [];
     await pIteration.forEach(parentGeohashArray, async (parentGeohash) => {
-      const contoursByParent = await this.getContoursByParentGeohash(parentGeohash, contractAddress);
+      const contoursByParent = await this.getContoursByParentGeohash(parentGeohash, contractAddress, level);
       // console.log('contoursByParent', parentGeohash, contoursByParent);
       resultContours = resultContours.concat(contoursByParent);
     });
     return _.uniqBy(resultContours, 'tokenId');
   }
 
-  async getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string): Promise<[IExplorerResultContour]> {
+  async getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string, level?: string): Promise<[IExplorerResultContour]> {
     let resultContours = [];
 
     const cachedIsGeohashInsideResultContour = {};
@@ -70,7 +76,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     let parentGeohash = innerGeohash;
     while (parentGeohash.length > config.maxParentGeohashToFindInner) {
       parentGeohash = parentGeohash.slice(0, -1);
-      const contoursOfParentGeohash = await this.getContoursByParentGeohash(parentGeohash, contractAddress);
+      const contoursOfParentGeohash = await this.getContoursByParentGeohash(parentGeohash, contractAddress, level);
 
       const contoursThatContentsInnerGeohash = _.filter(contoursOfParentGeohash, (resultContour) => {
         const tokenId = resultContour.tokenId;

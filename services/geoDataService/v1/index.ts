@@ -63,6 +63,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId);
     
+    let level;
+    if(geoData.humanAddress) {
+      const split = geoData.humanAddress.split('|\n');
+      split.some(s => {
+        if(s && s.split('=')[0] === 'floor') {
+          level = s.split('=')[1];
+          return true;
+        }
+      })
+    }
+    
+    if(level) {
+      await this.database.addOrUpdateContour(geoData.geohashContour, tokenId, contractAddress, level);
+    }
+    
     const lockerOwner = await this.chainService.getLockerOwner(owner);
     if(tokenId.toString() === '126') {
       console.log('126 owner', owner);
@@ -76,6 +91,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       owner: lockerOwner ? lockerOwner : owner,
       locker: lockerOwner ? owner : null,
       inLocker: !!lockerOwner,
+      level,
       ...geoData,
       ...additionalData
     })

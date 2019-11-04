@@ -14,6 +14,9 @@ module.exports = async function (sequelize, models) {
     tokenId: {
       type: Sequelize.STRING(100)
     },
+    level: {
+      type: Sequelize.STRING(100)
+    },
     contractAddress: {
       type: Sequelize.STRING(100)
     },
