@@ -107,6 +107,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       owner: geoData.owner,
       locker: geoData.locker,
       inLocker: geoData.inLocker,
+      level: geoData.level || '0',
       area: geoData.area,
       areaSource: geoData.areaSource,
       dataLink: dataLink,

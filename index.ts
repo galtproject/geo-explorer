@@ -210,10 +210,10 @@ const config = require('./config');
     // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
     
     // const spaceTokens = await geoDataService.filterSpaceTokens({
-    //   owner: "0xf0430bbb78C3c359c22d4913484081A563B86170",
-    //   contractAddress: '0x7ef8678453B361394a4a8cD544D2E5eDAe674702'
+    //   // owner: "0xf0430bbb78C3c359c22d4913484081A563B86170",
+    //   contractAddress: '0xC8c42c67A624dcFEDEF6b8733f9F3E7a89a54890'
     // });
-    // console.log('spaceTokens.list.length', spaceTokens.list.length);
+    // console.log('spaceTokens.list', spaceTokens.list.map(s => s.level));
     //
     // const orders = await geoDataService.filterOrders({
     //   landAreaMin: 3000,
