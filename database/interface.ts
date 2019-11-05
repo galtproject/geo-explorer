@@ -62,7 +62,7 @@ export interface ISpaceTokenGeoData {
   tokenType;
   type;
   subtype;
-  level;
+  level: string[];
   contractAddress;
   fullRegion;
   regionLvl1?;

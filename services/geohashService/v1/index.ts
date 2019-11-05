@@ -54,11 +54,11 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     await this.database.addOrUpdateContour(geohashContour, spaceTokenNumberId, event.contractAddress, level);
   };
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string) {
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]) {
     return this.database.getContoursByParentGeohash(parentGeohash, contractAddress, level);
   }
 
-  async getContoursByParentGeohashArray(parentGeohashArray: string[], contractAddress?: string, level?: string) {
+  async getContoursByParentGeohashArray(parentGeohashArray: string[], contractAddress?: string, level?: string[]) {
     let resultContours = [];
     await pIteration.forEach(parentGeohashArray, async (parentGeohash) => {
       const contoursByParent = await this.getContoursByParentGeohash(parentGeohash, contractAddress, level);
@@ -68,7 +68,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     return _.uniqBy(resultContours, 'tokenId');
   }
 
-  async getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string, level?: string): Promise<[IExplorerResultContour]> {
+  async getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]> {
     let resultContours = [];
 
     const cachedIsGeohashInsideResultContour = {};
