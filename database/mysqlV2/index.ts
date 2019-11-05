@@ -109,13 +109,13 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string): Promise<[{ contour: string[], tokenId: number, level: string }]> {
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string }]> {
     const where: any = { contourGeohash: {[Op.like]: parentGeohash + '%'} };
     if(contractAddress) {
       where.contractAddress = contractAddress;
     }
-    if(level) {
-      where.level = level;
+    if(level && level.length) {
+      where.level = {[Op.in]: level};
     }
     let foundContourGeohashes = await this.models.GeohashSpaceToken.findAll({ where });
 
@@ -662,7 +662,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['tokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
     }
 
-    ['tokenType', 'inLocker', 'level'].forEach((field) => {
+    if(spaceTokensQuery.level && spaceTokensQuery.level.length) {
+      allWheres['level'] = {[Op.in]: spaceTokensQuery.level};
+    }
+
+    ['tokenType', 'inLocker'].forEach((field) => {
       if(!_.isUndefined(spaceTokensQuery[field]) && !_.isNull(spaceTokensQuery[field]))
         allWheres[field] = spaceTokensQuery[field];
     });
