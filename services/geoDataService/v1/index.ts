@@ -123,7 +123,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     
     const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
-    let {details, floorPlans, photos, ledgerIdentifier} = spaceData;
+    let {details, floorPlans, photos} = spaceData;
 
     if(!details) {
       details = spaceData.data;
@@ -157,7 +157,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
       dataJson: JSON.stringify(spaceData),
-      ledgerIdentifier: ledgerIdentifier,
+      ledgerIdentifier: details.ledgerIdentifier || geoData.ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     }, geoDataToSave);
     
