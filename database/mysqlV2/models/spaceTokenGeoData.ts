@@ -97,7 +97,10 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.STRING(100)
     },
     dataLink: {
-      type: Sequelize.STRING(100)
+      type: Sequelize.STRING
+    },
+    humanAddress: {
+      type: Sequelize.STRING
     },
     dataJson: {
       type: Sequelize.TEXT

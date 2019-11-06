@@ -111,6 +111,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       area: geoData.area,
       areaSource: geoData.areaSource,
       dataLink: dataLink,
+      humanAddress: geoData.humanAddress,
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       geohashesCount: geoData.geohashContour.length,
       heightsContourJson: JSON.stringify(geoData.heightsContour),
