@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     level: {
       type: Sequelize.STRING(100)
     },
+    levelNumber: {
+      type: Sequelize.FLOAT
+    },
     fullRegion: {
       type: Sequelize.TEXT
     },

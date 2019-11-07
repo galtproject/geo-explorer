@@ -63,6 +63,7 @@ export interface ISpaceTokenGeoData {
   type;
   subtype;
   level: string[];
+  levelNumber;
   contractAddress;
   fullRegion;
   regionLvl1?;
@@ -239,6 +240,8 @@ export interface SpaceTokensQuery {
 
   sortBy?: string;
   sortDir?: string;
+  
+  groupBy?: string;
 
   contractAddress: string;
   tokensIds?: string[];
