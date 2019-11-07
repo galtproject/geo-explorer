@@ -629,7 +629,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   spaceTokensQueryToFindAllParam(spaceTokensQuery: SpaceTokensQuery) {
     const allWheres: any = {};
 
-    ['bedroomsCount', 'bathroomsCount', 'area', 'geohashesCount'].forEach(field => {
+    ['bedroomsCount', 'bathroomsCount', 'area', 'geohashesCount', 'levelNumber'].forEach(field => {
       const minVal = parseFloat(spaceTokensQuery[field + 'Min']);
       const maxVal = parseFloat(spaceTokensQuery[field + 'Max']);
       if(!minVal && !maxVal)
@@ -680,7 +680,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', 'level', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', 'level', 'levelNumber', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     }
@@ -699,6 +699,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.order = [
       [spaceTokensQuery.sortBy || 'createdAt', spaceTokensQuery.sortDir || 'DESC']
     ];
+    
+    if(spaceTokensQuery.groupBy) {
+      findAllParam.group = [spaceTokensQuery.groupBy];
+      findAllParam.attributes = [spaceTokensQuery.groupBy];
+      return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
+    }
     
     return this.models.SpaceTokenGeoData.findAll(findAllParam);
   }

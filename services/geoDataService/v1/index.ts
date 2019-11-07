@@ -79,10 +79,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     
     const lockerOwner = await this.chainService.getLockerOwner(owner);
-    if(tokenId.toString() === '126') {
-      console.log('126 owner', owner);
-      console.log('126 lockerOwner', lockerOwner);
-    }
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
@@ -108,6 +104,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       locker: geoData.locker,
       inLocker: geoData.inLocker,
       level: geoData.level || '0',
+      levelNumber: parseFloat((geoData.level || '0').toString().match(/\d+/g)[0]),
       area: geoData.area,
       areaSource: geoData.areaSource,
       dataLink: dataLink,
