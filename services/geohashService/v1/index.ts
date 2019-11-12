@@ -65,7 +65,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       // console.log('contoursByParent', parentGeohash, contoursByParent);
       resultContours = resultContours.concat(contoursByParent);
     });
-    return _.uniqBy(resultContours, 'tokenId');
+    return _.uniqBy(resultContours, (c) => c.contractAddress + c.tokenId);
   }
 
   async getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]> {
@@ -80,17 +80,22 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
 
       const contoursThatContentsInnerGeohash = _.filter(contoursOfParentGeohash, (resultContour) => {
         const tokenId = resultContour.tokenId;
+        const contractAddress = resultContour.contractAddress;
         const contour = resultContour.contour;
-
-        if (cachedIsGeohashInsideResultContour[tokenId] === undefined) {
-          cachedIsGeohashInsideResultContour[tokenId] = galtUtils.geohash.contour.isGeohashInsideContour(innerGeohash, contour);
+        
+        if(!cachedIsGeohashInsideResultContour[contractAddress]) {
+          cachedIsGeohashInsideResultContour[contractAddress] = {};
         }
-        return cachedIsGeohashInsideResultContour[tokenId];
+
+        if (cachedIsGeohashInsideResultContour[contractAddress][tokenId] === undefined) {
+          cachedIsGeohashInsideResultContour[contractAddress][tokenId] = galtUtils.geohash.contour.isGeohashInsideContour(innerGeohash, contour);
+        }
+        return cachedIsGeohashInsideResultContour[contractAddress][tokenId];
       });
 
       resultContours = resultContours.concat(contoursThatContentsInnerGeohash);
     }
 
-    return _.uniqBy(resultContours, 'tokenId');
+    return _.uniqBy(resultContours, (c) => c.contractAddress + c.tokenId);
   };
 }

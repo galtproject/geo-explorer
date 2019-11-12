@@ -243,7 +243,7 @@ export interface SpaceTokensQuery {
   
   groupBy?: string;
 
-  contractAddress: string;
+  contractAddress?: string;
   tokensIds?: string[];
   tokenType?: string;
   inLocker?: boolean;

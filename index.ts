@@ -274,11 +274,17 @@ const config = require('./config');
     // });
     // console.log('found offers', offers.list.map(o => [o.orderId, o.order.typesSubtypesArray, o.order.sumLandArea]));
 
+    // const spaceTokens = await geohashService.getContoursByParentGeohashArray(["dr4w","dr4y","dr5n","dr5q","dr5w","dr5y","dr4x","dr4z","dr5p","dr5r","dr5x","dr5z","dr68","dr6b","dr70","dr72","dr78","dr7b"]);
+    // console.log('found spaceTokens', spaceTokens.map(st => st.contour[0]));
+
+    //curl 'https://geo-explorer.testnet.galtproject.io:33440/v1/contours/by/parent-geohash' -H 'Connection: keep-alive' -H 'Accept: application/json, text/plain, */*' -H 'Origin: http://localhost:8081' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36' -H 'Content-Type: application/json;charset=UTF-8' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: cors' -H 'Referer: http://localhost:8081/' -H 'Accept-Encoding: gzip, deflate, br' -H 'Accept-Language: en,en-US;q=0.9,ru;q=0.8' --data-binary '{"geohashes":["dr4w","dr4y","dr5n","dr5q","dr5w","dr5y","dr4x","dr4z","dr5p","dr5r","dr5x","dr5z","dr68","dr6b","dr70","dr72","dr78","dr7b"]}' --compressed
+    // curl 'https://geo-explorer.testnet.galtproject.io:33440/v1/space-tokens/search' -H 'Connection: keep-alive' -H 'Accept: application/json, text/plain, */*' -H 'Origin: http://localhost:8081' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36' -H 'Content-Type: application/json;charset=UTF-8' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: cors' -H 'Referer: http://localhost:8081/' -H 'Accept-Encoding: gzip, deflate, br' -H 'Accept-Language: en,en-US;q=0.9,ru;q=0.8' --data-binary '{"surroundingsGeohashBox":,"limit":10,"sortBy":"levelNumber","sortDir":"ASC","groupBy":"levelNumber"}' --compressed
     // const spaceTokens = await geoDataService.filterSpaceTokens({
-    //   contractAddress: "0x2c174a91573C4Fbcf3A0091c95B212C260bB1ef4",
-    //   sortBy: 'levelNumber',
-    //   sortDir: 'desc',
-    //   groupBy: 'levelNumber'
+    // surroundingsGeohashBox: ["dr5ren","dr5req","dr5rew","dr5rey","dr5rsn","dr5rsq","dr5rsw","dr5rsy","dr5rtn","dr5rtq","dr5rtw","dr5rty","dr5rwn","dr5rwq","dr5rep","dr5rer","dr5rex","dr5rez","dr5rsp","dr5rsr","dr5rsx","dr5rsz","dr5rtp","dr5rtr","dr5rtx","dr5rtz","dr5rwp","dr5rwr","dr5rg0","dr5rg2","dr5rg8","dr5rgb","dr5ru0","dr5ru2","dr5ru8","dr5rub","dr5rv0","dr5rv2","dr5rv8","dr5rvb","dr5ry0","dr5ry2","dr5rg1","dr5rg3","dr5rg9","dr5rgc","dr5ru1","dr5ru3","dr5ru9","dr5ruc","dr5rv1","dr5rv3","dr5rv9","dr5rvc","dr5ry1","dr5ry3","dr5rg4","dr5rg6","dr5rgd","dr5rgf","dr5ru4","dr5ru6","dr5rud","dr5ruf","dr5rv4","dr5rv6","dr5rvd","dr5rvf","dr5ry4","dr5ry6","dr5rg5","dr5rg7","dr5rge","dr5rgg","dr5ru5","dr5ru7","dr5rue","dr5rug","dr5rv5","dr5rv7","dr5rve","dr5rvg","dr5ry5","dr5ry7","dr5rgh","dr5rgk","dr5rgs","dr5rgu","dr5ruh","dr5ruk","dr5rus","dr5ruu","dr5rvh","dr5rvk","dr5rvs","dr5rvu","dr5ryh","dr5ryk","dr5rgj","dr5rgm","dr5rgt","dr5rgv","dr5ruj","dr5rum","dr5rut","dr5ruv","dr5rvj","dr5rvm","dr5rvt","dr5rvv","dr5ryj","dr5rym"]
+    // //   contractAddress: "0x2c174a91573C4Fbcf3A0091c95B212C260bB1ef4",
+    // //   sortBy: 'levelNumber',
+    // //   sortDir: 'desc',
+    // //   groupBy: 'levelNumber'
     // });
     // console.log('found spaceTokens', spaceTokens.list.map(st => st));
 
