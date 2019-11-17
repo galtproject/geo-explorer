@@ -20,6 +20,9 @@ module.exports = async function (sequelize, models) {
     contractAddress: {
       type: Sequelize.STRING(100)
     },
+    tokenType: {
+      type: Sequelize.STRING(100)
+    },
     contourGeohash: {
       type: Sequelize.STRING(12)
     },

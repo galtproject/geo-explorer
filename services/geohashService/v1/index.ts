@@ -39,9 +39,13 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     });
     
     let level;
+    let tokenType;
     const spaceGeoData = await this.database.getSpaceTokenGeoData(event.contractAddress, tokenId);
     if(spaceGeoData && spaceGeoData.level) {
       level = spaceGeoData.level;
+    }
+    if(spaceGeoData && spaceGeoData.tokenType) {
+      tokenType = spaceGeoData.tokenType;
     }
     
     let spaceTokenNumberId: number;
@@ -51,7 +55,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       spaceTokenNumberId = parseInt(tokenId);
     }
 
-    await this.database.addOrUpdateContour(geohashContour, spaceTokenNumberId, event.contractAddress, level);
+    await this.database.addOrUpdateContour(geohashContour, spaceTokenNumberId, event.contractAddress, level, tokenType);
   };
 
   async getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]) {
