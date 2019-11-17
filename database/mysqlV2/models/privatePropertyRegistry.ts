@@ -21,6 +21,12 @@ module.exports = async function (sequelize, models) {
     symbol: {
       type: Sequelize.STRING(100)
     },
+    owner: {
+      type: Sequelize.STRING(100)
+    },
+    totalSupply: {
+      type: Sequelize.INTEGER
+    },
     createdAtBlock: {
       type: Sequelize.INTEGER
     },

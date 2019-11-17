@@ -364,7 +364,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleNewPrivatePropertyRegistryEvent(event) {
-    await this.database.addOrPrivatePropertyRegistry({address: event.returnValues.token});
+    const address = event.returnValues.token;
+    return this.updatePrivatePropertyRegistry(address);
+  }
+  
+  async updatePrivatePropertyRegistry(address) {
+    const contract = await this.chainService.getPropertyRegistryContract(address);
+
+    const name = await contract.methods.name().call({});
+    const symbol = await contract.methods.symbol().call({});
+    const owner = await contract.methods.owner().call({});
+    const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
+
+    await this.database.addOrPrivatePropertyRegistry({ address, owner, totalSupply, name, symbol });
   }
 
   async getPrivatePropertyRegistry(address) {
