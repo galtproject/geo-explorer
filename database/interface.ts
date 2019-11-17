@@ -346,6 +346,8 @@ export interface IPrivatePropertyRegistry {
   address;
   name?;
   symbol?;
+  owner?;
+  totalSupply?;
 
   createdAtBlock?;
   updatedAtBlock?;

@@ -49,6 +49,8 @@ export default interface IExplorerGeoDataService {
 
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 
+  updatePrivatePropertyRegistry(address): Promise<void>;
+
   filterPrivatePropertyRegistries(pprQuery: FilterPrivatePropertyRegistryGeoQuery): Promise<IPrivatePropertyRegistryListResponse>;
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
