@@ -20,7 +20,13 @@ module.exports = async function (sequelize, models) {
     },
     symbol: {
       type: Sequelize.STRING(100)
-    }
+    },
+    createdAtBlock: {
+      type: Sequelize.INTEGER
+    },
+    updatedAtBlock: {
+      type: Sequelize.INTEGER
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
@@ -28,6 +34,16 @@ module.exports = async function (sequelize, models) {
       // {fields: ['owner']}
     ]
   });
+
+
+  models.SpaceTokensPrivateRegistries = sequelize.define('spaceTokensPrivateRegistries', {} as any, {} as any);
+
+  PrivatePropertyRegistry.belongsToMany(models.SpaceTokenGeoData, {as: 'spaceTokens', through: models.SpaceTokensPrivateRegistries});
+  models.SpaceTokenGeoData.belongsToMany(PrivatePropertyRegistry, {as: 'privateRegistries', through: models.SpaceTokensPrivateRegistries});
+
+  await PrivatePropertyRegistry.sync({});
+
+  await models.SpaceTokensPrivateRegistries.sync({});
   
   //
   // PrivatePropertyRegistry.belongsTo(models.SpaceTokenGeoData, {as: 'tokenGeoData', foreignKey: 'tokenGeoDataId'});
@@ -37,5 +53,5 @@ module.exports = async function (sequelize, models) {
   //
   // await models.SpaceTokensOrders.sync({});
   
-  return PrivatePropertyRegistry.sync({});
+  return PrivatePropertyRegistry;
 };

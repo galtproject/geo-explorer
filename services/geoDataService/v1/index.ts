@@ -7,10 +7,15 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerDatabase, {ISaleOffer, SaleOffersQuery, SaleOrdersQuery} from "../../../database/interface";
+import IExplorerDatabase, {
+  ISaleOffer,
+  PrivatePropertyRegistryQuery,
+  SaleOffersQuery,
+  SaleOrdersQuery
+} from "../../../database/interface";
 import {
   default as IExplorerGeoDataService,
-  FilterApplicationsGeoQuery,
+  FilterApplicationsGeoQuery, FilterPrivatePropertyRegistryGeoQuery,
   FilterSaleOrdersGeoQuery,
   FilterSpaceTokensGeoQuery
 } from "../interface";
@@ -74,8 +79,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       })
     }
     
-    if(level) {
-      await this.database.addOrUpdateContour(geoData.geohashContour, tokenId, contractAddress, level);
+    if(level || geoData.spaceTokenType) {
+      await this.database.addOrUpdateContour(geoData.geohashContour, tokenId, contractAddress, level, geoData.spaceTokenType);
     }
     
     const lockerOwner = await this.chainService.getLockerOwner(owner);
@@ -359,9 +364,22 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleNewPrivatePropertyRegistryEvent(event) {
-
+    await this.database.addOrPrivatePropertyRegistry({address: event.returnValues.token});
   }
 
+  async getPrivatePropertyRegistry(address) {
+    return this.database.getPrivatePropertyRegistry(address);
+  }
+
+  async filterPrivatePropertyRegistries(filterQuery: FilterPrivatePropertyRegistryGeoQuery) {
+    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+      filterQuery.addresses = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
+    }
+    return {
+      list: await this.database.filterPrivatePropertyRegistry(filterQuery),
+      total: await this.database.filterPrivatePropertyRegistryCount(filterQuery)
+    };
+  }
   async handleSaleOfferEvent(event) {
     let { orderId, buyer } = event.returnValues;
     if(!orderId) {

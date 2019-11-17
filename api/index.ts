@@ -71,10 +71,6 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.getOrderById(req.params.id, req.params.contractAddress));
   });
 
-  service.post('/v1/orders/get/:contractAddress/:id', async (req, res) => {
-    await respondByScheme(res, await geoDataService.getOrderById(req.params.id, req.params.contractAddress));
-  });
-
   service.post('/v1/offers/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterSaleOffers(req.body));
   });
@@ -89,6 +85,14 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
 
   service.post('/v1/applications/get-by-id/:contract/:id', async (req, res) => {
     await respondByScheme(res, await geoDataService.getApplicationById(req.params.id, req.params.contract));
+  });
+
+  service.post('/v1/ppr/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterPrivatePropertyRegistries(req.body));
+  });
+
+  service.post('/v1/ppr/get/:address', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getPrivatePropertyRegistry(req.params.address));
   });
 
   async function respondByScheme(res, data) {

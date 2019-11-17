@@ -7,14 +7,16 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
+import {IExplorerResultContour} from "../services/interfaces";
+
 export default interface IExplorerDatabase {
   flushDatabase(): Promise<void>;
 
-  addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string): Promise<void>;
+  addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string, tokenType?: string): Promise<void>;
 
   getContourBySpaceTokenId(tokenId, contractAddress?: string, level?: string): Promise<string[]>;
 
-  getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string }]>;
+  getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
 
   getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
   
@@ -49,6 +51,14 @@ export default interface IExplorerDatabase {
   filterSaleOffers(filterQuery: SaleOffersQuery): Promise<ISaleOffer[]>;
 
   filterSaleOffersCount(filterQuery: SaleOffersQuery): Promise<number>;
+  
+  addOrPrivatePropertyRegistry(registry: IPrivatePropertyRegistry): Promise<IPrivatePropertyRegistry>;
+
+  getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
+
+  filterPrivatePropertyRegistry(filterQuery: PrivatePropertyRegistryQuery): Promise<IPrivatePropertyRegistry[]>;
+
+  filterPrivatePropertyRegistryCount(filterQuery: PrivatePropertyRegistryQuery): Promise<number>;
   
   getValue(key: string): Promise<string>;
 
@@ -330,3 +340,25 @@ export interface SaleOffersQuery {
   bathroomsCountMin?: number;
 }
 
+export interface IPrivatePropertyRegistry {
+  id?;
+
+  address;
+  name?;
+  symbol?;
+
+  createdAtBlock?;
+  updatedAtBlock?;
+}
+
+export interface PrivatePropertyRegistryQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  address?: string;
+  addresses?: string[];
+  tokensIds?: string[];
+}

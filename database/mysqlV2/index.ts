@@ -12,7 +12,12 @@ import IExplorerDatabase, {
   ISaleOrder,
   SaleOrdersQuery,
   IApplication,
-  ApplicationsQuery, SpaceTokensQuery, SaleOffersQuery, ISaleOffer
+  ApplicationsQuery,
+  SpaceTokensQuery,
+  SaleOffersQuery,
+  ISaleOffer,
+  IPrivatePropertyRegistry,
+  PrivatePropertyRegistryQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -68,7 +73,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // Geohashes
   // =============================================================
   
-  async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string) {
+  async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string, tokenType?: string) {
     // find contour object with included geohashes
 
     let dbContourGeohashes = await this.models.GeohashSpaceToken.findAll({
@@ -90,9 +95,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     await pIteration.forEach(contourGeohashes, async (contourGeohash, position) => {
       // bind geohash to contour
-      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position, level}).catch(e => {
+      await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position, level, tokenType}).catch(e => {
         // it exists so update it
-        return this.models.GeohashSpaceToken.update({position, level}, {where: {tokenId, contourGeohash, contractAddress}});
+        return this.models.GeohashSpaceToken.update({position, level, tokenType}, {where: {tokenId, contourGeohash, contractAddress}});
       });
     });
   }
@@ -109,7 +114,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string, contractAddress: string }]> {
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string, tokenType: string, contractAddress: string }]> {
     const where: any = { contourGeohash: {[Op.like]: parentGeohash + '%'} };
     if(contractAddress) {
       where.contractAddress = contractAddress;
@@ -122,11 +127,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     foundContourGeohashes = _.uniqBy(foundContourGeohashes, (c) => c.contractAddress + c.tokenId);
 
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
-      const {tokenId, contractAddress, level} = geohashObj;
+      const {tokenId, contractAddress, level, tokenType} = geohashObj;
 
       let contour = await this.getContourBySpaceTokenId(tokenId, contractAddress);
 
-      return {contour, tokenId, contractAddress, level};
+      return {contour, tokenId, contractAddress, level, tokenType};
     });
   }
 
@@ -153,6 +158,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     return this.getSpaceTokenGeoData(geoData.tokenId, geoData.contractAddress);
   }
+
+  // =============================================================
+  // Sale Orders
+  // =============================================================
 
   async getSaleOrder(orderId, contractAddress) {
     const saleOrder = await this.models.SaleOrder.findOne({
@@ -902,6 +911,113 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       where: { orderId, buyer: {[Op.like]: buyer}, contractAddress: {[Op.like]: contractAddress} },
       include: [{ association: 'order', include: [{association: 'spaceTokens'}]}]
     });
+  }
+
+
+  // =============================================================
+  // Sale Orders
+  // =============================================================
+
+  async getPrivatePropertyRegistry(address) {
+    return this.models.PrivatePropertyRegistry.findOne({
+      where: {address: {[Op.like]: address}},
+      // include: [{
+      //   model: this.models.SpaceTokenGeoData,
+      //   as: 'spaceTokens',
+      // }]
+    });
+  }
+
+  async addOrPrivatePropertyRegistry(registry: IPrivatePropertyRegistry) {
+    let dbObject = await this.getPrivatePropertyRegistry(registry.address);
+
+    registry.address = registry.address.toLowerCase();
+    
+    if(dbObject) {
+      registry.createdAtBlock = dbObject.createdAtBlock || registry.createdAtBlock;
+      await this.models.PrivatePropertyRegistry.update(registry, {
+        where: {address: {[Op.like]: registry.address}}
+      });
+    } else {
+      await this.models.PrivatePropertyRegistry.create(registry).catch(() => {
+        return this.models.PrivatePropertyRegistry.update(registry, {
+          where: {address: {[Op.like]: registry.address}}
+        });
+      });
+    }
+    return this.getPrivatePropertyRegistry(registry.address);
+  }
+
+  preparePrivatePropertyRegistryWhere(pprQuery) {
+    const allWheres: any = {};
+
+    if(pprQuery.tokensIds) {
+      allWheres['tokenId'] = {[Op.in]: pprQuery.tokensIds};
+    }
+    if(pprQuery.addresses) {
+      allWheres['address'] = {[Op.in]: pprQuery.addresses.map(a => a.toLowerCase())};
+    }
+
+    return allWheres;
+  }
+
+  privatePropertyRegistryQueryToFindAllParam(pprQuery: PrivatePropertyRegistryQuery) {
+    const allWheres = this.preparePrivatePropertyRegistryWhere(pprQuery);
+
+    const include: any = [{
+      model: this.models.SpaceTokenGeoData,
+      // association: this.models.SpaceTokenGeoData,
+      // association: this.models.SpaceTokensOrders,
+      as: 'spaceTokens',
+      // include: 'SpaceTokenGeoData',
+      // required: false
+      // association: 'spaceTokens',
+      // required: true,
+      // where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    }];
+
+    return {
+      where: resultWhere(allWheres, ['address', 'tokenId']),
+      include: include
+    }
+  }
+
+  async filterPrivatePropertyRegistry(pprQuery: PrivatePropertyRegistryQuery) {
+    if(pprQuery.limit > 1000) {
+      pprQuery.limit = 1000;
+    }
+    
+    console.log('pprQuery', pprQuery);
+
+    const findAllParam: any = this.privatePropertyRegistryQueryToFindAllParam(pprQuery);
+
+    findAllParam.limit = pprQuery.limit || 20;
+    findAllParam.offset = pprQuery.offset || 0;
+
+    const registries = await this.models.PrivatePropertyRegistry.findAll(findAllParam);
+    console.log('registries', registries.length);
+
+    findAllParam.where = { id: { [ Op.in]: registries.map(o => o.id) } };
+    findAllParam.include.forEach(i => {
+      i.where = null;
+    });
+
+    findAllParam.order = [
+      [pprQuery.sortBy || 'createdAt', pprQuery.sortDir || 'DESC']
+    ];
+
+    delete findAllParam.limit;
+    delete findAllParam.offset;
+
+    return this.models.PrivatePropertyRegistry.findAll(findAllParam);
+  }
+
+  async filterPrivatePropertyRegistryCount(pprQuery: PrivatePropertyRegistryQuery) {
+    const findAllParam: any = this.privatePropertyRegistryQueryToFindAllParam(pprQuery);
+
+    findAllParam.distinct = true;
+
+    return this.models.PrivatePropertyRegistry.count(findAllParam);
   }
   
   // =============================================================

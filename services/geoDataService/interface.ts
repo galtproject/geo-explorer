@@ -19,7 +19,7 @@ import {
   ApplicationsQuery,
   IApplication,
   SpaceTokensQuery,
-  ISpaceTokenGeoData, ISaleOffer, SaleOffersQuery
+  ISpaceTokenGeoData, ISaleOffer, SaleOffersQuery, PrivatePropertyRegistryQuery, IPrivatePropertyRegistry
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -48,6 +48,10 @@ export default interface IExplorerGeoDataService {
   getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
+
+  filterPrivatePropertyRegistries(pprQuery: FilterPrivatePropertyRegistryGeoQuery): Promise<IPrivatePropertyRegistryListResponse>;
+
+  getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -70,6 +74,15 @@ export interface IApplicationsListResponse {
 
 export interface FilterSpaceTokensGeoQuery extends SpaceTokensQuery {
   surroundingsGeohashBox?: string[];
+}
+
+export interface FilterPrivatePropertyRegistryGeoQuery extends PrivatePropertyRegistryQuery {
+  surroundingsGeohashBox?: string[];
+}
+
+export interface IPrivatePropertyRegistryListResponse {
+  list: IPrivatePropertyRegistry[];
+  total: number;
 }
 
 export interface ISpaceTokensListResponse {

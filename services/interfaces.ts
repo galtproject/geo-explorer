@@ -15,6 +15,8 @@ export interface IExplorerChainContourEvent {
 export interface IExplorerResultContour {
   contour: string[];
   tokenId: number;
+  contractAddress: string;
+  tokenType: string;
 }
 
 export interface IExplorerGeoDataEvent {
