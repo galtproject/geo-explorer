@@ -60,6 +60,28 @@ export default interface IExplorerDatabase {
 
   filterPrivatePropertyRegistryCount(filterQuery: PrivatePropertyRegistryQuery): Promise<number>;
   
+  addOrUpdateCommunity(community: ICommunity): Promise<ICommunity>;
+
+  getCommunity(address): Promise<ICommunity>;
+
+  addOrUpdateCommunityMember(community: ICommunity, member: ICommunityMember): Promise<ICommunityMember>;
+
+  getCommunityMember(communityId, memberAddress): Promise<ICommunityMember>;
+
+  addOrUpdateCommunityVoting(community: ICommunity, voting: ICommunityVoting): Promise<ICommunityVoting>;
+
+  getCommunityVoting(communityId, marker): Promise<ICommunityVoting>;
+
+  addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal): Promise<ICommunityProposal>;
+
+  getCommunityProposal(votingId, proposalId): Promise<ICommunityProposal>;
+
+  getCommunityTokensCount(community: ICommunity): Promise<number>;
+
+  filterCommunity(filterQuery: CommunityQuery): Promise<ICommunity[]>;
+
+  filterCommunityCount(filterQuery: CommunityQuery): Promise<number>;
+  
   getValue(key: string): Promise<string>;
 
   setValue(key: string, content: string): Promise<void>;
@@ -354,6 +376,81 @@ export interface IPrivatePropertyRegistry {
 }
 
 export interface PrivatePropertyRegistryQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  address?: string;
+  addresses?: string[];
+  tokensIds?: string[];
+}
+
+export interface ICommunity {
+  id?;
+
+  address;
+  raAddress?;
+  name?;
+  description?;
+  activeFundRulesCount?;
+  tokensCount?;
+  isPrivate?;
+  isDecentralized?;
+
+  createdAtBlock?;
+  updatedAtBlock?;
+  
+  addSpaceTokens?(tokensObjects);
+  removeSpaceTokens?(tokensObjects);
+  setSpaceTokens?(tokensObjects);
+}
+
+export interface ICommunityMember {
+  id?;
+  communityId?;
+
+  address;
+  currentReputation?;
+  basicReputation?;
+  tokensCount?;
+  fullNameHash?;
+  
+  destroy?();
+}
+
+export interface ICommunityVoting {
+  id?;
+  communityId?;
+
+  marker;
+  threshold?;
+  activeProposalsCount?;
+  proposalManager?;
+  destination?;
+
+  destroy?();
+}
+
+export interface ICommunityProposal {
+  id?;
+  communityId;
+  votingId;
+
+  marker;
+  proposalId;
+  status?;
+  description?;
+  acceptedShare?;
+  declinedShare?;
+  acceptedCount?;
+  declinedCount?;
+
+  destroy?();
+}
+
+export interface CommunityQuery {
   limit?: number;
   offset?: number;
 

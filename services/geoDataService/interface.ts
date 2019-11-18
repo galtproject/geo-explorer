@@ -8,8 +8,10 @@
  */
 
 import {
+  IExplorerCommunityMintEvent,
+  IExplorerCommunityBurnEvent,
   IExplorerGeoDataEvent,
-  IExplorerNewApplicationEvent,
+  IExplorerNewApplicationEvent, IExplorerNewCommunityEvent,
   IExplorerNewPrivatePropertyRegistryEvent, IExplorerSaleOfferEvent,
   IExplorerSaleOrderEvent
 } from "../interfaces";
@@ -19,7 +21,12 @@ import {
   ApplicationsQuery,
   IApplication,
   SpaceTokensQuery,
-  ISpaceTokenGeoData, ISaleOffer, SaleOffersQuery, PrivatePropertyRegistryQuery, IPrivatePropertyRegistry
+  ISpaceTokenGeoData,
+  ISaleOffer,
+  SaleOffersQuery,
+  PrivatePropertyRegistryQuery,
+  IPrivatePropertyRegistry,
+  CommunityQuery, ICommunity
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -54,6 +61,27 @@ export default interface IExplorerGeoDataService {
   filterPrivatePropertyRegistries(pprQuery: FilterPrivatePropertyRegistryGeoQuery): Promise<IPrivatePropertyRegistryListResponse>;
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
+
+  handleNewCommunityEvent(event: IExplorerNewCommunityEvent, isDecentralized): Promise<void>;
+
+  handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isDecentralized): Promise<void>;
+
+  handleCommunityBurnEvent(communityAddress, event: IExplorerCommunityBurnEvent, isDecentralized): Promise<void>;
+
+  handleCommunityAddVotingEvent(communityAddress, event);
+  
+  handleCommunityRemoveVotingEvent(communityAddress, event);
+
+  handleCommunityAddProposalEvent(communityAddress, event);
+
+  handleCommunityRemoveProposalEvent(communityAddress, event);
+
+  updateCommunity(address, isDecentralized): Promise<void>;
+
+  filterCommunities(communityQuery: FilterCommunityGeoQuery): Promise<ICommunityListResponse>;
+
+  getCommunity(address): Promise<ICommunity>;
+
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -95,4 +123,13 @@ export interface ISpaceTokensListResponse {
 export interface ISaleOffersListResponse {
   list: ISaleOffer[];
   total: number;
+}
+
+export interface ICommunityListResponse {
+  list: ICommunity[];
+  total: number;
+}
+
+export interface FilterCommunityGeoQuery extends CommunityQuery {
+  surroundingsGeohashBox?: string[];
 }

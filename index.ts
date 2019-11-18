@@ -13,6 +13,7 @@ import IExplorerChainService, {ChainServiceEvents} from "./services/chainService
 import IExplorerGeoDataService from "./services/geoDataService/interface";
 
 const pIteration = require("p-iteration");
+const _ = require("lodash");
 const config = require('./config');
 
 (async () => {
@@ -215,6 +216,111 @@ const config = require('./config');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
     });
+
+
+    const subscribedToCommunity = {
+      // communityAddress => bool
+    };
+
+    await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
+      await pIteration.forEach(events, async (e) => {
+        await subscribeToPrivatePropertyRegistry(e.returnValues.token);
+        return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.communityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
+      const fundId = newEvent.returnValues.fundId;
+      const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+      subscribeToCommunity(fundDeployment.fundStorage, true);
+      await geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
+
+    async function subscribeToCommunity (address, isDecentralized) {
+      if(subscribedToCommunity[address]) {
+        return;
+      }
+      console.log('📢 Subscribed to Community:', address);
+
+      subscribedToCommunity[address] = true;
+      const contract = await chainService.getCommunityContract(address, isDecentralized);
+      const communityRaAddress = await await chainService.callContractMethod(contract, 'getRA', []);
+
+      const contractRa = await chainService.getCommunityRaContract(communityRaAddress, isDecentralized);
+
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityMint, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityMintEvent(address, e, isDecentralized);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityBurn, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityBurnEvent(address, e, isDecentralized);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityMint, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityMint event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityMintEvent(address, newEvent, isDecentralized);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityBurn, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityBurn event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityBurnEvent(address, newEvent, isDecentralized);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      let proposalManagersAddresses = [];
+      
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityAddMarker, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          proposalManagersAddresses.push(e.returnValues.proposalManager.toLowerCase());
+          await geoDataService.handleCommunityAddVotingEvent(address, e);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityRemoveMarker, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityRemoveVotingEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityAddMarker, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityAddMarker event, blockNumber:', currentBlockNumber);
+        proposalManagersAddresses.push(newEvent.returnValues.proposalManager.toLowerCase());
+        await geoDataService.handleCommunityAddVotingEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityRemoveMarker, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityRemoveMarker event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityRemoveVotingEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      proposalManagersAddresses = _.uniq(proposalManagersAddresses);
+      proposalManagersAddresses.forEach(pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
+    }
+    
+    async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
+      const contractPm = await chainService.getCommunityProposalManagerContract(proposalManagerAddress);
+
+      await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityNewProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityAddProposalEvent(communityAddress, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityNewProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityNewProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityAddProposalEvent(communityAddress, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+    }
 
     // console.log('events finish');
     // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);

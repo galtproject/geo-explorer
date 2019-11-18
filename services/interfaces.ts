@@ -47,3 +47,21 @@ export interface IExplorerNewPrivatePropertyRegistryEvent {
   contractAddress;
   blockNumber;
 }
+
+export interface IExplorerNewCommunityEvent {
+  returnValues: { fundId: string };
+  contractAddress;
+  blockNumber;
+}
+
+export interface IExplorerCommunityMintEvent {
+  returnValues: { lockerAddress: string, registry?: string, tokenId: number };
+  contractAddress;
+  blockNumber;
+}
+
+export interface IExplorerCommunityBurnEvent {
+  returnValues: { lockerAddress: string, registry?: string, tokenId: number };
+  contractAddress;
+  blockNumber;
+}

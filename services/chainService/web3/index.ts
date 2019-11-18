@@ -63,11 +63,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
   
+  decentralizedCommunityRegistry: any;
+  pprCommunityRegistry: any;
+  communityFactory: any;
+  
   contractsConfig: any;
 
   callbackOnReconnect: any;
 
   pprCache: any = {};
+  communityCache: any = {};
   
   redeployed = false;
 
@@ -82,6 +87,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
+
+  // =============================================================
+  // Contract Events
+  // =============================================================
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     if(!contract) {
@@ -115,10 +124,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       }
       callback(error, e);
     });
-  }
-
-  async getCurrentBlock() {
-    return this.web3.eth.getBlockNumber();
   }
 
   onReconnect(callback) {
@@ -161,21 +166,30 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   private createContractInstance() {
     this.pprCache = {};
+    this.communityCache = {};
     
+    const aliases = {
+      'fundsRegistry': 'decentralizedCommunityRegistry',
+      'pprFundsRegistry': 'pprCommunityRegistry', 
+      'fundFactory': 'communityFactory'
+    };
     ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
       if(!contractAddress) {
         return console.log(`✖️ Contract ${contractName} not found in config`);
       }
+      if(aliases[contractName]) {
+        contractName = aliases[contractName];
+      }
       this[contractName] = new this.web3.eth.Contract(contractAbi, contractAddress);
       console.log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
     });
   }
-  
-  isContractAddress(contract, address) {
-    return contract && address.toLowerCase() === contract._address.toLowerCase()
-  }
+
+  // =============================================================
+  // Space Tokens
+  // =============================================================
   
   getPropertyRegistryContract(address) {
     if(this.isContractAddress(this.spaceToken, address)) {
@@ -192,15 +206,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     const privatePropertyContract = new this.web3.eth.Contract(this.contractsConfig['privatePropertyTokenAbi'], address);
     this.pprCache[address] = privatePropertyContract;
     return privatePropertyContract;
-  }
-
-  getPropertyMarketContract(address) {
-    if(this.isContractAddress(this.propertyMarket, address)) {
-      return this.propertyMarket;
-    }
-    if(this.isContractAddress(this.privatePropertyMarket, address)) {
-      return this.privatePropertyMarket;
-    }
   }
 
   public async getLockerOwner(address) {
@@ -277,6 +282,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  // =============================================================
+  // Sale Orders
+  // =============================================================
+
+  getPropertyMarketContract(address) {
+    if(this.isContractAddress(this.propertyMarket, address)) {
+      return this.propertyMarket;
+    }
+    if(this.isContractAddress(this.privatePropertyMarket, address)) {
+      return this.privatePropertyMarket;
+    }
+  }
+  
   getSaleOrder(contractAddress, orderId) {
     const propertyMarketContract = this.getPropertyMarketContract(contractAddress);
     return propertyMarketContract.methods.saleOrders(orderId).call({}).then(async result => {
@@ -303,6 +321,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  // =============================================================
+  // Applications
+  // =============================================================
+  
   getNewPropertyApplication(applicationId) {
     return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
       result.id = applicationId.toString(10);
@@ -367,6 +389,58 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  // =============================================================
+  // Community
+  // =============================================================
+
+  getCommunityContract(address, isDecentralized) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityContract = new this.web3.eth.Contract(isDecentralized ? this.contractsConfig['fundStorageAbi'] : this.contractsConfig['pprFundStorageAbi'], address);
+    this.communityCache[address] = communityContract;
+    return communityContract;
+  }
+  
+  getCommunityRaContract(address, isDecentralized) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityRaContract = new this.web3.eth.Contract(isDecentralized ? this.contractsConfig['fundRAAbi'] : this.contractsConfig['pprFundRAAbi'], address);
+    this.communityCache[address] = communityRaContract;
+    return communityRaContract;
+  }
+
+  getCommunityProposalManagerContract(address) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityProposalManagerContract = new this.web3.eth.Contract(this.contractsConfig['fundProposalManager'], address);
+    this.communityCache[address] = communityProposalManagerContract;
+    return communityProposalManagerContract;
+  }
+
+  // =============================================================
+  // Common
+  // =============================================================
+
+  public async callContractMethod(contract, method, args, type) {
+    let value = await contract.methods[method].apply(contract, args).call({});
+    if(type === 'wei') {
+      value = this.weiToEther(value);
+    }
+    if(type === 'number') {
+      value = parseFloat(value.toString(10));
+    }
+    if(type === 'bytes32') {
+      value = _.trimEnd(value.toString(10), '0');
+    }
+    return value;
+  }
+  
   public async getContractSymbol(address) {
     const contract = new this.web3.eth.Contract([{"constant":true,"inputs":[],"name":"_symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xb09f1266"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}], address);
     // console.log(this.contractsConfig['spaceLockerAbi']);
@@ -374,5 +448,17 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       .catch(() => 
         contract.methods._symbol().call({}).catch(() => null)
       );
+  }
+
+  isContractAddress(contract, address) {
+    return contract && address.toLowerCase() === contract._address.toLowerCase()
+  }
+  
+  weiToEther(value) {
+    return this.web3.utils.fromWei(value, 'ether');
+  }
+  
+  async getCurrentBlock() {
+    return this.web3.eth.getBlockNumber();
   }
 }

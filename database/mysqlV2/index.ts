@@ -17,7 +17,7 @@ import IExplorerDatabase, {
   SaleOffersQuery,
   ISaleOffer,
   IPrivatePropertyRegistry,
-  PrivatePropertyRegistryQuery
+  PrivatePropertyRegistryQuery, ICommunity, CommunityQuery, ICommunityMember, ICommunityVoting, ICommunityProposal
 } from "../interface";
 
 const _ = require("lodash");
@@ -912,10 +912,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       include: [{ association: 'order', include: [{association: 'spaceTokens'}]}]
     });
   }
-
-
+  
   // =============================================================
-  // Sale Orders
+  // Private Property Registries
   // =============================================================
 
   async getPrivatePropertyRegistry(address) {
@@ -1018,6 +1017,195 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.distinct = true;
 
     return this.models.PrivatePropertyRegistry.count(findAllParam);
+  }
+
+  // =============================================================
+  // Communities
+  // =============================================================
+
+  async getCommunity(address) {
+    return this.models.Community.findOne({
+      where: {address: {[Op.like]: address}},
+      // include: [{
+      //   model: this.models.SpaceTokenGeoData,
+      //   as: 'spaceTokens',
+      // }]
+    });
+  }
+  
+  async getCommunityTokensCount(community) {
+    return this.models.SpaceTokensCommunities.count({
+      where: {communityId: community.id},
+    });
+  }
+
+  async addOrUpdateCommunity(community: ICommunity) {
+    let dbObject = await this.getCommunity(community.address);
+
+    community.address = community.address.toLowerCase();
+
+    if(dbObject) {
+      community.createdAtBlock = dbObject.createdAtBlock || community.createdAtBlock;
+      await this.models.Community.update(community, {
+        where: {address: {[Op.like]: community.address}}
+      });
+    } else {
+      await this.models.Community.create(community).catch(() => {
+        return this.models.Community.update(community, {
+          where: {address: {[Op.like]: community.address}}
+        });
+      });
+    }
+    return this.getCommunity(community.address);
+  }
+
+  async getCommunityMember(communityId, address) {
+    return this.models.CommunityMember.findOne({
+      where: {communityId, address: {[Op.like]: address}}
+    });
+  }
+  
+  async addOrUpdateCommunityMember(community: ICommunity, member: ICommunityMember) {
+    let dbObject = await this.getCommunityMember(community.id, member.address);
+
+    member.communityId = community.id;
+    member.address = member.address.toLowerCase();
+
+    if(dbObject) {
+      await this.models.CommunityMember.update(member, {
+        where: {address: {[Op.like]: member.address}, communityId: community.id}
+      });
+    } else {
+      await this.models.CommunityMember.create(member).catch(() => {
+        return this.models.CommunityMember.update(member, {
+          where: {address: {[Op.like]: member.address}, communityId: community.id}
+        });
+      });
+    }
+    return this.getCommunityMember(community.id, member.address);
+  }
+
+  async getCommunityVoting(communityId, marker) {
+    return this.models.CommunityVoting.findOne({
+      where: {communityId, marker: {[Op.like]: marker}}
+    });
+  }
+
+  async addOrUpdateCommunityVoting(community: ICommunity, voting: ICommunityVoting) {
+    let dbObject = await this.getCommunityVoting(community.id, voting.marker);
+
+    voting.communityId = community.id;
+    voting.marker = voting.marker.toLowerCase();
+
+    if(dbObject) {
+      await this.models.CommunityVoting.update(voting, {
+        where: {marker: {[Op.like]: voting.marker}, communityId: community.id}
+      });
+    } else {
+      await this.models.CommunityVoting.create(voting).catch(() => {
+        return this.models.CommunityVoting.update(voting, {
+          where: {marker: {[Op.like]: voting.marker}, communityId: community.id}
+        });
+      });
+    }
+    return this.getCommunityVoting(community.id, voting.marker);
+  }
+
+  async getCommunityProposal(votingId, proposalId) {
+    return this.models.CommunityProposal.findOne({
+      where: {votingId, proposalId}
+    });
+  }
+
+  async addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal) {
+    let dbObject = await this.getCommunityProposal(voting.id, proposal.proposalId);
+
+    proposal.votingId = voting.id;
+
+    if(dbObject) {
+      await this.models.CommunityProposal.update(voting, {
+        where: {proposalId: proposal.proposalId, votingId: voting.id}
+      });
+    } else {
+      await this.models.CommunityProposal.create(voting).catch(() => {
+        return this.models.CommunityProposal.update(voting, {
+          where: {proposalId: proposal.proposalId, votingId: voting.id}
+        });
+      });
+    }
+    return this.getCommunityProposal(voting.id, proposal.proposalId);
+  }
+
+  prepareCommunityWhere(communityQuery) {
+    const allWheres: any = {};
+
+    if(communityQuery.tokensIds) {
+      allWheres['tokenId'] = {[Op.in]: communityQuery.tokensIds};
+    }
+    if(communityQuery.addresses) {
+      allWheres['address'] = {[Op.in]: communityQuery.addresses.map(a => a.toLowerCase())};
+    }
+
+    return allWheres;
+  }
+
+  communityQueryToFindAllParam(communityQuery: CommunityQuery) {
+    const allWheres = this.prepareCommunityWhere(communityQuery);
+
+    const include: any = [{
+      model: this.models.SpaceTokenGeoData,
+      // association: this.models.SpaceTokenGeoData,
+      // association: this.models.SpaceTokensOrders,
+      as: 'spaceTokens',
+      // include: 'SpaceTokenGeoData',
+      // required: false
+      // association: 'spaceTokens',
+      // required: true,
+      // where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
+    }];
+
+    return {
+      where: resultWhere(allWheres, ['address', 'tokenId']),
+      include: include
+    }
+  }
+
+  async filterCommunity(communityQuery: CommunityQuery) {
+    if(communityQuery.limit > 1000) {
+      communityQuery.limit = 1000;
+    }
+
+    console.log('communityQuery', communityQuery);
+
+    const findAllParam: any = this.communityQueryToFindAllParam(communityQuery);
+
+    findAllParam.limit = communityQuery.limit || 20;
+    findAllParam.offset = communityQuery.offset || 0;
+
+    const communities = await this.models.Community.findAll(findAllParam);
+    console.log('communities', communities.length);
+
+    findAllParam.where = { id: { [ Op.in]: communities.map(o => o.id) } };
+    findAllParam.include.forEach(i => {
+      i.where = null;
+    });
+
+    findAllParam.order = [
+      [communityQuery.sortBy || 'createdAt', communityQuery.sortDir || 'DESC']
+    ];
+
+    delete findAllParam.limit;
+    delete findAllParam.offset;
+
+    return this.models.Community.findAll(findAllParam);
+  }
+
+  async filterCommunityCount(communityQuery: CommunityQuery) {
+    const findAllParam: any = this.communityQueryToFindAllParam(communityQuery);
+
+    findAllParam.distinct = true;
+
+    return this.models.Community.count(findAllParam);
   }
   
   // =============================================================

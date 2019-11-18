@@ -22,6 +22,11 @@ export default interface IExplorerChainService {
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
 
+  communityFactory: any;
+  
+  decentralizedCommunityRegistry: any;
+  pprCommunityRegistry: any;
+
   callbackOnReconnect: any;
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
@@ -35,6 +40,8 @@ export default interface IExplorerChainService {
   getLockerOwner(address): Promise<string>;
 
   getContractSymbol(address): Promise<string>;
+  
+  callContractMethod(contract, method, args, type?): Promise<any>;
   
   getSpaceTokenOwner(contractAddress, tokenId): Promise<string>;
 
@@ -55,6 +62,12 @@ export default interface IExplorerChainService {
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
   
   getPropertyRegistryContract(address): Promise<any>;
+
+  getCommunityContract(address, isDecentralized): Promise<any>;
+
+  getCommunityRaContract(address, isDecentralized): Promise<any>;
+
+  getCommunityProposalManagerContract(address): Promise<any>;
 }
 
 export enum ChainServiceEvents {
@@ -70,7 +83,14 @@ export enum ChainServiceEvents {
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
   
   NewPrivatePropertyRegistry = 'Add',
-  SetPrivatePropertyDetails = 'SetDetails'
+  SetPrivatePropertyDetails = 'SetDetails',
+  NewCommunity = 'CreateFundFifthStep',
+  CommunityMint = 'LockerMint',
+  CommunityBurn = 'LockerBurn',
+  CommunityAddMarker = 'AddProposalMarker',
+  CommunityRemoveMarker = 'RemoveProposalMarker',
+  CommunityNewProposal = 'NewProposal',
+  
 }
 
 export interface ChainServiceSaleOrder {
