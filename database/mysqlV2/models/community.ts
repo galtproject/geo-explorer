@@ -18,6 +18,9 @@ module.exports = async function (sequelize, models) {
     raAddress: {
       type: Sequelize.STRING(100)
     },
+    pmAddress: {
+      type: Sequelize.STRING(100)
+    },
     name: {
       type: Sequelize.STRING(100)
     },
@@ -59,7 +62,7 @@ module.exports = async function (sequelize, models) {
   await Community.sync({});
 
   await models.SpaceTokensCommunities.sync({});
-  
+
   //
   // Community.belongsTo(models.SpaceTokenGeoData, {as: 'tokenGeoData', foreignKey: 'tokenGeoDataId'});
   // models.SpaceTokenGeoData.hasMany(Community, {as: 'orders', foreignKey: 'tokenGeoDataId'});
@@ -67,6 +70,6 @@ module.exports = async function (sequelize, models) {
   // await Community.sync({});
   //
   // await models.SpaceTokensOrders.sync({});
-  
+
   return Community;
 };

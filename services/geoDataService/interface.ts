@@ -26,14 +26,20 @@ import {
   SaleOffersQuery,
   PrivatePropertyRegistryQuery,
   IPrivatePropertyRegistry,
-  CommunityQuery, ICommunity
+  CommunityQuery,
+  ICommunity,
+  ICommunityVoting,
+  CommunityVotingQuery,
+  CommunityProposalQuery,
+  ICommunityProposal,
+  ICommunityMember, CommunityMemberQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
   handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
-  
+
   handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
-  
+
   handleSaleOfferEvent(event: IExplorerSaleOfferEvent): Promise<void>;
 
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
@@ -62,19 +68,19 @@ export default interface IExplorerGeoDataService {
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
 
-  handleNewCommunityEvent(event: IExplorerNewCommunityEvent, isDecentralized): Promise<void>;
+  handleNewCommunityEvent(address: string, isDecentralized): Promise<void>;
 
   handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isDecentralized): Promise<void>;
 
   handleCommunityBurnEvent(communityAddress, event: IExplorerCommunityBurnEvent, isDecentralized): Promise<void>;
 
   handleCommunityAddVotingEvent(communityAddress, event);
-  
+
   handleCommunityRemoveVotingEvent(communityAddress, event);
 
   handleCommunityAddProposalEvent(communityAddress, event);
 
-  handleCommunityRemoveProposalEvent(communityAddress, event);
+  handleCommunityUpdateProposalEvent(communityAddress, event);
 
   updateCommunity(address, isDecentralized): Promise<void>;
 
@@ -82,6 +88,11 @@ export default interface IExplorerGeoDataService {
 
   getCommunity(address): Promise<ICommunity>;
 
+  filterCommunityVotings(communityQuery: CommunityVotingQuery): Promise<ICommunityVotingListResponse>;
+
+  filterCommunityProposals(communityQuery: CommunityProposalQuery): Promise<ICommunityProposalListResponse>;
+
+  filterCommunityMembers(communityQuery: CommunityMemberQuery): Promise<ICommunityMemberListResponse>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -127,6 +138,20 @@ export interface ISaleOffersListResponse {
 
 export interface ICommunityListResponse {
   list: ICommunity[];
+  total: number;
+}
+
+export interface ICommunityVotingListResponse {
+  list: ICommunityVoting[];
+  total: number;
+}
+
+export interface ICommunityProposalListResponse {
+  list: ICommunityProposal[];
+  total: number;
+}
+export interface ICommunityMemberListResponse {
+  list: ICommunityMember[];
   total: number;
 }
 

@@ -15,6 +15,9 @@ module.exports = async function (sequelize, models) {
     address: {
       type: Sequelize.STRING(100)
     },
+    communityAddress: {
+      type: Sequelize.STRING(100)
+    },
     currentReputation: {
       type: Sequelize.FLOAT
     },
@@ -37,6 +40,6 @@ module.exports = async function (sequelize, models) {
 
   CommunityMember.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
   models.Community.hasMany(CommunityMember, {as: 'members', foreignKey: 'communityId'});
-  
+
   return CommunityMember.sync({});
 };

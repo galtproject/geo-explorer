@@ -12,6 +12,9 @@ module.exports = async function (sequelize, models) {
 
   const CommunityVotingProposal = sequelize.define('communityVotingProposal', {
     // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types
+    communityAddress: {
+      type: Sequelize.STRING(100)
+    },
     marker: {
       type: Sequelize.STRING(100)
     },
@@ -44,11 +47,11 @@ module.exports = async function (sequelize, models) {
     ]
   });
 
-  CommunityVotingProposal.belongsTo(models.Voting, {as: 'voting', foreignKey: 'votingId', onDelete: 'CASCADE'});
-  models.Voting.hasMany(CommunityVotingProposal, {as: 'proposals', foreignKey: 'votingId'});
+  CommunityVotingProposal.belongsTo(models.CommunityVoting, {as: 'voting', foreignKey: 'votingId', onDelete: 'CASCADE'});
+  models.CommunityVoting.hasMany(CommunityVotingProposal, {as: 'proposals', foreignKey: 'votingId'});
 
   CommunityVotingProposal.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
   models.Community.hasMany(CommunityVotingProposal, {as: 'proposals', foreignKey: 'communityId'});
-  
+
   return CommunityVotingProposal.sync({});
 };

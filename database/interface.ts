@@ -19,15 +19,15 @@ export default interface IExplorerDatabase {
   getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
 
   getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
-  
+
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
 
   getSaleOrder(orderId, contractAddress): Promise<ISaleOrder>;
-  
+
   addOrUpdateSaleOrder(saleOrder: ISaleOrder): Promise<ISaleOrder>;
 
   filterSaleOrders(filterQuery: SaleOrdersQuery): Promise<ISaleOrder[]>;
-  
+
   filterSaleOrdersCount(filterQuery: SaleOrdersQuery): Promise<number>;
 
   getApplication(applicationId, contractAddress): Promise<IApplication>;
@@ -37,7 +37,7 @@ export default interface IExplorerDatabase {
   filterApplications(filterQuery: ApplicationsQuery): Promise<IApplication[]>;
 
   filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
-  
+
   getSpaceToken(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
@@ -45,13 +45,17 @@ export default interface IExplorerDatabase {
   filterSpaceTokensCount(filterQuery: SpaceTokensQuery): Promise<number>;
 
   addOrUpdateSaleOffer(saleOffer: ISaleOffer): Promise<ISaleOffer>;
-  
+
   getSaleOffer(orderId, buyer, contractAddress): Promise<ISaleOffer>;
 
   filterSaleOffers(filterQuery: SaleOffersQuery): Promise<ISaleOffer[]>;
 
   filterSaleOffersCount(filterQuery: SaleOffersQuery): Promise<number>;
-  
+
+  // =============================================================
+  // Private Property Registries
+  // =============================================================
+
   addOrPrivatePropertyRegistry(registry: IPrivatePropertyRegistry): Promise<IPrivatePropertyRegistry>;
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
@@ -59,29 +63,61 @@ export default interface IExplorerDatabase {
   filterPrivatePropertyRegistry(filterQuery: PrivatePropertyRegistryQuery): Promise<IPrivatePropertyRegistry[]>;
 
   filterPrivatePropertyRegistryCount(filterQuery: PrivatePropertyRegistryQuery): Promise<number>;
-  
+
+  // =============================================================
+  // Communities
+  // =============================================================
+
   addOrUpdateCommunity(community: ICommunity): Promise<ICommunity>;
 
   getCommunity(address): Promise<ICommunity>;
+
+  filterCommunity(filterQuery: CommunityQuery): Promise<ICommunity[]>;
+
+  filterCommunityCount(filterQuery: CommunityQuery): Promise<number>;
+
+  getCommunityTokensCount(community: ICommunity): Promise<number>;
+
+  // =============================================================
+  // Community Members
+  // =============================================================
 
   addOrUpdateCommunityMember(community: ICommunity, member: ICommunityMember): Promise<ICommunityMember>;
 
   getCommunityMember(communityId, memberAddress): Promise<ICommunityMember>;
 
+  filterCommunityMember(filterQuery: CommunityMemberQuery): Promise<ICommunityMember[]>;
+
+  filterCommunityMemberCount(filterQuery: CommunityMemberQuery): Promise<number>;
+
+  // =============================================================
+  // Community Votings
+  // =============================================================
+
   addOrUpdateCommunityVoting(community: ICommunity, voting: ICommunityVoting): Promise<ICommunityVoting>;
 
   getCommunityVoting(communityId, marker): Promise<ICommunityVoting>;
+
+  filterCommunityVoting(filterQuery: CommunityVotingQuery): Promise<ICommunityVoting[]>;
+
+  filterCommunityVotingCount(filterQuery: CommunityVotingQuery): Promise<number>;
+
+  // =============================================================
+  // Community Proposals
+  // =============================================================
 
   addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal): Promise<ICommunityProposal>;
 
   getCommunityProposal(votingId, proposalId): Promise<ICommunityProposal>;
 
-  getCommunityTokensCount(community: ICommunity): Promise<number>;
+  filterCommunityProposal(filterQuery: CommunityProposalQuery): Promise<ICommunityProposal[]>;
 
-  filterCommunity(filterQuery: CommunityQuery): Promise<ICommunity[]>;
+  filterCommunityProposalCount(filterQuery: CommunityProposalQuery): Promise<number>;
 
-  filterCommunityCount(filterQuery: CommunityQuery): Promise<number>;
-  
+  // =============================================================
+  // Values
+  // =============================================================
+
   getValue(key: string): Promise<string>;
 
   setValue(key: string, content: string): Promise<void>;
@@ -133,7 +169,7 @@ export interface ISpaceTokenGeoData {
 
 export interface ISaleOrder {
   id?;
-  
+
   orderId;
   currency?;
   currencyAddress?;
@@ -196,27 +232,27 @@ export interface IApplication {
 export interface SaleOrdersQuery {
   limit?: number;
   offset?: number;
-  
+
   sortBy?: string;
   sortDir?: string;
 
   statusName?: string;
   contractAddress: string;
   tokensIds?: string[];
-  
+
   features?: string[];
-  
+
   currency?: string;
   currencyAddress?: string;
-  
+
   buyer?: string;
   includeOrderIds?: string[];
   excludeOrderIds?: string[];
-  
+
   regions?: string[];
   types?: string[];
   subtypes?: string[];
-  
+
   askMin?: number;
   askMax?: number;
 
@@ -272,7 +308,7 @@ export interface SpaceTokensQuery {
 
   sortBy?: string;
   sortDir?: string;
-  
+
   groupBy?: string;
 
   contractAddress?: string;
@@ -303,18 +339,18 @@ export interface ISaleOffer {
 
   ask?: number;
   bid?: number;
-  
+
   buyer?: string;
   seller?: string;
   status?: string;
-  
+
   createdAtBlock?;
   updatedAtBlock?;
 
   lastOfferAskAt;
   lastOfferBidAt;
   createdOfferAt;
-  
+
   dbOrderId;
 
   isFirstOffer?: boolean;
@@ -392,6 +428,7 @@ export interface ICommunity {
 
   address;
   raAddress?;
+  pmAddress?;
   name?;
   description?;
   activeFundRulesCount?;
@@ -401,7 +438,7 @@ export interface ICommunity {
 
   createdAtBlock?;
   updatedAtBlock?;
-  
+
   addSpaceTokens?(tokensObjects);
   removeSpaceTokens?(tokensObjects);
   setSpaceTokens?(tokensObjects);
@@ -416,7 +453,7 @@ export interface ICommunityMember {
   basicReputation?;
   tokensCount?;
   fullNameHash?;
-  
+
   destroy?();
 }
 
@@ -424,6 +461,7 @@ export interface ICommunityVoting {
   id?;
   communityId?;
 
+  communityAddress;
   marker;
   threshold?;
   activeProposalsCount?;
@@ -435,9 +473,10 @@ export interface ICommunityVoting {
 
 export interface ICommunityProposal {
   id?;
+  votingId?;
   communityId;
-  votingId;
 
+  communityAddress;
   marker;
   proposalId;
   status?;
@@ -460,4 +499,34 @@ export interface CommunityQuery {
   address?: string;
   addresses?: string[];
   tokensIds?: string[];
+}
+
+export interface CommunityMemberQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  communityAddress?: number;
+}
+
+export interface CommunityVotingQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  communityAddress?: number;
+}
+
+export interface CommunityProposalQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  marker?: number;
 }

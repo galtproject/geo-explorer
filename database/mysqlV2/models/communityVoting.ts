@@ -15,6 +15,9 @@ module.exports = async function (sequelize, models) {
     marker: {
       type: Sequelize.STRING(100)
     },
+    communityAddress: {
+      type: Sequelize.STRING(100)
+    },
     proposalManager: {
       type: Sequelize.STRING(100)
     },
@@ -37,6 +40,6 @@ module.exports = async function (sequelize, models) {
 
   CommunityVoting.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
   models.Community.hasMany(CommunityVoting, {as: 'votings', foreignKey: 'communityId'});
-  
+
   return CommunityVoting.sync({});
 };
