@@ -435,7 +435,7 @@ export interface ICommunity {
   id?;
 
   address;
-  raAddress?;
+  storageAddress?;
   pmAddress?;
   multiSigAddress?;
   name?;

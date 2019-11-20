@@ -15,7 +15,7 @@ module.exports = async function (sequelize, models) {
     address: {
       type: Sequelize.STRING(100)
     },
-    raAddress: {
+    storageAddress: {
       type: Sequelize.STRING(100)
     },
     pmAddress: {

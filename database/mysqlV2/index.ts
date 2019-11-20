@@ -1145,7 +1145,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     //   findAllParam.attributes = [communityTokensQuery.groupBy];
     // }
 
-    console.log('findAllParam',findAllParam);
+    // console.log('findAllParam',findAllParam);
     return community.countSpaceTokens(findAllParam);
   }
 
