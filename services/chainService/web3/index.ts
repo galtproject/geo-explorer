@@ -66,6 +66,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
   communityFactory: any;
+  communityMockFactory: any;
 
   contractsConfig: any;
 
@@ -173,7 +174,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       // 'pprFundsRegistry': 'pprCommunityRegistry',
       'fundFactory': 'communityFactory'
     };
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory'].forEach(contractName => {
+    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
       if(!contractAddress) {

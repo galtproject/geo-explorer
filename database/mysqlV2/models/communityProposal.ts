@@ -15,6 +15,12 @@ module.exports = async function (sequelize, models) {
     communityAddress: {
       type: Sequelize.STRING(100)
     },
+    creatorAddress: {
+      type: Sequelize.STRING(100)
+    },
+    pmAddress: {
+      type: Sequelize.STRING(100)
+    },
     marker: {
       type: Sequelize.STRING(100)
     },
@@ -42,7 +48,7 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      // {fields: ['marker', 'communityId'], unique: true},
+      {fields: ['pmAddress', 'proposalId'], unique: true},
       // {fields: ['owner']}
     ]
   });

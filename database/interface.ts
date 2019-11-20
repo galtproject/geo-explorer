@@ -76,7 +76,13 @@ export default interface IExplorerDatabase {
 
   filterCommunityCount(filterQuery: CommunityQuery): Promise<number>;
 
+  filterCommunityTokens(filterQuery: CommunityQuery): Promise<ISpaceTokenGeoData[]>;
+
+  filterCommunityTokensCount(filterQuery: CommunityQuery): Promise<number>;
+
   getCommunityTokensCount(community: ICommunity): Promise<number>;
+
+  getCommunityMemberTokens(community: ICommunity, memberAddress): Promise<ISpaceTokenGeoData[]>;
 
   // =============================================================
   // Community Members
@@ -109,6 +115,8 @@ export default interface IExplorerDatabase {
   addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal): Promise<ICommunityProposal>;
 
   getCommunityProposal(votingId, proposalId): Promise<ICommunityProposal>;
+
+  getCommunityProposalByVotingAddress(votingAddress, proposalId): Promise<ICommunityProposal>;
 
   filterCommunityProposal(filterQuery: CommunityProposalQuery): Promise<ICommunityProposal[]>;
 
@@ -476,6 +484,8 @@ export interface ICommunityProposal {
   votingId?;
   communityId;
 
+  creatorAddress;
+  pmAddress;
   communityAddress;
   marker;
   proposalId;
@@ -511,6 +521,10 @@ export interface CommunityMemberQuery {
   communityAddress?: number;
 }
 
+export interface CommunityTokensQuery extends SpaceTokensQuery {
+  communityAddress: string;
+}
+
 export interface CommunityVotingQuery {
   limit?: number;
   offset?: number;
@@ -529,4 +543,7 @@ export interface CommunityProposalQuery {
   sortDir?: string;
 
   marker?: number;
+  creatorAddress?: string;
+  pmAddress?: string;
+  communityAddress?: string;
 }

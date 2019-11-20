@@ -23,6 +23,7 @@ export default interface IExplorerChainService {
   privatePropertyMarket: any;
 
   communityFactory: any;
+  communityMockFactory: any;
 
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
@@ -85,8 +86,8 @@ export enum ChainServiceEvents {
   NewPrivatePropertyRegistry = 'Add',
   SetPrivatePropertyDetails = 'SetDetails',
   NewCommunity = 'CreateFundFifthStep',
-  CommunityMint = 'LockerMint',
-  CommunityBurn = 'LockerBurn',
+  CommunityMint = 'TokenMint',
+  CommunityBurn = 'TokenBurn',
   CommunityAddMarker = 'AddProposalMarker',
   CommunityRemoveMarker = 'RemoveProposalMarker',
   CommunityNewProposal = 'NewProposal',

@@ -32,7 +32,7 @@ import {
   CommunityVotingQuery,
   CommunityProposalQuery,
   ICommunityProposal,
-  ICommunityMember, CommunityMemberQuery
+  ICommunityMember, CommunityMemberQuery, CommunityTokensQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -87,6 +87,8 @@ export default interface IExplorerGeoDataService {
   filterCommunities(communityQuery: FilterCommunityGeoQuery): Promise<ICommunityListResponse>;
 
   getCommunity(address): Promise<ICommunity>;
+
+  filterCommunityTokens(communityQuery: CommunityTokensQuery): Promise<ICommunityTokensListResponse>;
 
   filterCommunityVotings(communityQuery: CommunityVotingQuery): Promise<ICommunityVotingListResponse>;
 
@@ -152,6 +154,10 @@ export interface ICommunityProposalListResponse {
 }
 export interface ICommunityMemberListResponse {
   list: ICommunityMember[];
+  total: number;
+}
+export interface ICommunityTokensListResponse {
+  list: ISpaceTokenGeoData[];
   total: number;
 }
 

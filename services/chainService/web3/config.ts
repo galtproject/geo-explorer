@@ -17,5 +17,6 @@ module.exports = {
   'newPropertyManagerName': 'newPropertyManager',
   'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry',
   'privatePropertyMarketName': 'privatePropertyMarket',
-  'communityFactoryName': 'fundFactory'
+  'communityFactoryName': 'fundFactory',
+  'communityMockFactoryName': 'mockFundFactory'
 };

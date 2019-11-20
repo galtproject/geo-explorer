@@ -8,7 +8,7 @@
  */
 
 import IExplorerDatabase, {
-  CommunityMemberQuery, CommunityProposalQuery, CommunityVotingQuery,
+  CommunityMemberQuery, CommunityProposalQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity,
   ISaleOffer,
   PrivatePropertyRegistryQuery,
@@ -497,7 +497,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const currentReputation = await this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei');
     const basicReputation = await this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei');
 
-    const tokensCount =  await this.chainService.callContractMethod(raContract, 'spaceTokensByOwnerCount', [address], 'number');
+    const tokensCount = (await this.database.getCommunityMemberTokens(community, address)).length;
 
     if(tokensCount > 0) {
       await this.database.addOrUpdateCommunityMember(community, {
@@ -590,23 +590,27 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleCommunityAddProposalEvent(communityAddress, event) {
-    return this.updateCommunityProposal(communityAddress, event.returnValues.marker, event.returnValues.proposalId);
+    return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
   }
 
   async handleCommunityUpdateProposalEvent(communityAddress, event) {
-    return this.updateCommunityProposal(communityAddress, event.returnValues.marker, event.returnValues.proposalId);
+    return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
   }
 
-  async updateCommunityProposal(communityAddress, marker, proposalId) {
+  async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId) {
     const community = await this.database.getCommunity(communityAddress);
-    const voting = await this.database.getCommunityVoting(community.id, marker);
 
     if(!marker) {
-      const proposal = await this.database.getCommunityProposal(voting.id, proposalId);
+      const proposal = await this.database.getCommunityProposalByVotingAddress(pmAddress, proposalId);
+      if(!proposal) {
+        return console.error('Not found proposal', proposalId, 'in', pmAddress);
+      }
       marker = proposal.marker;
     }
 
-    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(community.pmAddress);
+    const voting = await this.database.getCommunityVoting(community.id, marker);
+
+    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(pmAddress);
 
     const proposalData = await proposalManagerContract.methods.proposals(proposalId).call({});
     const proposalVotingData = await proposalManagerContract.methods.getProposalVoting(proposalId).call({});
@@ -625,10 +629,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ayeShare /= 10000;
     nayShare /= 10000;
 
-    await this.database.addOrUpdateCommunityProposal(voting, {
+    const proposal = await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
       proposalId,
+      pmAddress,
+      creatorAddress: proposalData.creator,
       communityId: community.id,
       acceptedShare: ayeShare,
       acceptedCount: proposalVotingData.ayes.length,
@@ -650,6 +656,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterCommunity(filterQuery),
       total: await this.database.filterCommunityCount(filterQuery)
+    };
+  }
+
+  async filterCommunityTokens(filterQuery: CommunityTokensQuery) {
+    return {
+      list: await this.database.filterCommunityTokens(filterQuery),
+      total: await this.database.filterCommunityTokensCount(filterQuery)
     };
   }
 

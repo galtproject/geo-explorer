@@ -23,7 +23,7 @@ import IExplorerDatabase, {
   ICommunityMember,
   ICommunityVoting,
   ICommunityProposal,
-  CommunityVotingQuery, CommunityProposalQuery, CommunityMemberQuery
+  CommunityVotingQuery, CommunityProposalQuery, CommunityMemberQuery, CommunityTokensQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -1039,12 +1039,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
 
-  async getCommunityTokensCount(community) {
-    return this.models.SpaceTokensCommunities.count({
-      where: {communityId: community.id},
-    });
-  }
-
   async addOrUpdateCommunity(community: ICommunity) {
     let dbObject = await this.getCommunity(community.address);
 
@@ -1126,6 +1120,37 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.distinct = true;
 
     return this.models.Community.count(findAllParam);
+  }
+
+  // =============================================================
+  // Community Tokens
+  // =============================================================
+
+  async filterCommunityTokens(communityTokensQuery: CommunityTokensQuery) {
+    const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
+    const community = await this.getCommunity(communityTokensQuery.communityAddress);
+    return community.getSpaceTokens(findAllParam);
+  }
+
+  async filterCommunityTokensCount(communityTokensQuery: CommunityTokensQuery) {
+    const community = await this.getCommunity(communityTokensQuery.communityAddress);
+
+    const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
+
+    findAllParam.distinct = true;
+    return community.getSpaceTokensCount(findAllParam);
+  }
+
+  async getCommunityMemberTokens(community, memberAddress) {
+    return community.getSpaceTokens({
+      where: {owner: {[Op.like]: memberAddress}}
+    });
+  }
+
+  async getCommunityTokensCount(community) {
+    return this.models.SpaceTokensCommunities.count({
+      where: {communityId: community.id},
+    });
   }
 
   // =============================================================
@@ -1280,18 +1305,24 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
 
+  async getCommunityProposalByVotingAddress(pmAddress, proposalId) {
+    return this.models.CommunityProposal.findOne({
+      where: {pmAddress: {[Op.like]: pmAddress}, proposalId}
+    });
+  }
+
   async addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal) {
     let dbObject = await this.getCommunityProposal(voting.id, proposal.proposalId);
 
     proposal.votingId = voting.id;
 
     if(dbObject) {
-      await this.models.CommunityProposal.update(voting, {
+      await this.models.CommunityProposal.update(proposal, {
         where: {proposalId: proposal.proposalId, votingId: voting.id}
       });
     } else {
-      await this.models.CommunityProposal.create(voting).catch(() => {
-        return this.models.CommunityProposal.update(voting, {
+      await this.models.CommunityProposal.create(proposal).catch((e) => {
+        return this.models.CommunityProposal.update(proposal, {
           where: {proposalId: proposal.proposalId, votingId: voting.id}
         });
       });
@@ -1310,6 +1341,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['communityAddress'] = {[Op.like]: communityProposalQuery.communityAddress};
     }
 
+    if(communityProposalQuery.pmAddress) {
+      allWheres['pmAddress'] = {[Op.like]: communityProposalQuery.pmAddress};
+    }
+
     return allWheres;
   }
 
@@ -1317,7 +1352,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'marker'])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'marker'])
     }
   }
 
@@ -1325,8 +1360,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityProposalQuery.limit > 1000) {
       communityProposalQuery.limit = 1000;
     }
-
-    console.log('communityProposalQuery', communityProposalQuery);
 
     const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
 
