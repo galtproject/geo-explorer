@@ -30,6 +30,12 @@ module.exports = async function (sequelize, models) {
     activeFundRulesCount: {
       type: Sequelize.INTEGER
     },
+    spaceTokenOwnersCount: {
+      type: Sequelize.INTEGER
+    },
+    reputationTotalSupply: {
+      type: Sequelize.INTEGER
+    },
     tokensCount: {
       type: Sequelize.INTEGER
     },

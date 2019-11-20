@@ -468,23 +468,35 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const raAddress = await this.chainService.callContractMethod(contract, 'getRA', []);
 
+    const raContract = await this.chainService.getCommunityRaContract(raAddress, isDecentralized);
+
     const name = await contract.methods.name().call({});
     const description = await contract.methods.description().call({});
     const activeFundRulesCount =  await this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number');
     const tokensCount = community ? await this.database.getCommunityTokensCount(community) : 0;
 
+    const spaceTokenOwnersCount = await this.database.filterCommunityMemberCount({
+      communityAddress: address
+    });
+    const reputationTotalSupply = await this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei');
+
     const isPrivate = (await contract.methods.getConfigValue(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-    await this.database.addOrUpdateCommunity({
+    const _community = await this.database.addOrUpdateCommunity({
       address,
       raAddress,
       isDecentralized,
       isPrivate,
       tokensCount,
       activeFundRulesCount,
+      spaceTokenOwnersCount,
+      reputationTotalSupply,
       description,
       name
     });
+    if(!community) {
+      console.log('community created', address, JSON.stringify(_community))
+    }
   }
 
   async updateCommunityMember(community: ICommunity, address) {
@@ -519,6 +531,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
     const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
 
+    console.log('addSpaceTokens', propertyToken.tokenId);
     await community.addSpaceTokens([propertyToken]);
 
     await this.updateCommunityMember(community, propertyToken.owner);
@@ -544,6 +557,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityVoting(communityAddress, marker) {
     const community = await this.database.getCommunity(communityAddress);
 
+    if(!community) {
+      console.log('community not found', communityAddress);
+    }
     const contract = await this.chainService.getCommunityContract(communityAddress, community.isDecentralized);
 
     const markerData = await contract.methods.getProposalMarker(marker).call({});
@@ -629,7 +645,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ayeShare /= 10000;
     nayShare /= 10000;
 
-    const proposal = await this.database.addOrUpdateCommunityProposal(voting, {
+    await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
       proposalId,

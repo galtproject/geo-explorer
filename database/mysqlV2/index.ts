@@ -1050,7 +1050,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         where: {address: {[Op.like]: community.address}}
       });
     } else {
-      await this.models.Community.create(community).catch(() => {
+      await this.models.Community.create(community).catch((e) => {
+        console.log('create error', e);
         return this.models.Community.update(community, {
           where: {address: {[Op.like]: community.address}}
         });
@@ -1137,8 +1138,15 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
 
-    findAllParam.distinct = true;
-    return community.getSpaceTokensCount(findAllParam);
+    // findAllParam.distinct = true;
+    //
+    // if(communityTokensQuery.groupBy) {
+    //   findAllParam.group = [communityTokensQuery.groupBy];
+    //   findAllParam.attributes = [communityTokensQuery.groupBy];
+    // }
+
+    console.log('findAllParam',findAllParam);
+    return community.countSpaceTokens(findAllParam);
   }
 
   async getCommunityMemberTokens(community, memberAddress) {
@@ -1219,8 +1227,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async filterCommunityMemberCount(communityQuery: CommunityMemberQuery) {
     const findAllParam: any = this.communityMemberQueryToFindAllParam(communityQuery);
 
-    findAllParam.distinct = true;
+    // findAllParam.distinct = true;
 
+    console.log('findAllParam', findAllParam);
     return this.models.CommunityMember.count(findAllParam);
   }
 

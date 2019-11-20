@@ -76,9 +76,9 @@ export default interface IExplorerDatabase {
 
   filterCommunityCount(filterQuery: CommunityQuery): Promise<number>;
 
-  filterCommunityTokens(filterQuery: CommunityQuery): Promise<ISpaceTokenGeoData[]>;
+  filterCommunityTokens(filterQuery: CommunityTokensQuery): Promise<ISpaceTokenGeoData[]>;
 
-  filterCommunityTokensCount(filterQuery: CommunityQuery): Promise<number>;
+  filterCommunityTokensCount(filterQuery: CommunityTokensQuery): Promise<number>;
 
   getCommunityTokensCount(community: ICommunity): Promise<number>;
 
@@ -440,6 +440,8 @@ export interface ICommunity {
   name?;
   description?;
   activeFundRulesCount?;
+  spaceTokenOwnersCount?;
+  reputationTotalSupply?;
   tokensCount?;
   isPrivate?;
   isDecentralized?;
@@ -505,6 +507,8 @@ export interface CommunityQuery {
 
   sortBy?: string;
   sortDir?: string;
+
+  groupBy?: string;
 
   address?: string;
   addresses?: string[];
