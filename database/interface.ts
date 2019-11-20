@@ -437,6 +437,7 @@ export interface ICommunity {
   address;
   raAddress?;
   pmAddress?;
+  multiSigAddress?;
   name?;
   description?;
   activeFundRulesCount?;

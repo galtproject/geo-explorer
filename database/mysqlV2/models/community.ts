@@ -21,6 +21,9 @@ module.exports = async function (sequelize, models) {
     pmAddress: {
       type: Sequelize.STRING(100)
     },
+    multiSigAddress: {
+      type: Sequelize.STRING(100)
+    },
     name: {
       type: Sequelize.STRING(100)
     },

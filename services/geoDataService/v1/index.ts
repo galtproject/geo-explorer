@@ -467,6 +467,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(address);
 
     const raAddress = await this.chainService.callContractMethod(contract, 'getRA', []);
+    const multiSigAddress = await this.chainService.callContractMethod(contract, 'getMultiSig', []);
 
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isDecentralized);
 
@@ -485,6 +486,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const _community = await this.database.addOrUpdateCommunity({
       address,
       raAddress,
+      multiSigAddress,
       isDecentralized,
       isPrivate,
       tokensCount,
