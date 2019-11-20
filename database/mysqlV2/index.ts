@@ -1229,7 +1229,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     // findAllParam.distinct = true;
 
-    console.log('findAllParam', findAllParam);
+    // console.log('findAllParam', findAllParam);
     return this.models.CommunityMember.count(findAllParam);
   }
 
@@ -1286,7 +1286,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       communityVotingQuery.limit = 1000;
     }
 
-    console.log('communityVotingQuery', communityVotingQuery);
+    // console.log('communityVotingQuery', communityVotingQuery);
 
     const findAllParam: any = this.communityMemberQueryToFindAllParam(communityVotingQuery);
 

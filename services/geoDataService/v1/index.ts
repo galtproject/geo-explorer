@@ -462,7 +462,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunity(raAddress, isDecentralized) {
-    console.log('updateCommunity', raAddress, isDecentralized);
+    // console.log('updateCommunity', raAddress, isDecentralized);
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isDecentralized);
     const storageAddress = await this.chainService.callContractMethod(raContract, 'fundStorage', []);
 
@@ -475,6 +475,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const description = await contract.methods.description().call({});
     const activeFundRulesCount =  await this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number');
     const tokensCount = community ? await this.database.getCommunityTokensCount(community) : 0;
+    console.log(raAddress, 'tokensCount', tokensCount);
 
     const spaceTokenOwnersCount = await this.database.filterCommunityMemberCount({
       communityAddress: raAddress
