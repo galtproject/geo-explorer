@@ -1130,6 +1130,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async filterCommunityTokens(communityTokensQuery: CommunityTokensQuery) {
     const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
     const community = await this.getCommunity(communityTokensQuery.communityAddress);
+
+    findAllParam.limit = communityTokensQuery.limit || 20;
+    findAllParam.offset = communityTokensQuery.offset || 0;
+
     return community.getSpaceTokens(findAllParam);
   }
 
