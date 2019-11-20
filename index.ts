@@ -479,14 +479,14 @@ const config = require('./config');
     //
     // console.log('found pprs', privateProperties.list);
 
-    const communityTokenOwnersCount = await database.filterCommunityTokensCount({
-      groupBy: 'owner',
-      communityAddress: '0x57643B519b92fF772068136177A47C8f68cB943C'
-        // surroundingsGeohashBox: ["dr5n6","dr5n7","dr5nk","dr5nm","dr5nq","dr5nr","dr5q2","dr5q3","dr5q6","dr5q7","dr5qk","dr5qm","dr5qq","dr5qr","dr5w2","dr5w3","dr5w6","dr5w7","dr5wk","dr5wm","dr5wq","dr5nd","dr5ne","dr5ns","dr5nt","dr5nw","dr5nx","dr5q8","dr5q9","dr5qd","dr5qe","dr5qs","dr5qt","dr5qw","dr5qx","dr5w8","dr5w9","dr5wd","dr5we","dr5ws","dr5wt","dr5ww","dr5nf","dr5ng","dr5nu","dr5nv","dr5ny","dr5nz","dr5qb","dr5qc","dr5qf","dr5qg","dr5qu","dr5qv","dr5qy","dr5qz","dr5wb","dr5wc","dr5wf","dr5wg","dr5wu","dr5wv","dr5wy","dr5p4","dr5p5","dr5ph","dr5pj","dr5pn","dr5pp","dr5x0","dr5x1","dr5x4","dr5x5","dr5xh","dr5xj","dr5xn","dr5p6","dr5p7","dr5pk","dr5pm","dr5pq","dr5pr","dr5x2","dr5x3","dr5x6","dr5x7","dr5xk","dr5xm","dr5xq","dr5pd","dr5pe","dr5ps","dr5pt","dr5pw","dr5px","dr5x8","dr5x9","dr5xd","dr5xe","dr5xs","dr5xt","dr5xw","dr5pf","dr5pg","dr5pu","dr5pv","dr5py","dr5pz","dr5xb","dr5xc","dr5xf","dr5xg","dr5xu","dr5xv","dr5xy","dr704","dr705","dr70h","dr70j","dr70n","dr70p","dr720","dr721","dr724","dr725","dr72h","dr72j","dr72n","dr72p","dr780","dr781","dr784","dr785","dr78h","dr78j","dr78n","dr706","dr707","dr70k","dr70m","dr70q","dr70r","dr722","dr723","dr726","dr727","dr72k","dr72m","dr72q","dr72r","dr782","dr783","dr786","dr787","dr78k","dr78m","dr78q","dr70d","dr70e","dr70s","dr70t","dr70w","dr70x","dr728","dr729","dr72d","dr72e","dr72s","dr72t","dr72w","dr72x","dr788","dr789","dr78d","dr78e","dr78s","dr78t","dr78w","dr5r"]
-        // surroundingsGeohashBox: ["dr5n6"]
-      });
-
-      console.log('communityTokenOwnersCount', communityTokenOwnersCount);
+    // const communityTokenOwnersCount = await database.filterCommunityTokensCount({
+    //   groupBy: 'owner',
+    //   communityAddress: '0x57643B519b92fF772068136177A47C8f68cB943C'
+    //     // surroundingsGeohashBox: ["dr5n6","dr5n7","dr5nk","dr5nm","dr5nq","dr5nr","dr5q2","dr5q3","dr5q6","dr5q7","dr5qk","dr5qm","dr5qq","dr5qr","dr5w2","dr5w3","dr5w6","dr5w7","dr5wk","dr5wm","dr5wq","dr5nd","dr5ne","dr5ns","dr5nt","dr5nw","dr5nx","dr5q8","dr5q9","dr5qd","dr5qe","dr5qs","dr5qt","dr5qw","dr5qx","dr5w8","dr5w9","dr5wd","dr5we","dr5ws","dr5wt","dr5ww","dr5nf","dr5ng","dr5nu","dr5nv","dr5ny","dr5nz","dr5qb","dr5qc","dr5qf","dr5qg","dr5qu","dr5qv","dr5qy","dr5qz","dr5wb","dr5wc","dr5wf","dr5wg","dr5wu","dr5wv","dr5wy","dr5p4","dr5p5","dr5ph","dr5pj","dr5pn","dr5pp","dr5x0","dr5x1","dr5x4","dr5x5","dr5xh","dr5xj","dr5xn","dr5p6","dr5p7","dr5pk","dr5pm","dr5pq","dr5pr","dr5x2","dr5x3","dr5x6","dr5x7","dr5xk","dr5xm","dr5xq","dr5pd","dr5pe","dr5ps","dr5pt","dr5pw","dr5px","dr5x8","dr5x9","dr5xd","dr5xe","dr5xs","dr5xt","dr5xw","dr5pf","dr5pg","dr5pu","dr5pv","dr5py","dr5pz","dr5xb","dr5xc","dr5xf","dr5xg","dr5xu","dr5xv","dr5xy","dr704","dr705","dr70h","dr70j","dr70n","dr70p","dr720","dr721","dr724","dr725","dr72h","dr72j","dr72n","dr72p","dr780","dr781","dr784","dr785","dr78h","dr78j","dr78n","dr706","dr707","dr70k","dr70m","dr70q","dr70r","dr722","dr723","dr726","dr727","dr72k","dr72m","dr72q","dr72r","dr782","dr783","dr786","dr787","dr78k","dr78m","dr78q","dr70d","dr70e","dr70s","dr70t","dr70w","dr70x","dr728","dr729","dr72d","dr72e","dr72s","dr72t","dr72w","dr72x","dr788","dr789","dr78d","dr78e","dr78s","dr78t","dr78w","dr5r"]
+    //     // surroundingsGeohashBox: ["dr5n6"]
+    //   });
+    //
+    //   console.log('communityTokenOwnersCount', communityTokenOwnersCount);
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 
