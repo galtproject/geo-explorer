@@ -521,7 +521,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         currentReputation,
         basicReputation,
         tokensCount,
-        fullNameHash
+        fullNameHash,
+        communityAddress: community.address
       });
     } else {
       const member = await this.database.getCommunityMember(community.id, address);

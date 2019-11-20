@@ -460,6 +460,7 @@ export interface ICommunityMember {
   communityId?;
 
   address;
+  communityAddress;
   currentReputation?;
   basicReputation?;
   tokensCount?;
