@@ -238,7 +238,7 @@ const config = require('./config');
       await pIteration.forEach(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
-        await geoDataService.handleNewCommunityEvent(fundDeployment.fundRA, true);
+        await geoDataService.handleNewCommunityEvent(fundDeployment, true);
         subscribeToCommunity(fundDeployment.fundRA, true);
       });
     });
@@ -247,7 +247,7 @@ const config = require('./config');
       await pIteration.forEach(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
-        await geoDataService.handleNewCommunityEvent(fundDeployment.fundRA, true);
+        await geoDataService.handleNewCommunityEvent(fundDeployment, true);
         return subscribeToCommunity(fundDeployment.fundRA, true);
       });
     });
@@ -256,7 +256,7 @@ const config = require('./config');
       console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
       const fundId = newEvent.returnValues.fundId;
       const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
-      await geoDataService.handleNewCommunityEvent(fundDeployment.fundRA, true);
+      await geoDataService.handleNewCommunityEvent(fundDeployment, true);
       await subscribeToCommunity(fundDeployment.fundRA, true);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });

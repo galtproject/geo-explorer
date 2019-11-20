@@ -1134,6 +1134,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.limit = communityTokensQuery.limit || 20;
     findAllParam.offset = communityTokensQuery.offset || 0;
 
+    findAllParam.order = [
+      [communityTokensQuery.sortBy || 'createdAt', communityTokensQuery.sortDir || 'DESC']
+    ];
+
     return community.getSpaceTokens(findAllParam);
   }
 
