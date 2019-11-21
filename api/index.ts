@@ -23,10 +23,10 @@ const bodyParser = require('body-parser');
 service.use(bodyParser.json());
 
 module.exports = (geohashService: IExplorerGeohashService, chainService: IExplorerChainService, database: IExplorerDatabase, geoDataService: IExplorerGeoDataService, port) => {
-  
+
   service.use(async (req, res, next) => {
     setHeaders(res);
-    
+
     req.query = {};
     if (_.includes(req.url, '?')) {
       const searchParams: any = new URLSearchParams(req.url.split('?')[1]);
@@ -46,7 +46,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     setHeaders(res);
     res.send(200);
   });
-  
+
   service.post('/v1/contours/by/inner-geohash', async (req, res) => {
     await respondByScheme(res, await geohashService.getContoursByInnerGeohash(req.body.geohash, req.body.contractAddress, req.body.level));
   });
@@ -95,6 +95,34 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.getPrivatePropertyRegistry(req.params.address));
   });
 
+  service.post('/v1/communities/get/:address', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getCommunity(req.params.address));
+  });
+
+  service.post('/v1/communities/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunities(req.body));
+  });
+
+  service.post('/v1/communities/get/:address', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getCommunity(req.params.address));
+  });
+
+  service.post('/v1/community-tokens/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunityTokens(req.body));
+  });
+
+  service.post('/v1/community-votings/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunityVotings(req.body));
+  });
+
+  service.post('/v1/community-members/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunityMembers(req.body));
+  });
+
+  service.post('/v1/community-proposals/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunityProposals(req.body));
+  });
+
   async function respondByScheme(res, data) {
     res.send({
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
@@ -102,7 +130,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
       data
     }, 200);
   }
-  
+
   function setHeaders(res) {
     res.setHeader('Strict-Transport-Security', 'max-age=0');
     res.setHeader('Access-Control-Allow-Credentials', 'true');

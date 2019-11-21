@@ -17,7 +17,13 @@ import IExplorerDatabase, {
   SaleOffersQuery,
   ISaleOffer,
   IPrivatePropertyRegistry,
-  PrivatePropertyRegistryQuery
+  PrivatePropertyRegistryQuery,
+  ICommunity,
+  CommunityQuery,
+  ICommunityMember,
+  ICommunityVoting,
+  ICommunityProposal,
+  CommunityVotingQuery, CommunityProposalQuery, CommunityMemberQuery, CommunityTokensQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -56,23 +62,23 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async flushDatabase() {
     await this.models.GeohashSpaceToken.destroy({where: {}});
-    
+
     await this.models.Application.destroy({where: {}});
     await this.models.SpaceTokensOrders.destroy({where: {}});
     await this.models.SpaceTokenGeoData.destroy({where: {}});
-    
+
     await this.models.SaleOffer.destroy({where: {}});
     await this.models.SaleOrder.destroy({where: {}});
-    
+
     await this.models.PrivatePropertyRegistry.destroy({where: {}});
-    
+
     await this.models.Value.destroy({where: {}});
   }
 
   // =============================================================
   // Geohashes
   // =============================================================
-  
+
   async addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string, tokenType?: string) {
     // find contour object with included geohashes
 
@@ -88,7 +94,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         await this.models.GeohashSpaceToken.destroy({where: {tokenId, contractAddress, contourGeohash}});
       }
     });
-    
+
     if(!level) {
       level = '0';
     }
@@ -138,7 +144,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // =============================================================
   // SpaceGeoData
   // =============================================================
-  
+
   async getSpaceTokenGeoData(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
       where: { tokenId, contractAddress: {[Op.like]: contractAddress}  }
@@ -178,10 +184,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     saleOrder.spaceTokens = _.orderBy(saleOrder.spaceTokens, [(spaceToken) => {
       return spaceToken.spaceTokensOrders.position;
     }], ['asc']);
-    
+
     return saleOrder;
   }
-  
+
   async addOrUpdateSaleOrder(saleOrder: ISaleOrder) {
     // console.log('addOrUpdateSaleOrder', saleOrder);
     let dbObject = await this.getSaleOrder(saleOrder.orderId, saleOrder.contractAddress);
@@ -200,7 +206,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     return this.getSaleOrder(saleOrder.orderId, saleOrder.contractAddress);
   }
-  
+
   prepareSaleOrdersWhere(ordersQuery) {
     const allWheres: any = {};
 
@@ -321,15 +327,15 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(ordersQuery[field])
         allWheres[field] = { [Op.like]: ordersQuery[field]};
     });
-    
+
     return allWheres;
   }
-  
+
   saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
     const allWheres = this.prepareSaleOrdersWhere(ordersQuery);
 
     // console.log('allWheres', allWheres);
-    
+
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),
     //   include : {//[this.models.SaleOrder._conformInclude({
@@ -359,7 +365,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     //https://github.com/sequelize/sequelize/issues/10943
     //https://github.com/sequelize/sequelize/issues/4880
     //https://github.com/sequelize/sequelize/issues/10582
-    
+
     const include: any = [{
       model: this.models.SpaceTokenGeoData,
       // association: this.models.SpaceTokenGeoData,
@@ -371,7 +377,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       // required: true,
       where: resultWhere(allWheres, ['tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'])
     }];
-    
+
     if(ordersQuery.buyer) {
       include.push({
         model: this.models.SaleOffer,
@@ -381,25 +387,25 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(!allWheres[Op.and]) {
         allWheres[Op.and] = [];
       }
-      
+
       const buyerWhere: any = {
         '$offers.buyer$': {[Op.like]: ordersQuery.buyer}
       };
       if(ordersQuery.excludeOrderIds && ordersQuery.excludeOrderIds.length) {
         buyerWhere['orderId'] = {[Op.notIn]: ordersQuery.excludeOrderIds};
       }
-      
+
       const orArray: any = [buyerWhere];
-      
+
       if(ordersQuery.includeOrderIds && ordersQuery.includeOrderIds.length) {
         orArray.push({ 'orderId': {[Op.in]: ordersQuery.includeOrderIds }});
       }
-      
+
       allWheres[Op.and].push({
         [Op.or]: orArray
       });
     }
-    
+
     return {
       where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress', 'sumBedroomsCount', 'sumBathroomsCount', 'typesSubtypesArray', 'typesSubtypesArray', 'sumBuildingArea', 'sumLandArea', 'featureArray', 'contractAddress', 'statusName', Op.and]),
       include: include
@@ -410,7 +416,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(ordersQuery.limit > 1000) {
       ordersQuery.limit = 1000;
     }
-    
+
     const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
 
     if(ordersQuery.buyer) {
@@ -422,7 +428,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     const orders = await this.models.SaleOrder.findAll(findAllParam);
-    
+
     findAllParam.where = { id: { [ Op.in]: orders.map(o => o.id) } };
     findAllParam.include.forEach(i => {
       i.where = null;
@@ -440,7 +446,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       delete findAllParam.limit;
       delete findAllParam.offset;
     }
-    
+
     const saleOrders = await this.models.SaleOrder.findAll(findAllParam);
 
     return saleOrders.map(saleOrder => {
@@ -455,10 +461,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const findAllParam: any = this.saleOrdersQueryToFindAllParam(ordersQuery);
 
     findAllParam.distinct = true;
-    
+
     return this.models.SaleOrder.count(findAllParam);
   }
-  
+
   // =============================================================
   // Applications
   // =============================================================
@@ -486,7 +492,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
     return this.getApplication(application.applicationId, application.contractAddress);
   }
-  
+
   applicationsQueryToFindAllParam(applicationsQuery: ApplicationsQuery) {
     const allWheres: any = {};
 
@@ -679,7 +685,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       if(!_.isUndefined(spaceTokensQuery[field]) && !_.isNull(spaceTokensQuery[field]))
         allWheres[field] = spaceTokensQuery[field];
     });
-    
+
     ['owner', 'contractAddress'].forEach((field) => {
       if(spaceTokensQuery[field])
         allWheres[field] = {[Op.like]: spaceTokensQuery[field]};
@@ -708,13 +714,13 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.order = [
       [spaceTokensQuery.sortBy || 'createdAt', spaceTokensQuery.sortDir || 'DESC']
     ];
-    
+
     if(spaceTokensQuery.groupBy) {
       findAllParam.group = [spaceTokensQuery.groupBy];
       findAllParam.attributes = [spaceTokensQuery.groupBy];
       return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
     }
-    
+
     return this.models.SpaceTokenGeoData.findAll(findAllParam);
   }
 
@@ -723,7 +729,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return this.models.SpaceTokenGeoData.count(findAllParam);
   }
-  
+
   async getSpaceToken(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
       where: { tokenId, contractAddress }
@@ -735,10 +741,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // =============================================================
 
   firstSaleOfferQueue = {};
-  
+
   async addOrUpdateSaleOffer(saleOffer: ISaleOffer) {
     let dbObject = await this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
-    
+
     const saleOfferParams = {orderId: saleOffer.orderId, buyer: {[Op.like]: saleOffer.buyer}, contractAddress: {[Op.like]: saleOffer.contractAddress}};
     if(dbObject) {
       saleOffer.createdAtBlock = dbObject.createdAtBlock || saleOffer.createdAtBlock;
@@ -756,7 +762,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(!this.firstSaleOfferQueue[saleOffer.contractAddress]) {
       this.firstSaleOfferQueue[saleOffer.contractAddress] = {};
     }
-    
+
     if(!this.firstSaleOfferQueue[saleOffer.contractAddress][saleOffer.orderId]) {
       this.firstSaleOfferQueue[saleOffer.contractAddress][saleOffer.orderId] = true;
 
@@ -775,7 +781,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         this.firstSaleOfferQueue[saleOffer.contractAddress][saleOffer.orderId] = false;
       }, 1000);
     }
-    
+
     return this.getSaleOffer(saleOffer.orderId, saleOffer.buyer, saleOffer.contractAddress);
   }
 
@@ -814,7 +820,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       }
       allWheres['orderId'][Op.notIn] = saleOffersQuery.excludeOrderIds;
     }
-    
+
     let additionalWhere = {};
     if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
       const orArray = [];
@@ -827,13 +833,13 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     allWheres = _.extend(this.prepareSaleOrdersWhere(saleOffersQuery), allWheres);
-    
+
     const offersWhere = resultWhere(allWheres, ['buyer', 'seller', 'contractAddress', 'status', 'orderId', 'ask', 'bid'])
-    
+
     if(additionalWhere[Op.or]) {
       offersWhere[Op.and] = additionalWhere;
     }
-    
+
     return {
       where: offersWhere,
       include: [{
@@ -861,17 +867,17 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.order = [
       [saleOffersQuery.sortBy || 'createdAt', saleOffersQuery.sortDir || 'DESC']
     ];
-    
+
     if(!saleOffersQuery.includeOrders) {
       delete findAllParam.include;
     }
 
     let result = await this.models.SaleOffer.findAll(findAllParam);
-    
+
     // if(saleOffersQuery.includeOrderIds && saleOffersQuery.includeOrderIds.length) {
-    //  
+    //
     //   const orderIds = _.uniq(result.map(o => o.orderId).concat(saleOffersQuery.includeOrderIds));
-    //  
+    //
     //   // console.log('orderIds', orderIds);
     //   findAllParam.where = { orderId: { [ Op.in]: orderIds }, isFirstOffer: true };
     //   if(saleOffersQuery.contractAddress) {
@@ -913,9 +919,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
 
-
   // =============================================================
-  // Sale Orders
+  // Private Property Registries
   // =============================================================
 
   async getPrivatePropertyRegistry(address) {
@@ -932,7 +937,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     let dbObject = await this.getPrivatePropertyRegistry(registry.address);
 
     registry.address = registry.address.toLowerCase();
-    
+
     if(dbObject) {
       registry.createdAtBlock = dbObject.createdAtBlock || registry.createdAtBlock;
       await this.models.PrivatePropertyRegistry.update(registry, {
@@ -986,7 +991,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(pprQuery.limit > 1000) {
       pprQuery.limit = 1000;
     }
-    
+
     console.log('pprQuery', pprQuery);
 
     const findAllParam: any = this.privatePropertyRegistryQueryToFindAllParam(pprQuery);
@@ -1019,7 +1024,374 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return this.models.PrivatePropertyRegistry.count(findAllParam);
   }
-  
+
+  // =============================================================
+  // Communities
+  // =============================================================
+
+  async getCommunity(address) {
+    return this.models.Community.findOne({
+      where: {address: {[Op.like]: address}},
+      // include: [{
+      //   model: this.models.SpaceTokenGeoData,
+      //   as: 'spaceTokens',
+      // }]
+    });
+  }
+
+  async addOrUpdateCommunity(community: ICommunity) {
+    let dbObject = await this.getCommunity(community.address);
+
+    community.address = community.address.toLowerCase();
+
+    if(dbObject) {
+      community.createdAtBlock = dbObject.createdAtBlock || community.createdAtBlock;
+      await this.models.Community.update(community, {
+        where: {address: {[Op.like]: community.address}}
+      });
+    } else {
+      await this.models.Community.create(community).catch((e) => {
+        console.log('create error', e);
+        return this.models.Community.update(community, {
+          where: {address: {[Op.like]: community.address}}
+        });
+      });
+    }
+    return this.getCommunity(community.address);
+  }
+
+  prepareCommunityWhere(communityQuery) {
+    const allWheres: any = {};
+
+    if(communityQuery.tokensIds) {
+      allWheres['tokenId'] = {[Op.in]: communityQuery.tokensIds};
+    }
+    if(communityQuery.addresses) {
+      allWheres['address'] = {[Op.in]: communityQuery.addresses.map(a => a.toLowerCase())};
+    }
+
+    return allWheres;
+  }
+
+  communityQueryToFindAllParam(communityQuery: CommunityQuery) {
+    const allWheres = this.prepareCommunityWhere(communityQuery);
+
+    return {
+      where: resultWhere(allWheres, ['address', 'tokenId']),
+      include: [{
+        model: this.models.SpaceTokenGeoData,
+        as: 'spaceTokens'
+      }]
+    }
+  }
+
+  async filterCommunity(communityQuery: CommunityQuery) {
+    if(communityQuery.limit > 1000) {
+      communityQuery.limit = 1000;
+    }
+
+    console.log('communityQuery', communityQuery);
+
+    const findAllParam: any = this.communityQueryToFindAllParam(communityQuery);
+
+    findAllParam.limit = communityQuery.limit || 20;
+    findAllParam.offset = communityQuery.offset || 0;
+
+    const communities = await this.models.Community.findAll(findAllParam);
+    console.log('communities', communities.length);
+
+    findAllParam.where = { id: { [ Op.in]: communities.map(o => o.id) } };
+    findAllParam.include.forEach(i => {
+      i.where = null;
+    });
+
+    findAllParam.order = [
+      [communityQuery.sortBy || 'createdAt', communityQuery.sortDir || 'DESC']
+    ];
+
+    delete findAllParam.limit;
+    delete findAllParam.offset;
+
+    return this.models.Community.findAll(findAllParam);
+  }
+
+  async filterCommunityCount(communityQuery: CommunityQuery) {
+    const findAllParam: any = this.communityQueryToFindAllParam(communityQuery);
+
+    findAllParam.distinct = true;
+
+    return this.models.Community.count(findAllParam);
+  }
+
+  // =============================================================
+  // Community Tokens
+  // =============================================================
+
+  async filterCommunityTokens(communityTokensQuery: CommunityTokensQuery) {
+    const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
+    const community = await this.getCommunity(communityTokensQuery.communityAddress);
+
+    findAllParam.limit = communityTokensQuery.limit || 20;
+    findAllParam.offset = communityTokensQuery.offset || 0;
+
+    findAllParam.order = [
+      [communityTokensQuery.sortBy || 'createdAt', communityTokensQuery.sortDir || 'DESC']
+    ];
+
+    return community.getSpaceTokens(findAllParam);
+  }
+
+  async filterCommunityTokensCount(communityTokensQuery: CommunityTokensQuery) {
+    const community = await this.getCommunity(communityTokensQuery.communityAddress);
+
+    const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
+
+    // findAllParam.distinct = true;
+    //
+    // if(communityTokensQuery.groupBy) {
+    //   findAllParam.group = [communityTokensQuery.groupBy];
+    //   findAllParam.attributes = [communityTokensQuery.groupBy];
+    // }
+
+    // console.log('findAllParam',findAllParam);
+    return community.countSpaceTokens(findAllParam);
+  }
+
+  async getCommunityMemberTokens(community, memberAddress) {
+    return community.getSpaceTokens({
+      where: {owner: {[Op.like]: memberAddress}}
+    });
+  }
+
+  async getCommunityTokensCount(community) {
+    return this.models.SpaceTokensCommunities.count({
+      where: {communityId: community.id},
+    });
+  }
+
+  // =============================================================
+  // Community Members
+  // =============================================================
+
+  async getCommunityMember(communityId, address) {
+    return this.models.CommunityMember.findOne({
+      where: {communityId, address: {[Op.like]: address}}
+    });
+  }
+
+  async addOrUpdateCommunityMember(community: ICommunity, member: ICommunityMember) {
+    let dbObject = await this.getCommunityMember(community.id, member.address);
+
+    member.communityId = community.id;
+    member.address = member.address.toLowerCase();
+
+    if(dbObject) {
+      await this.models.CommunityMember.update(member, {
+        where: {address: {[Op.like]: member.address}, communityId: community.id}
+      });
+    } else {
+      await this.models.CommunityMember.create(member).catch(() => {
+        return this.models.CommunityMember.update(member, {
+          where: {address: {[Op.like]: member.address}, communityId: community.id}
+        });
+      });
+    }
+    return this.getCommunityMember(community.id, member.address);
+  }
+
+  prepareCommunityMemberWhere(communityMemberQuery) {
+    const allWheres: any = {};
+
+    if(communityMemberQuery.communityAddress) {
+      allWheres['communityAddress'] = {[Op.like]: communityMemberQuery.communityAddress};
+    }
+
+    return allWheres;
+  }
+
+  communityMemberQueryToFindAllParam(communityMemberQuery: CommunityVotingQuery) {
+    const allWheres = this.prepareCommunityMemberWhere(communityMemberQuery);
+
+    return {
+      where: resultWhere(allWheres, ['communityAddress'])
+    }
+  }
+
+  async filterCommunityMember(communityMemberQuery: CommunityMemberQuery) {
+    if(communityMemberQuery.limit > 1000) {
+      communityMemberQuery.limit = 1000;
+    }
+
+    console.log('communityMemberQuery', communityMemberQuery);
+
+    const findAllParam: any = this.communityMemberQueryToFindAllParam(communityMemberQuery);
+
+    findAllParam.limit = communityMemberQuery.limit || 20;
+    findAllParam.offset = communityMemberQuery.offset || 0;
+
+    return this.models.CommunityMember.findAll(findAllParam);
+  }
+
+  async filterCommunityMemberCount(communityQuery: CommunityMemberQuery) {
+    const findAllParam: any = this.communityMemberQueryToFindAllParam(communityQuery);
+
+    // findAllParam.distinct = true;
+
+    // console.log('findAllParam', findAllParam);
+    return this.models.CommunityMember.count(findAllParam);
+  }
+
+  // =============================================================
+  // Community Votings
+  // =============================================================
+
+  async getCommunityVoting(communityId, marker) {
+    return this.models.CommunityVoting.findOne({
+      where: {communityId, marker: {[Op.like]: marker}}
+    });
+  }
+
+  async addOrUpdateCommunityVoting(community: ICommunity, voting: ICommunityVoting) {
+    let dbObject = await this.getCommunityVoting(community.id, voting.marker);
+
+    voting.communityId = community.id;
+    voting.marker = voting.marker.toLowerCase();
+
+    if(dbObject) {
+      await this.models.CommunityVoting.update(voting, {
+        where: {marker: {[Op.like]: voting.marker}, communityId: community.id}
+      });
+    } else {
+      await this.models.CommunityVoting.create(voting).catch(() => {
+        return this.models.CommunityVoting.update(voting, {
+          where: {marker: {[Op.like]: voting.marker}, communityId: community.id}
+        });
+      });
+    }
+    return this.getCommunityVoting(community.id, voting.marker);
+  }
+
+  prepareCommunityVotingWhere(communityVotingQuery) {
+    const allWheres: any = {};
+
+    if(communityVotingQuery.communityAddress) {
+      allWheres['communityAddress'] = {[Op.like]: communityVotingQuery.communityAddress};
+    }
+
+    return allWheres;
+  }
+
+  communityVotingQueryToFindAllParam(communityVotingQuery: CommunityVotingQuery) {
+    const allWheres = this.prepareCommunityVotingWhere(communityVotingQuery);
+
+    return {
+      where: resultWhere(allWheres, ['communityAddress'])
+    }
+  }
+
+  async filterCommunityVoting(communityVotingQuery: CommunityVotingQuery) {
+    if(communityVotingQuery.limit > 1000) {
+      communityVotingQuery.limit = 1000;
+    }
+
+    // console.log('communityVotingQuery', communityVotingQuery);
+
+    const findAllParam: any = this.communityMemberQueryToFindAllParam(communityVotingQuery);
+
+    findAllParam.limit = communityVotingQuery.limit || 20;
+    findAllParam.offset = communityVotingQuery.offset || 0;
+
+    return this.models.CommunityVoting.findAll(findAllParam);
+  }
+
+  async filterCommunityVotingCount(communityVotingQuery: CommunityVotingQuery) {
+    const findAllParam: any = this.communityVotingQueryToFindAllParam(communityVotingQuery);
+
+    // findAllParam.distinct = true;
+
+    return this.models.CommunityVoting.count(findAllParam);
+  }
+
+  // =============================================================
+  // Community Proposals
+  // =============================================================
+
+  async getCommunityProposal(votingId, proposalId) {
+    return this.models.CommunityProposal.findOne({
+      where: {votingId, proposalId}
+    });
+  }
+
+  async getCommunityProposalByVotingAddress(pmAddress, proposalId) {
+    return this.models.CommunityProposal.findOne({
+      where: {pmAddress: {[Op.like]: pmAddress}, proposalId}
+    });
+  }
+
+  async addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal) {
+    let dbObject = await this.getCommunityProposal(voting.id, proposal.proposalId);
+
+    proposal.votingId = voting.id;
+
+    if(dbObject) {
+      await this.models.CommunityProposal.update(proposal, {
+        where: {proposalId: proposal.proposalId, votingId: voting.id}
+      });
+    } else {
+      await this.models.CommunityProposal.create(proposal).catch((e) => {
+        return this.models.CommunityProposal.update(proposal, {
+          where: {proposalId: proposal.proposalId, votingId: voting.id}
+        });
+      });
+    }
+    return this.getCommunityProposal(voting.id, proposal.proposalId);
+  }
+
+  prepareCommunityProposalWhere(communityProposalQuery) {
+    const allWheres: any = {};
+
+    if(communityProposalQuery.marker) {
+      allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
+    }
+
+    if(communityProposalQuery.communityAddress) {
+      allWheres['communityAddress'] = {[Op.like]: communityProposalQuery.communityAddress};
+    }
+
+    if(communityProposalQuery.pmAddress) {
+      allWheres['pmAddress'] = {[Op.like]: communityProposalQuery.pmAddress};
+    }
+
+    return allWheres;
+  }
+
+  communityProposalQueryToFindAllParam(communityProposalQuery: CommunityProposalQuery) {
+    const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
+
+    return {
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'marker'])
+    }
+  }
+
+  async filterCommunityProposal(communityProposalQuery: CommunityProposalQuery) {
+    if(communityProposalQuery.limit > 1000) {
+      communityProposalQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
+
+    findAllParam.limit = communityProposalQuery.limit || 20;
+    findAllParam.offset = communityProposalQuery.offset || 0;
+
+    return this.models.CommunityProposal.findAll(findAllParam);
+  }
+
+  async filterCommunityProposalCount(communityProposalQuery: CommunityProposalQuery) {
+    const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
+
+    return this.models.CommunityProposal.count(findAllParam);
+  }
+
   // =============================================================
   // Values
   // =============================================================

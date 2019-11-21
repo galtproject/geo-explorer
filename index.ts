@@ -13,6 +13,7 @@ import IExplorerChainService, {ChainServiceEvents} from "./services/chainService
 import IExplorerGeoDataService from "./services/geoDataService/interface";
 
 const pIteration = require("p-iteration");
+const _ = require("lodash");
 const config = require('./config');
 
 (async () => {
@@ -37,7 +38,7 @@ const config = require('./config');
   let prevBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
   await fetchAndSubscribe(chainService.contractsConfig.blockNumber > prevBlockNumber);
-  
+
   setInterval(() => {
     chainService.getCurrentBlock();
   }, 30 * 1000);
@@ -65,13 +66,13 @@ const config = require('./config');
         return geoDataService.handleSaleOrderEvent(e)
       });
     });
-    
+
     await chainService.getEventsFromBlock(chainService.propertyMarket, ChainServiceEvents.SaleOfferStatusChanged, prevBlockNumber).then(async (events) => {
       await pIteration.forEach(events, (e) => {
         return geoDataService.handleSaleOfferEvent(e)
       });
     });
-    
+
     await chainService.getEventsFromBlock(chainService.newPropertyManager, ChainServiceEvents.NewPropertyApplication, prevBlockNumber).then(async (events) => {
       await pIteration.forEach(events, geoDataService.handleNewApplicationEvent.bind(geoDataService));
     });
@@ -108,7 +109,7 @@ const config = require('./config');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
     });
-    
+
     chainService.subscribeForNewEvents(chainService.newPropertyManager, ChainServiceEvents.NewPropertyApplication, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New NewPropertyApplication event, blockNumber:', currentBlockNumber);
       await geoDataService.handleNewApplicationEvent(newEvent);
@@ -120,7 +121,7 @@ const config = require('./config');
       await geoDataService.handleNewApplicationEvent(newEvent);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
-    
+
     chainService.subscribeForNewEvents(chainService.newPropertyManager, ChainServiceEvents.NewPropertyApplicationStatusChanged, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New NewPropertyApplication event, blockNumber:', currentBlockNumber);
       await geoDataService.handleNewApplicationEvent(newEvent);
@@ -130,27 +131,27 @@ const config = require('./config');
     const subscribedToPrivatePropertyRegistry = {
       // registryAddress => bool
     };
-    
+
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
       await pIteration.forEach(events, async (e) => {
         await subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
     });
-    
+
     chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add PrivatePropertyRegistry event, blockNumber:', currentBlockNumber);
       subscribeToPrivatePropertyRegistry(newEvent.returnValues.token);
       await geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
-    
+
     async function subscribeToPrivatePropertyRegistry (address) {
       if(subscribedToPrivatePropertyRegistry[address]) {
         return;
       }
       console.log('📢 Subscribed to Private Property Registry:', address);
-      
+
       subscribedToPrivatePropertyRegistry[address] = true;
       const contract = chainService.getPropertyRegistryContract(address);
 
@@ -203,7 +204,7 @@ const config = require('./config');
         return geoDataService.handleSaleOfferEvent(e)
       });
     });
-    
+
     await chainService.subscribeForNewEvents(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, currentBlockNumber, async (err, newEvent) => {
       return geoDataService.handleSaleOrderEvent(newEvent)
     });
@@ -216,13 +217,197 @@ const config = require('./config');
       });
     });
 
+
+    const subscribedToCommunity = {
+      // communityAddress => bool
+    };
+
+    await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, prevBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, async (e) => {
+        await subscribeToPrivatePropertyRegistry(e.returnValues.token);
+        return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
+      });
+    });
+
+    await chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (e) => {
+      await subscribeToPrivatePropertyRegistry(e.returnValues.token);
+      return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
+    });
+
+    await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, prevBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, async (e) => {
+        const fundId = e.returnValues.fundId;
+        const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+        fundDeployment.blockNumber = e.blockNumber;
+        await geoDataService.handleNewCommunityEvent(fundDeployment, true);
+        subscribeToCommunity(fundDeployment.fundRA, true);
+      });
+    });
+
+    await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, prevBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, async (e) => {
+        const fundId = e.returnValues.fundId;
+        const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
+        fundDeployment.blockNumber = e.blockNumber;
+        await geoDataService.handleNewCommunityEvent(fundDeployment, true);
+        return subscribeToCommunity(fundDeployment.fundRA, true);
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.communityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
+      const fundId = newEvent.returnValues.fundId;
+      const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+      fundDeployment.blockNumber = newEvent.blockNumber;
+      await geoDataService.handleNewCommunityEvent(fundDeployment, true);
+      await subscribeToCommunity(fundDeployment.fundRA, true);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
+
+    async function subscribeToCommunity (address, isDecentralized) {
+      if(subscribedToCommunity[address]) {
+        return;
+      }
+      console.log('📢 Subscribed to Community:', address);
+
+      subscribedToCommunity[address] = true;
+      const contractRa = await chainService.getCommunityRaContract(address, isDecentralized);
+
+      const storageAddress = await await chainService.callContractMethod(contractRa, 'fundStorage', []);
+
+      const contractStorage = await chainService.getCommunityContract(storageAddress, isDecentralized);
+
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityMint, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityMintEvent(address, e, isDecentralized);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityBurn, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityBurnEvent(address, e, isDecentralized);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityMint, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityMint event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityMintEvent(address, newEvent, isDecentralized);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityBurn, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityBurn event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityBurnEvent(address, newEvent, isDecentralized);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      let proposalManagersAddresses = [];
+
+      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityAddMarker, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          proposalManagersAddresses.push(e.returnValues.proposalManager.toLowerCase());
+          await geoDataService.handleCommunityAddVotingEvent(address, e);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityRemoveMarker, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityRemoveVotingEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityAddMarker, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityAddMarker event, blockNumber:', currentBlockNumber);
+        proposalManagersAddresses.push(newEvent.returnValues.proposalManager.toLowerCase());
+        await geoDataService.handleCommunityAddVotingEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityRemoveMarker, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityRemoveMarker event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityRemoveVotingEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      proposalManagersAddresses = _.uniq(proposalManagersAddresses);
+      proposalManagersAddresses.forEach(pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
+    }
+
+    async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
+      const contractPm = await chainService.getCommunityProposalManagerContract(proposalManagerAddress);
+
+      await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityNewProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          // console.log('CommunityNewProposal', _.pick(e,['contractAddress', 'returnValues']));
+          await geoDataService.handleCommunityAddProposalEvent(communityAddress, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityNewProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityNewProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityAddProposalEvent(communityAddress, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityAyeProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          // console.log('CommunityAyeProposal', _.pick(e,['contractAddress', 'returnValues']));
+          await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityNayProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          // console.log('CommunityNayProposal', _.pick(e,['contractAddress', 'returnValues']));
+          await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityAyeProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityNewProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityNayProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityNewProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      // await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityApprovedProposal, prevBlockNumber).then(async (events) => {
+      //   await pIteration.forEach(events, async (e) => {
+      //     console.log('CommunityApprovedProposal', _.pick(e,['contractAddress', 'returnValues']));
+      //     await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
+      //   });
+      // });
+      //
+      // await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityRejectedProposal, prevBlockNumber).then(async (events) => {
+      //   await pIteration.forEach(events, async (e) => {
+      //     await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
+      //   });
+      // });
+
+      // chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityApprovedProposal, currentBlockNumber, async (err, newEvent) => {
+      //   console.log('🛎 New CommunityApprovedProposal event, blockNumber:', currentBlockNumber);
+      //   await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, newEvent);
+      //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      // });
+      //
+      // chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityRejectedProposal, currentBlockNumber, async (err, newEvent) => {
+      //   console.log('🛎 New CommunityRejectedProposal event, blockNumber:', currentBlockNumber);
+      //   await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, newEvent);
+      //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      // });
+    }
+
     // console.log('events finish');
     // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);
     // console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
     //
     // const byInnerGeohashResult = await geohashService.getContoursByInnerGeohash('w24q8xwfk4u3', chainService.spaceGeoData._address);
     // console.log('byInnerGeohashResult after for w24q8xwfk4u3', byInnerGeohashResult);
-    
+
     // const spaceTokens = await geoDataService.filterSpaceTokens({
     //   // owner: "0xf0430bbb78C3c359c22d4913484081A563B86170",
     //   contractAddress: '0xC8c42c67A624dcFEDEF6b8733f9F3E7a89a54890'
@@ -253,7 +438,7 @@ const config = require('./config');
       //   // surroundingsGeohashBox: ['9q598'],
       //   // limit: 2
       //   types: ['land'],
-      //    
+      //
       //   availableRoles: ['PM_LAWYER_ORACLE_TYPE', 'PM_SURVEYOR_ORACLE_TYPE'],
       //   bedroomsCountMin: 3,
       // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
@@ -289,13 +474,22 @@ const config = require('./config');
     // //   groupBy: 'levelNumber'
     // });
     // console.log('found spaceTokens', spaceTokens.list.map(st => st));
-    
+
     // const privateProperties = await geoDataService.filterPrivatePropertyRegistries({
     //   surroundingsGeohashBox: ["dr5n6","dr5n7","dr5nk","dr5nm","dr5nq","dr5nr","dr5q2","dr5q3","dr5q6","dr5q7","dr5qk","dr5qm","dr5qq","dr5qr","dr5w2","dr5w3","dr5w6","dr5w7","dr5wk","dr5wm","dr5wq","dr5nd","dr5ne","dr5ns","dr5nt","dr5nw","dr5nx","dr5q8","dr5q9","dr5qd","dr5qe","dr5qs","dr5qt","dr5qw","dr5qx","dr5w8","dr5w9","dr5wd","dr5we","dr5ws","dr5wt","dr5ww","dr5nf","dr5ng","dr5nu","dr5nv","dr5ny","dr5nz","dr5qb","dr5qc","dr5qf","dr5qg","dr5qu","dr5qv","dr5qy","dr5qz","dr5wb","dr5wc","dr5wf","dr5wg","dr5wu","dr5wv","dr5wy","dr5p4","dr5p5","dr5ph","dr5pj","dr5pn","dr5pp","dr5x0","dr5x1","dr5x4","dr5x5","dr5xh","dr5xj","dr5xn","dr5p6","dr5p7","dr5pk","dr5pm","dr5pq","dr5pr","dr5x2","dr5x3","dr5x6","dr5x7","dr5xk","dr5xm","dr5xq","dr5pd","dr5pe","dr5ps","dr5pt","dr5pw","dr5px","dr5x8","dr5x9","dr5xd","dr5xe","dr5xs","dr5xt","dr5xw","dr5pf","dr5pg","dr5pu","dr5pv","dr5py","dr5pz","dr5xb","dr5xc","dr5xf","dr5xg","dr5xu","dr5xv","dr5xy","dr704","dr705","dr70h","dr70j","dr70n","dr70p","dr720","dr721","dr724","dr725","dr72h","dr72j","dr72n","dr72p","dr780","dr781","dr784","dr785","dr78h","dr78j","dr78n","dr706","dr707","dr70k","dr70m","dr70q","dr70r","dr722","dr723","dr726","dr727","dr72k","dr72m","dr72q","dr72r","dr782","dr783","dr786","dr787","dr78k","dr78m","dr78q","dr70d","dr70e","dr70s","dr70t","dr70w","dr70x","dr728","dr729","dr72d","dr72e","dr72s","dr72t","dr72w","dr72x","dr788","dr789","dr78d","dr78e","dr78s","dr78t","dr78w","dr5r"]
     //   // surroundingsGeohashBox: ["dr5n6"]
     // });
     //
     // console.log('found pprs', privateProperties.list);
+
+    // const communityTokenOwnersCount = await database.filterCommunityTokensCount({
+    //   groupBy: 'owner',
+    //   communityAddress: '0x57643B519b92fF772068136177A47C8f68cB943C'
+    //     // surroundingsGeohashBox: ["dr5n6","dr5n7","dr5nk","dr5nm","dr5nq","dr5nr","dr5q2","dr5q3","dr5q6","dr5q7","dr5qk","dr5qm","dr5qq","dr5qr","dr5w2","dr5w3","dr5w6","dr5w7","dr5wk","dr5wm","dr5wq","dr5nd","dr5ne","dr5ns","dr5nt","dr5nw","dr5nx","dr5q8","dr5q9","dr5qd","dr5qe","dr5qs","dr5qt","dr5qw","dr5qx","dr5w8","dr5w9","dr5wd","dr5we","dr5ws","dr5wt","dr5ww","dr5nf","dr5ng","dr5nu","dr5nv","dr5ny","dr5nz","dr5qb","dr5qc","dr5qf","dr5qg","dr5qu","dr5qv","dr5qy","dr5qz","dr5wb","dr5wc","dr5wf","dr5wg","dr5wu","dr5wv","dr5wy","dr5p4","dr5p5","dr5ph","dr5pj","dr5pn","dr5pp","dr5x0","dr5x1","dr5x4","dr5x5","dr5xh","dr5xj","dr5xn","dr5p6","dr5p7","dr5pk","dr5pm","dr5pq","dr5pr","dr5x2","dr5x3","dr5x6","dr5x7","dr5xk","dr5xm","dr5xq","dr5pd","dr5pe","dr5ps","dr5pt","dr5pw","dr5px","dr5x8","dr5x9","dr5xd","dr5xe","dr5xs","dr5xt","dr5xw","dr5pf","dr5pg","dr5pu","dr5pv","dr5py","dr5pz","dr5xb","dr5xc","dr5xf","dr5xg","dr5xu","dr5xv","dr5xy","dr704","dr705","dr70h","dr70j","dr70n","dr70p","dr720","dr721","dr724","dr725","dr72h","dr72j","dr72n","dr72p","dr780","dr781","dr784","dr785","dr78h","dr78j","dr78n","dr706","dr707","dr70k","dr70m","dr70q","dr70r","dr722","dr723","dr726","dr727","dr72k","dr72m","dr72q","dr72r","dr782","dr783","dr786","dr787","dr78k","dr78m","dr78q","dr70d","dr70e","dr70s","dr70t","dr70w","dr70x","dr728","dr729","dr72d","dr72e","dr72s","dr72t","dr72w","dr72x","dr788","dr789","dr78d","dr78e","dr78s","dr78t","dr78w","dr5r"]
+    //     // surroundingsGeohashBox: ["dr5n6"]
+    //   });
+    //
+    //   console.log('communityTokenOwnersCount', communityTokenOwnersCount);
 
     await database.setValue('lastBlockNumber', currentBlockNumber.toString());
 

@@ -8,8 +8,10 @@
  */
 
 import {
+  IExplorerCommunityMintEvent,
+  IExplorerCommunityBurnEvent,
   IExplorerGeoDataEvent,
-  IExplorerNewApplicationEvent,
+  IExplorerNewApplicationEvent, IExplorerNewCommunityEvent,
   IExplorerNewPrivatePropertyRegistryEvent, IExplorerSaleOfferEvent,
   IExplorerSaleOrderEvent
 } from "../interfaces";
@@ -19,14 +21,25 @@ import {
   ApplicationsQuery,
   IApplication,
   SpaceTokensQuery,
-  ISpaceTokenGeoData, ISaleOffer, SaleOffersQuery, PrivatePropertyRegistryQuery, IPrivatePropertyRegistry
+  ISpaceTokenGeoData,
+  ISaleOffer,
+  SaleOffersQuery,
+  PrivatePropertyRegistryQuery,
+  IPrivatePropertyRegistry,
+  CommunityQuery,
+  ICommunity,
+  ICommunityVoting,
+  CommunityVotingQuery,
+  CommunityProposalQuery,
+  ICommunityProposal,
+  ICommunityMember, CommunityMemberQuery, CommunityTokensQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
   handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
-  
+
   handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
-  
+
   handleSaleOfferEvent(event: IExplorerSaleOfferEvent): Promise<void>;
 
   filterOrders(ordersQuery: FilterSaleOrdersGeoQuery): Promise<ISaleOrdersListResponse>;
@@ -54,6 +67,34 @@ export default interface IExplorerGeoDataService {
   filterPrivatePropertyRegistries(pprQuery: FilterPrivatePropertyRegistryGeoQuery): Promise<IPrivatePropertyRegistryListResponse>;
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
+
+  handleNewCommunityEvent(address: string, isDecentralized): Promise<void>;
+
+  handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isDecentralized): Promise<void>;
+
+  handleCommunityBurnEvent(communityAddress, event: IExplorerCommunityBurnEvent, isDecentralized): Promise<void>;
+
+  handleCommunityAddVotingEvent(communityAddress, event);
+
+  handleCommunityRemoveVotingEvent(communityAddress, event);
+
+  handleCommunityAddProposalEvent(communityAddress, event);
+
+  handleCommunityUpdateProposalEvent(communityAddress, event);
+
+  updateCommunity(address, isDecentralized): Promise<void>;
+
+  filterCommunities(communityQuery: FilterCommunityGeoQuery): Promise<ICommunityListResponse>;
+
+  getCommunity(address): Promise<ICommunity>;
+
+  filterCommunityTokens(communityQuery: CommunityTokensQuery): Promise<ICommunityTokensListResponse>;
+
+  filterCommunityVotings(communityQuery: CommunityVotingQuery): Promise<ICommunityVotingListResponse>;
+
+  filterCommunityProposals(communityQuery: CommunityProposalQuery): Promise<ICommunityProposalListResponse>;
+
+  filterCommunityMembers(communityQuery: CommunityMemberQuery): Promise<ICommunityMemberListResponse>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -95,4 +136,31 @@ export interface ISpaceTokensListResponse {
 export interface ISaleOffersListResponse {
   list: ISaleOffer[];
   total: number;
+}
+
+export interface ICommunityListResponse {
+  list: ICommunity[];
+  total: number;
+}
+
+export interface ICommunityVotingListResponse {
+  list: ICommunityVoting[];
+  total: number;
+}
+
+export interface ICommunityProposalListResponse {
+  list: ICommunityProposal[];
+  total: number;
+}
+export interface ICommunityMemberListResponse {
+  list: ICommunityMember[];
+  total: number;
+}
+export interface ICommunityTokensListResponse {
+  list: ISpaceTokenGeoData[];
+  total: number;
+}
+
+export interface FilterCommunityGeoQuery extends CommunityQuery {
+  surroundingsGeohashBox?: string[];
 }

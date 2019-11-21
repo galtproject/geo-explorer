@@ -8,6 +8,8 @@
  */
 
 import IExplorerDatabase, {
+  CommunityMemberQuery, CommunityProposalQuery, CommunityTokensQuery, CommunityVotingQuery,
+  ICommunity,
   ISaleOffer,
   PrivatePropertyRegistryQuery,
   SaleOffersQuery,
@@ -15,12 +17,12 @@ import IExplorerDatabase, {
 } from "../../../database/interface";
 import {
   default as IExplorerGeoDataService,
-  FilterApplicationsGeoQuery, FilterPrivatePropertyRegistryGeoQuery,
+  FilterApplicationsGeoQuery, FilterCommunityGeoQuery, FilterPrivatePropertyRegistryGeoQuery,
   FilterSaleOrdersGeoQuery,
   FilterSpaceTokensGeoQuery
 } from "../interface";
 import {
-  IExplorerChainContourEvent,
+  IExplorerChainContourEvent, IExplorerCommunityMintEvent,
   IExplorerGeoDataEvent, IExplorerNewApplicationEvent,
   IExplorerResultContour,
   IExplorerSaleOrderEvent
@@ -39,10 +41,10 @@ module.exports = async (database: IExplorerDatabase, geohashService: IExplorerGe
     server: 'https://geesome-node.galtproject.io:7722',
     apiKey: "MCYK5V1-15Q48EQ-QSEKRWX-1ZS0SPW"
   });
-  
+
   await geesome.init();
   await geesome.initRuntimeIpfsNode();
-  
+
   return new ExplorerGeoDataV1Service(database, geohashService, chainService, geesome);
 };
 
@@ -59,30 +61,34 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     this.chainService = _chainService;
   }
 
+  // =============================================================
+  // Space Tokens
+  // =============================================================
+
   async handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent) {
     let tokenId: string = event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'] || event.returnValues['_spaceTokenId'] || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'];
-    await this.saveSpaceTokenById(spaceGeoDataAddress, tokenId, { createdAtBlock: event.blockNumber });
+    await this.saveSpaceTokenById(spaceGeoDataAddress, tokenId, {createdAtBlock: event.blockNumber});
   };
-  
+
   async saveSpaceTokenById(contractAddress, tokenId, additionalData = {}) {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId);
-    
+
     let level;
-    if(geoData.humanAddress) {
+    if (geoData.humanAddress) {
       const split = geoData.humanAddress.split('|\n');
       split.some(s => {
-        if(s && s.split('=')[0] === 'floor') {
+        if (s && s.split('=')[0] === 'floor') {
           level = s.split('=')[1];
           return true;
         }
       })
     }
-    
-    if(level || geoData.spaceTokenType) {
+
+    if (level || geoData.spaceTokenType) {
       await this.database.addOrUpdateContour(geoData.geohashContour, tokenId, contractAddress, level, geoData.spaceTokenType);
     }
-    
+
     const lockerOwner = await this.chainService.getLockerOwner(owner);
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
@@ -97,9 +103,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ...additionalData
     })
   }
-  
+
   async saveSpaceTokenByDataLink(contractAddress, dataLink, geoData) {
-    
+
     let geoDataToSave = {
       contractAddress,
       isPrivate: !this.chainService.spaceGeoData || contractAddress.toLowerCase() !== this.chainService.spaceGeoData._address.toLowerCase(),
@@ -120,23 +126,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       createdAtBlock: geoData.createdAtBlock,
       updatedAtBlock: geoData.createdAtBlock
     };
-    
-    if(!isIpldHash(dataLink)) {
+
+    if (!isIpldHash(dataLink)) {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
-    
+
     const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
     let {details, floorPlans, photos} = spaceData;
 
-    if(!details) {
+    if (!details) {
       details = spaceData.data;
     }
 
-    if(!details) {
+    if (!details) {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
-    
-    if(details.region) {
+
+    if (details.region) {
       geoDataToSave = _.extend({
         fullRegion: details.region.join(', '),
         regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
@@ -163,7 +169,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ledgerIdentifier: details.ledgerIdentifier || geoData.ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     }, geoDataToSave);
-    
+
     return this.addOrUpdateGeoData(geoDataToSave);
   }
 
@@ -173,22 +179,40 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
   }
 
+  async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
+    if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
+    }
+    return {
+      list: await this.database.filterSpaceTokens(filterQuery),
+      total: await this.database.filterSpaceTokensCount(filterQuery)
+    };
+  }
+
+  async getSpaceTokenById(tokenId, contractAddress) {
+    return this.database.getSpaceToken(tokenId, contractAddress);
+  }
+
+  // =============================================================
+  // Sale Orders
+  // =============================================================
+
   async handleSaleOrderEvent(event: IExplorerSaleOrderEvent) {
     let orderId: string = event.returnValues.orderId;
-    
+
     const chainOrder = await this.chainService.getSaleOrder(event.contractAddress, orderId);
-    
+
     const dbSpaceTokens = await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
       const geoDataAddress = chainOrder.details.propertyToken || this.chainService.spaceGeoData._address;
       const spaceToken = await this.database.getSpaceTokenGeoData(id, geoDataAddress);
-      if(spaceToken) {
+      if (spaceToken) {
         spaceToken.spaceTokensOrders = {position};
       }
       return spaceToken;
     });
 
     let orderData: any = {};
-    if(chainOrder.details.dataAddress) {
+    if (chainOrder.details.dataAddress) {
       orderData = await this.geesome.getObject(chainOrder.details.dataAddress);
     }
 
@@ -196,29 +220,30 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     dbSpaceTokens.forEach(token => {
       try {
         const spaceData = JSON.parse(token.dataJson);
-        if(spaceData) {
+        if (spaceData) {
           allFeatures = allFeatures.concat((spaceData.details || {}).features || []);
         }
-      } catch (e) {}
+      } catch (e) {
+      }
     });
 
     allFeatures = _.uniq(allFeatures);
-    
+
     let allTypesSubTypes = [];
     dbSpaceTokens.forEach(token => {
       allTypesSubTypes = allTypesSubTypes.concat([token.type, token.subtype].filter(s => s));
     });
 
     allTypesSubTypes = _.uniq(allTypesSubTypes);
-    
+
     const currency = chainOrder.escrowCurrency.toString(10) == '0' ? 'eth' : 'erc20';
     let currencyName = 'ETH';
-    if(currency === 'erc20') {
+    if (currency === 'erc20') {
       currencyName = await this.chainService.getContractSymbol(chainOrder.tokenContract);
     }
-    
+
     console.log(orderId, 'tokens types', dbSpaceTokens.map(s => [s.tokenType, s.area]));
-    
+
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
       currency,
@@ -241,14 +266,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       createdAtBlock: event.blockNumber,
       updatedAtBlock: event.blockNumber
     });
-    
+
     console.log('order saved', dbOrder.orderId, event.contractAddress);
-    
+
     await dbOrder.setSpaceTokens(dbSpaceTokens);
   };
-  
+
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
-    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+    if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
       filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     return {
@@ -256,35 +281,80 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       total: await this.database.filterSaleOrdersCount(filterQuery)
     };
   }
-  
+
   async getOrderById(orderId, contractAddress) {
     return this.database.getSaleOrder(orderId, contractAddress);
   }
-  
+
+  // =============================================================
+  // Sale Offers
+  // =============================================================
+
+  async handleSaleOfferEvent(event) {
+    let {orderId, buyer} = event.returnValues;
+    if (!orderId) {
+      orderId = event.returnValues.saleOrderId;
+    }
+
+    const saleOffer = await this.chainService.getSaleOffer(event.contractAddress, orderId, buyer);
+
+    const dbOrder = await this.database.getSaleOrder(orderId, event.contractAddress);
+
+    const saleOfferData: ISaleOffer = {
+      contractAddress: event.contractAddress,
+      orderId: orderId,
+      buyer,
+      seller: dbOrder.seller,
+      ask: saleOffer.ask,
+      bid: saleOffer.bid,
+      lastOfferAskAt: new Date().setTime(saleOffer.lastAskAt),
+      lastOfferBidAt: new Date().setTime(saleOffer.lastBidAt),
+      createdOfferAt: new Date().setTime(saleOffer.createdAt),
+      dbOrderId: dbOrder ? dbOrder.id : null
+    };
+
+    await this.database.addOrUpdateSaleOffer(saleOfferData);
+  }
+
+  async getSaleOfferById(orderId, buyer, contractAddress) {
+    return this.database.getSaleOffer(orderId, buyer, contractAddress);
+  }
+
+  async filterSaleOffers(filterQuery: SaleOffersQuery) {
+    return {
+      list: await this.database.filterSaleOffers(filterQuery),
+      total: await this.database.filterSaleOffersCount(filterQuery)
+    };
+  }
+
+  // =============================================================
+  // Applications
+  // =============================================================
+
   async handleNewApplicationEvent(event: IExplorerNewApplicationEvent) {
     const {contractAddress} = event;
     const {applicationId, applicant} = event.returnValues;
-    
+
     const spaceGeoDataAddress = this.chainService.spaceGeoData._address;
 
     const application = await this.chainService.getNewPropertyApplication(applicationId);
     const applicationDetails = await this.chainService.getNewPropertyApplicationDetails(applicationId);
-    
+
     const oracles = [];
     const availableRoles = [];
     let totalOraclesReward = 0;
-    
+
     await pIteration.map(application.assignedOracleTypes, async (roleName) => {
       const roleOracle = await this.chainService.getNewPropertyApplicationOracle(applicationId, roleName);
-      if(roleOracle.status === 'pending') {
+      if (roleOracle.status === 'pending') {
         availableRoles.push(roleName);
       }
-      if(roleOracle.address) {
+      if (roleOracle.address) {
         oracles.push(roleOracle.address);
       }
       totalOraclesReward += roleOracle.reward;
     });
-    
+
     const applicationData = {
       applicationId,
       applicantAddress: applicant,
@@ -306,19 +376,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       updatedAtBlock: event.blockNumber,
       totalOraclesReward
     };
-    
+
     let dbApplication = await this.database.addOrUpdateApplication(applicationData);
-    
-    if(!dbApplication) {
+
+    if (!dbApplication) {
       dbApplication = await this.database.addOrUpdateApplication(applicationData);
     }
-    
-    if(parseInt(application.tokenId)) {
+
+    if (parseInt(application.tokenId)) {
       const spaceToken = await this.saveSpaceTokenById(spaceGeoDataAddress, application.tokenId, {
         createdAtBlock: event.blockNumber,
         ...applicationDetails
       });
-      if(spaceToken) {
+      if (spaceToken) {
         await dbApplication.addSpaceTokens([spaceToken]);
       }
     } else {
@@ -327,16 +397,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         createdAtBlock: event.blockNumber,
         ...applicationDetails
       });
-      if(spaceToken) {
+      if (spaceToken) {
         await dbApplication.addSpaceTokens([spaceToken]);
       }
     }
     // console.log('spaceToken', spaceToken);
-    
+
   };
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {
-    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+    if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
       filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     return {
@@ -349,25 +419,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.database.getApplication(applicationId, contractAddress);
   }
 
-  async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
-    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
-    }
-    return {
-      list: await this.database.filterSpaceTokens(filterQuery),
-      total: await this.database.filterSpaceTokensCount(filterQuery)
-    };
-  }
-
-  async getSpaceTokenById(tokenId, contractAddress) {
-    return this.database.getSpaceToken(tokenId, contractAddress);
-  }
+  // =============================================================
+  // Private Property Registries
+  // =============================================================
 
   async handleNewPrivatePropertyRegistryEvent(event) {
     const address = event.returnValues.token;
     return this.updatePrivatePropertyRegistry(address);
   }
-  
+
   async updatePrivatePropertyRegistry(address) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
@@ -376,7 +436,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const owner = await contract.methods.owner().call({});
     const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
 
-    await this.database.addOrPrivatePropertyRegistry({ address, owner, totalSupply, name, symbol });
+    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol});
   }
 
   async getPrivatePropertyRegistry(address) {
@@ -384,7 +444,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async filterPrivatePropertyRegistries(filterQuery: FilterPrivatePropertyRegistryGeoQuery) {
-    if(filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+    if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
       filterQuery.addresses = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
     }
     return {
@@ -392,40 +452,262 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       total: await this.database.filterPrivatePropertyRegistryCount(filterQuery)
     };
   }
-  async handleSaleOfferEvent(event) {
-    let { orderId, buyer } = event.returnValues;
-    if(!orderId) {
-      orderId = event.returnValues.saleOrderId;
+
+  // =============================================================
+  // Communities
+  // =============================================================
+
+  async handleNewCommunityEvent(event, isDecentralized) {
+    return this.updateCommunity(event.fundRA, isDecentralized, event.blockNumber);
+  }
+
+  async updateCommunity(raAddress, isDecentralized, createdAtBlock?) {
+    // console.log('updateCommunity', raAddress, isDecentralized);
+    const raContract = await this.chainService.getCommunityRaContract(raAddress, isDecentralized);
+    const storageAddress = await this.chainService.callContractMethod(raContract, 'fundStorage', []);
+
+    const contract = await this.chainService.getCommunityContract(storageAddress, isDecentralized);
+    const community = await this.database.getCommunity(raAddress);
+
+    const multiSigAddress = await this.chainService.callContractMethod(contract, 'getMultiSig', []);
+
+    const name = await contract.methods.name().call({});
+    const description = await contract.methods.description().call({});
+    const activeFundRulesCount =  await this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number');
+    const tokensCount = community ? await this.database.getCommunityTokensCount(community) : 0;
+    console.log(raAddress, 'tokensCount', tokensCount);
+
+    const spaceTokenOwnersCount = await this.database.filterCommunityMemberCount({
+      communityAddress: raAddress
+    });
+    const reputationTotalSupply = await this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei');
+
+    const isPrivate = (await contract.methods.getConfigValue(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+    const _community = await this.database.addOrUpdateCommunity({
+      address: raAddress,
+      storageAddress,
+      multiSigAddress,
+      isDecentralized,
+      isPrivate,
+      tokensCount,
+      activeFundRulesCount,
+      spaceTokenOwnersCount,
+      reputationTotalSupply,
+      description,
+      name,
+      createdAtBlock
+    });
+    if(!community) {
+      console.log('community created', raAddress, JSON.stringify(_community))
     }
-    
-    const saleOffer = await this.chainService.getSaleOffer(event.contractAddress, orderId, buyer);
-
-    const dbOrder = await this.database.getSaleOrder(orderId, event.contractAddress);
-    
-    const saleOfferData: ISaleOffer = {
-      contractAddress: event.contractAddress,
-      orderId: orderId,
-      buyer,
-      seller: dbOrder.seller,
-      ask: saleOffer.ask,
-      bid: saleOffer.bid,
-      lastOfferAskAt: new Date().setTime(saleOffer.lastAskAt),
-      lastOfferBidAt: new Date().setTime(saleOffer.lastBidAt),
-      createdOfferAt: new Date().setTime(saleOffer.createdAt),
-      dbOrderId: dbOrder ? dbOrder.id : null
-    };
-    
-    await this.database.addOrUpdateSaleOffer(saleOfferData);
   }
 
-  async getSaleOfferById(orderId, buyer, contractAddress) {
-    return this.database.getSaleOffer(orderId, buyer, contractAddress);
+  async updateCommunityMember(community: ICommunity, address) {
+    const contract = await this.chainService.getCommunityContract(community.storageAddress, community.isDecentralized);
+
+    const fullNameHash = await this.chainService.callContractMethod(contract, 'getMemberIdentification', [address], 'bytes32');
+
+    const raContract = await this.chainService.getCommunityRaContract(community.address, community.isDecentralized);
+
+    const currentReputation = await this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei');
+    const basicReputation = await this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei');
+
+    const tokensCount = (await this.database.getCommunityMemberTokens(community, address)).length;
+
+    if(tokensCount > 0) {
+      await this.database.addOrUpdateCommunityMember(community, {
+        address,
+        currentReputation,
+        basicReputation,
+        tokensCount,
+        fullNameHash,
+        communityAddress: community.address
+      });
+    } else {
+      const member = await this.database.getCommunityMember(community.id, address);
+      if(member) {
+        member.destroy();
+      }
+    }
   }
 
-  async filterSaleOffers(filterQuery: SaleOffersQuery) {
+  async handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isDecentralized) {
+    const community = await this.database.getCommunity(communityAddress);
+    const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
+
+    console.log('addSpaceTokens', propertyToken.tokenId);
+    await community.addSpaceTokens([propertyToken]);
+
+    await this.updateCommunityMember(community, propertyToken.owner);
+
+    return this.updateCommunity(communityAddress, isDecentralized);
+  }
+
+  async handleCommunityBurnEvent(communityAddress, event, isDecentralized) {
+    const community = await this.database.getCommunity(communityAddress);
+    const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
+
+    await community.removeSpaceTokens([propertyToken]);
+
+    await this.updateCommunityMember(community, propertyToken.owner);
+
+    return this.updateCommunity(communityAddress, isDecentralized);
+  }
+
+  async handleCommunityAddVotingEvent(communityAddress, event) {
+    return this.updateCommunityVoting(communityAddress, event.returnValues.marker);
+  }
+
+  async updateCommunityVoting(communityAddress, marker) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    const contract = await this.chainService.getCommunityContract(community.storageAddress, community.isDecentralized);
+
+    const markerData = await contract.methods.getProposalMarker(marker).call({});
+
+    let threshold = await this.chainService.callContractMethod(contract, 'thresholds', [marker], 'number');
+    if(!threshold) {
+      threshold = await this.chainService.callContractMethod(contract, 'defaultProposalThreshold', [], 'number');
+    }
+    threshold /= 10000;
+
+    const proposalManager = markerData._proposalManager;
+    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
+
+    const activeProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getActiveProposalsCount', [marker], 'number');
+
+    await this.database.addOrUpdateCommunityVoting(community, {
+      communityAddress,
+      marker,
+      proposalManager,
+      name: this.chainService.hexToString(markerData._name),
+      description: markerData._description,
+      destination: markerData._destination,
+      threshold,
+      activeProposalsCount,
+      totalProposalsCount: await this.database.filterCommunityProposalCount({communityAddress, marker})
+    });
+
+    await this.database.addOrUpdateCommunity({
+      address: communityAddress,
+      pmAddress: proposalManager
+    });
+  }
+
+  async handleCommunityRemoveVotingEvent(communityAddress, event) {
+    const community = await this.database.getCommunity(communityAddress);
+    if(!community) {
+      return;
+    }
+
+    const communityVoting = await this.database.getCommunityVoting(community.id, event.returnValues.marker);
+
+    if(!communityVoting) {
+      return;
+    }
+
+    return communityVoting.destroy();
+  }
+
+  async handleCommunityAddProposalEvent(communityAddress, event) {
+    return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
+  }
+
+  async handleCommunityUpdateProposalEvent(communityAddress, event) {
+    return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
+  }
+
+  async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    if(!marker) {
+      const proposal = await this.database.getCommunityProposalByVotingAddress(pmAddress, proposalId);
+      if(!proposal) {
+        return console.error('Not found proposal', proposalId, 'in', pmAddress);
+      }
+      marker = proposal.marker;
+    }
+
+    const voting = await this.database.getCommunityVoting(community.id, marker);
+
+    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(pmAddress);
+
+    const proposalData = await proposalManagerContract.methods.proposals(proposalId).call({});
+    const proposalVotingData = await proposalManagerContract.methods.getProposalVoting(proposalId).call({});
+
+    const status = {
+      '0': null,
+      '1': 'active',
+      '2': 'approved',
+      '3': 'executed',
+      '4': 'rejected'
+    }[proposalData.status];
+
+    let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'number');
+    let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'number');
+
+    ayeShare /= 10000;
+    nayShare /= 10000;
+
+    await this.database.addOrUpdateCommunityProposal(voting, {
+      communityAddress,
+      marker,
+      proposalId,
+      pmAddress,
+      creatorAddress: proposalData.creator,
+      communityId: community.id,
+      acceptedShare: ayeShare,
+      acceptedCount: proposalVotingData.ayes.length,
+      declinedShare: nayShare,
+      declinedCount: proposalVotingData.nays.length,
+      status,
+      description: proposalData.description
+    });
+    // console.log('newProposal', JSON.stringify(newProposal));
+
+    await this.updateCommunityVoting(communityAddress, marker);
+  }
+
+  async getCommunity(address) {
+    return this.database.getCommunity(address);
+  }
+
+  async filterCommunities(filterQuery: FilterCommunityGeoQuery) {
+    if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
+      filterQuery.addresses = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
+    }
     return {
-      list: await this.database.filterSaleOffers(filterQuery),
-      total: await this.database.filterSaleOffersCount(filterQuery)
+      list: await this.database.filterCommunity(filterQuery),
+      total: await this.database.filterCommunityCount(filterQuery)
+    };
+  }
+
+  async filterCommunityTokens(filterQuery: CommunityTokensQuery) {
+    return {
+      list: await this.database.filterCommunityTokens(filterQuery),
+      total: await this.database.filterCommunityTokensCount(filterQuery)
+    };
+  }
+
+  async filterCommunityMembers(filterQuery: CommunityMemberQuery) {
+    return {
+      list: await this.database.filterCommunityMember(filterQuery),
+      total: await this.database.filterCommunityMemberCount(filterQuery)
+    };
+  }
+
+  async filterCommunityVotings(filterQuery: CommunityVotingQuery) {
+    return {
+      list: await this.database.filterCommunityVoting(filterQuery),
+      total: await this.database.filterCommunityVotingCount(filterQuery)
+    };
+  }
+
+  async filterCommunityProposals(filterQuery: CommunityProposalQuery) {
+    return {
+      list: await this.database.filterCommunityProposal(filterQuery),
+      total: await this.database.filterCommunityProposalCount(filterQuery)
     };
   }
 }

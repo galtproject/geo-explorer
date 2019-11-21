@@ -22,6 +22,12 @@ export default interface IExplorerChainService {
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
 
+  communityFactory: any;
+  communityMockFactory: any;
+
+  decentralizedCommunityRegistry: any;
+  pprCommunityRegistry: any;
+
   callbackOnReconnect: any;
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
@@ -31,11 +37,13 @@ export default interface IExplorerChainService {
   getCurrentBlock(): Promise<number>;
 
   onReconnect(callback): void;
-  
+
   getLockerOwner(address): Promise<string>;
 
   getContractSymbol(address): Promise<string>;
-  
+
+  callContractMethod(contract, method, args, type?): Promise<any>;
+
   getSpaceTokenOwner(contractAddress, tokenId): Promise<string>;
 
   getSpaceTokenArea(contractAddress, tokenId): Promise<number>;
@@ -45,16 +53,24 @@ export default interface IExplorerChainService {
   getSpaceTokenData(contractAddress, tokenId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[], ledgerIdentifier: string }>;
 
   getSaleOrder(contractAddress, orderId): Promise<ChainServiceSaleOrder>;
-  
+
   getSaleOffer(contractAddress, orderId, buyer): Promise<ChainServiceSaleOffer>;
 
   getNewPropertyApplication(applicationId): Promise<{ tokenId: string, id: string, applicant: string, currency: string, statusName: string, assignedOracleTypes: string[] }>;
 
   getNewPropertyApplicationDetails(applicationId): Promise<{ area: number, areaSource: string, spaceTokenType: string, humanAddress: string, dataLink: string, geohashContour: string[], heightsContour: number[], credentialsHash: string }>;
-  
+
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
-  
+
   getPropertyRegistryContract(address): Promise<any>;
+
+  getCommunityContract(address, isDecentralized): Promise<any>;
+
+  getCommunityRaContract(address, isDecentralized): Promise<any>;
+
+  getCommunityProposalManagerContract(address): Promise<any>;
+
+  hexToString(value): string;
 }
 
 export enum ChainServiceEvents {
@@ -68,9 +84,20 @@ export enum ChainServiceEvents {
   NewPropertyApplication = 'NewApplication',
   NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
-  
+
   NewPrivatePropertyRegistry = 'Add',
-  SetPrivatePropertyDetails = 'SetDetails'
+  SetPrivatePropertyDetails = 'SetDetails',
+  NewCommunity = 'CreateFundFifthStep',
+  CommunityMint = 'TokenMint',
+  CommunityBurn = 'TokenBurn',
+  CommunityAddMarker = 'AddProposalMarker',
+  CommunityRemoveMarker = 'RemoveProposalMarker',
+  CommunityNewProposal = 'NewProposal',
+  CommunityNayProposal = 'NayProposal',
+  CommunityAyeProposal = 'AyeProposal',
+  CommunityApprovedProposal = 'Approved',
+  CommunityRejectedProposal = 'Rejected',
+
 }
 
 export interface ChainServiceSaleOrder {

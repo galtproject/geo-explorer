@@ -62,13 +62,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
-  
+
+  decentralizedCommunityRegistry: any;
+  pprCommunityRegistry: any;
+  communityFactory: any;
+  communityMockFactory: any;
+
   contractsConfig: any;
 
   callbackOnReconnect: any;
 
   pprCache: any = {};
-  
+  communityCache: any = {};
+
   redeployed = false;
 
   constructor(_contractsConfig, _wsServer) {
@@ -82,6 +88,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribeForReconnect();
   }
+
+  // =============================================================
+  // Contract Events
+  // =============================================================
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     if(!contract) {
@@ -107,7 +117,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return;
     }
     console.log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
-    
+
     contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
@@ -115,10 +125,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       }
       callback(error, e);
     });
-  }
-
-  async getCurrentBlock() {
-    return this.web3.eth.getBlockNumber();
   }
 
   onReconnect(callback) {
@@ -161,22 +167,31 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   private createContractInstance() {
     this.pprCache = {};
-    
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket'].forEach(contractName => {
+    this.communityCache = {};
+
+    const aliases = {
+      // 'fundsRegistry': 'decentralizedCommunityRegistry',
+      // 'pprFundsRegistry': 'pprCommunityRegistry',
+      'fundFactory': 'communityFactory'
+    };
+    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
       if(!contractAddress) {
         return console.log(`✖️ Contract ${contractName} not found in config`);
       }
+      if(aliases[contractName]) {
+        contractName = aliases[contractName];
+      }
       this[contractName] = new this.web3.eth.Contract(contractAbi, contractAddress);
       console.log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
     });
   }
-  
-  isContractAddress(contract, address) {
-    return contract && address.toLowerCase() === contract._address.toLowerCase()
-  }
-  
+
+  // =============================================================
+  // Space Tokens
+  // =============================================================
+
   getPropertyRegistryContract(address) {
     if(this.isContractAddress(this.spaceToken, address)) {
       return this.spaceToken;
@@ -184,23 +199,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.isContractAddress(this.spaceGeoData, address)) {
       return this.spaceGeoData;
     }
-    
+
     if(this.pprCache[address]) {
       return this.pprCache[address];
     }
-    
+
     const privatePropertyContract = new this.web3.eth.Contract(this.contractsConfig['privatePropertyTokenAbi'], address);
     this.pprCache[address] = privatePropertyContract;
     return privatePropertyContract;
-  }
-
-  getPropertyMarketContract(address) {
-    if(this.isContractAddress(this.propertyMarket, address)) {
-      return this.propertyMarket;
-    }
-    if(this.isContractAddress(this.privatePropertyMarket, address)) {
-      return this.privatePropertyMarket;
-    }
   }
 
   public async getLockerOwner(address) {
@@ -214,7 +220,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     return this.getPropertyRegistryContract(contractAddress).methods.ownerOf(tokenId).call({});
   }
-  
+
   public async getSpaceTokenArea(contractAddress, tokenId) {
     if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
@@ -255,10 +261,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       } catch (e) {
         console.warn('Web3Utils.hexToUtf8', e);
       }
-      
+
       const geohashContour = [];
       const heightsContour = [];
-      
+
       result.contour.map((geohash5z) => {
         const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
         heightsContour.push(height / 100);
@@ -277,22 +283,35 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  // =============================================================
+  // Sale Orders
+  // =============================================================
+
+  getPropertyMarketContract(address) {
+    if(this.isContractAddress(this.propertyMarket, address)) {
+      return this.propertyMarket;
+    }
+    if(this.isContractAddress(this.privatePropertyMarket, address)) {
+      return this.privatePropertyMarket;
+    }
+  }
+
   getSaleOrder(contractAddress, orderId) {
     const propertyMarketContract = this.getPropertyMarketContract(contractAddress);
     return propertyMarketContract.methods.saleOrders(orderId).call({}).then(async result => {
       result.ask = Web3Utils.fromWei(result.ask.toString(10), 'ether');
       result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
-      
+
       result.statusName = {
         '0': 'inactive',
         '1': 'active'
       }[result.status.toString(10)];
-      
+
       return result;
     })
   }
-  
+
   getSaleOffer(contractAddress, orderId, buyer) {
     const propertyMarketContract = this.getPropertyMarketContract(contractAddress);
     return propertyMarketContract.methods.saleOffers(orderId, buyer).call({}).then(async result => {
@@ -302,6 +321,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return result;
     })
   }
+
+  // =============================================================
+  // Applications
+  // =============================================================
 
   getNewPropertyApplication(applicationId) {
     return this.newPropertyManager.methods.getApplication(applicationId).call({}).then(result => {
@@ -367,12 +390,80 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  // =============================================================
+  // Community
+  // =============================================================
+
+  getCommunityContract(address, isDecentralized) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityContract = new this.web3.eth.Contract(isDecentralized ? this.contractsConfig['fundStorageAbi'] : this.contractsConfig['pprFundStorageAbi'], address);
+    this.communityCache[address] = communityContract;
+    return communityContract;
+  }
+
+  getCommunityRaContract(address, isDecentralized) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityRaContract = new this.web3.eth.Contract(isDecentralized ? this.contractsConfig['fundRAAbi'] : this.contractsConfig['pprFundRAAbi'], address);
+    this.communityCache[address] = communityRaContract;
+    return communityRaContract;
+  }
+
+  getCommunityProposalManagerContract(address) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityProposalManagerContract = new this.web3.eth.Contract(this.contractsConfig['fundProposalManagerAbi'], address);
+    this.communityCache[address] = communityProposalManagerContract;
+    return communityProposalManagerContract;
+  }
+
+  // =============================================================
+  // Common
+  // =============================================================
+
+  public async callContractMethod(contract, method, args, type) {
+    let value = await contract.methods[method].apply(contract, args).call({});
+    if(type === 'wei') {
+      value = this.weiToEther(value);
+    }
+    if(type === 'number') {
+      value = parseFloat(value.toString(10));
+    }
+    if(type === 'bytes32') {
+      value = _.trimEnd(value.toString(10), '0');
+    }
+    return value;
+  }
+
   public async getContractSymbol(address) {
     const contract = new this.web3.eth.Contract([{"constant":true,"inputs":[],"name":"_symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xb09f1266"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}], address);
     // console.log(this.contractsConfig['spaceLockerAbi']);
     return contract.methods.symbol().call({})
-      .catch(() => 
+      .catch(() =>
         contract.methods._symbol().call({}).catch(() => null)
       );
+  }
+
+  isContractAddress(contract, address) {
+    return contract && address.toLowerCase() === contract._address.toLowerCase()
+  }
+
+  weiToEther(value) {
+    return this.web3.utils.fromWei(value, 'ether');
+  }
+
+  hexToString(value) {
+    return this.web3.utils.hexToUtf8(value);
+  }
+
+  async getCurrentBlock() {
+    return this.web3.eth.getBlockNumber();
   }
 }
