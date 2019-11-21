@@ -1307,7 +1307,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async filterCommunityVotingCount(communityVotingQuery: CommunityVotingQuery) {
     const findAllParam: any = this.communityVotingQueryToFindAllParam(communityVotingQuery);
 
-    findAllParam.distinct = true;
+    // findAllParam.distinct = true;
 
     return this.models.CommunityVoting.count(findAllParam);
   }
