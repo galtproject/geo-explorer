@@ -69,6 +69,8 @@ export default interface IExplorerChainService {
   getCommunityRaContract(address, isDecentralized): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;
+
+  hexToString(value): string;
 }
 
 export enum ChainServiceEvents {

@@ -478,6 +478,8 @@ export interface ICommunityVoting {
   threshold?;
   activeProposalsCount?;
   proposalManager?;
+  name?;
+  description?;
   destination?;
 
   destroy?();

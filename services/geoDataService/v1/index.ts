@@ -581,6 +581,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communityAddress,
       marker,
       proposalManager,
+      name: this.chainService.hexToString(markerData._name),
+      description: markerData._description,
       destination: markerData._destination,
       threshold,
       activeProposalsCount

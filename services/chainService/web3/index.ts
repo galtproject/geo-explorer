@@ -459,6 +459,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return this.web3.utils.fromWei(value, 'ether');
   }
 
+  hexToString(value) {
+    return this.web3.utils.hexToUtf8(value);
+  }
+
   async getCurrentBlock() {
     return this.web3.eth.getBlockNumber();
   }

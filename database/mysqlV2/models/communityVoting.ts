@@ -21,6 +21,12 @@ module.exports = async function (sequelize, models) {
     proposalManager: {
       type: Sequelize.STRING(100)
     },
+    name: {
+      type: Sequelize.STRING(100)
+    },
+    description: {
+      type: Sequelize.TEXT
+    },
     destination: {
       type: Sequelize.STRING(100)
     },
