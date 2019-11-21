@@ -36,6 +36,9 @@ module.exports = async function (sequelize, models) {
     activeProposalsCount: {
       type: Sequelize.INTEGER
     },
+    totalProposalsCount: {
+      type: Sequelize.INTEGER
+    }
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

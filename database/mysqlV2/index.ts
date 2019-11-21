@@ -1389,8 +1389,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async filterCommunityProposalCount(communityProposalQuery: CommunityProposalQuery) {
     const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
 
-    findAllParam.distinct = true;
-
     return this.models.CommunityProposal.count(findAllParam);
   }
 

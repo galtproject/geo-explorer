@@ -585,7 +585,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       description: markerData._description,
       destination: markerData._destination,
       threshold,
-      activeProposalsCount
+      activeProposalsCount,
+      totalProposalsCount: await this.database.filterCommunityProposalCount({communityAddress, marker})
     });
 
     await this.database.addOrUpdateCommunity({

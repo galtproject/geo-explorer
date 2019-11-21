@@ -477,6 +477,7 @@ export interface ICommunityVoting {
   marker;
   threshold?;
   activeProposalsCount?;
+  totalProposalsCount?;
   proposalManager?;
   name?;
   description?;
