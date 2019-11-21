@@ -664,6 +664,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       status,
       description: proposalData.description
     });
+    // console.log('newProposal', JSON.stringify(newProposal));
+
+    await this.updateCommunityVoting(communityAddress, marker);
   }
 
   async getCommunity(address) {
