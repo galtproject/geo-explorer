@@ -25,6 +25,8 @@ export default interface IExplorerChainService {
   communityFactory: any;
   communityMockFactory: any;
 
+  pprCommunityFactory: any;
+
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
 
@@ -64,9 +66,9 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryContract(address): Promise<any>;
 
-  getCommunityContract(address, isDecentralized): Promise<any>;
+  getCommunityContract(address, isPpr): Promise<any>;
 
-  getCommunityRaContract(address, isDecentralized): Promise<any>;
+  getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;
 

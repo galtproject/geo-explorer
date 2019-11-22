@@ -66,6 +66,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
   communityFactory: any;
+  pprCommunityFactory: any;
   communityMockFactory: any;
 
   contractsConfig: any;
@@ -174,7 +175,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       // 'pprFundsRegistry': 'pprCommunityRegistry',
       'fundFactory': 'communityFactory'
     };
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory'].forEach(contractName => {
+    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactoryName'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
       if(!contractAddress) {
@@ -394,22 +395,22 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // Community
   // =============================================================
 
-  getCommunityContract(address, isDecentralized) {
+  getCommunityContract(address, isPpr) {
     if(this.communityCache[address]) {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(isDecentralized ? this.contractsConfig['fundStorageAbi'] : this.contractsConfig['pprFundStorageAbi'], address);
+    const communityContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['fundStorageAbi'] : this.contractsConfig['pprFundStorageAbi'], address);
     this.communityCache[address] = communityContract;
     return communityContract;
   }
 
-  getCommunityRaContract(address, isDecentralized) {
+  getCommunityRaContract(address, isPpr) {
     if(this.communityCache[address]) {
       return this.communityCache[address];
     }
 
-    const communityRaContract = new this.web3.eth.Contract(isDecentralized ? this.contractsConfig['fundRAAbi'] : this.contractsConfig['pprFundRAAbi'], address);
+    const communityRaContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['fundRAAbi'] : this.contractsConfig['pprFundRAAbi'], address);
     this.communityCache[address] = communityRaContract;
     return communityRaContract;
   }

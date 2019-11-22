@@ -42,7 +42,7 @@ module.exports = async function (sequelize, models) {
     tokensCount: {
       type: Sequelize.INTEGER
     },
-    isDecentralized: {
+    isPpr: {
       type: Sequelize.BOOLEAN
     },
     isPrivate: {

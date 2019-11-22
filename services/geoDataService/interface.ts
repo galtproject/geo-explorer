@@ -68,11 +68,11 @@ export default interface IExplorerGeoDataService {
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
 
-  handleNewCommunityEvent(address: string, isDecentralized): Promise<void>;
+  handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 
-  handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isDecentralized): Promise<void>;
+  handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isPpr): Promise<void>;
 
-  handleCommunityBurnEvent(communityAddress, event: IExplorerCommunityBurnEvent, isDecentralized): Promise<void>;
+  handleCommunityBurnEvent(communityAddress, event: IExplorerCommunityBurnEvent, isPpr): Promise<void>;
 
   handleCommunityAddVotingEvent(communityAddress, event);
 
@@ -82,7 +82,7 @@ export default interface IExplorerGeoDataService {
 
   handleCommunityUpdateProposalEvent(communityAddress, event);
 
-  updateCommunity(address, isDecentralized): Promise<void>;
+  updateCommunity(address, isPpr): Promise<void>;
 
   filterCommunities(communityQuery: FilterCommunityGeoQuery): Promise<ICommunityListResponse>;
 

@@ -445,7 +445,7 @@ export interface ICommunity {
   reputationTotalSupply?;
   tokensCount?;
   isPrivate?;
-  isDecentralized?;
+  isPpr?;
 
   createdAtBlock?;
   updatedAtBlock?;

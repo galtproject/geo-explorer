@@ -18,5 +18,6 @@ module.exports = {
   'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry',
   'privatePropertyMarketName': 'privatePropertyMarket',
   'communityFactoryName': 'fundFactory',
-  'communityMockFactoryName': 'mockFundFactory'
+  'communityMockFactoryName': 'mockFundFactory',
+  'pprCommunityFactoryName': 'privateFundFactory'
 };
