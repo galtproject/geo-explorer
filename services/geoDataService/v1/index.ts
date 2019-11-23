@@ -575,8 +575,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
 
     const activeProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getActiveProposalsCount', [marker], 'number');
-    const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [], 'number');
-    const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [], 'number');
+    const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [marker], 'number');
+    const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [marker], 'number');
 
     await this.database.addOrUpdateCommunityVoting(community, {
       communityAddress,
