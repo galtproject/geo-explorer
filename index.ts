@@ -323,7 +323,7 @@ const config = require('./config');
 
       let proposalManagersAddresses = [];
 
-      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityAddMarker, prevBlockNumber).then(async (events) => {
+      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityAddMarker, 0).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
           proposalManagersAddresses.push(e.returnValues.proposalManager.toLowerCase());
           await geoDataService.handleCommunityAddVotingEvent(address, e);
