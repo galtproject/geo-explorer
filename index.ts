@@ -402,20 +402,8 @@ const config = require('./config');
         });
       });
 
-      await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityRejectedProposal, prevBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
-        });
-      });
-
       chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityApprovedProposal, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityApprovedProposal event, blockNumber:', currentBlockNumber);
-        await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, newEvent);
-        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
-      });
-
-      chainService.subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityRejectedProposal, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New CommunityRejectedProposal event, blockNumber:', currentBlockNumber);
         await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
