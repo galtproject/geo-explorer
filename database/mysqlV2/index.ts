@@ -1305,7 +1305,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     // console.log('communityVotingQuery', communityVotingQuery);
 
-    const findAllParam: any = this.communityMemberQueryToFindAllParam(communityVotingQuery);
+    const findAllParam: any = this.communityVotingQueryToFindAllParam(communityVotingQuery);
 
     findAllParam.limit = communityVotingQuery.limit || 20;
     findAllParam.offset = communityVotingQuery.offset || 0;
