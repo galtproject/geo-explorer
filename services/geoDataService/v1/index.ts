@@ -495,6 +495,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       spaceTokenOwnersCount,
       reputationTotalSupply,
       dataLink,
+      description: dataLink,
       name,
       createdAtBlock
     });

@@ -440,6 +440,7 @@ export interface ICommunity {
   multiSigAddress?;
   name?;
   dataLink?;
+  description?;
   activeFundRulesCount?;
   spaceTokenOwnersCount?;
   reputationTotalSupply?;
