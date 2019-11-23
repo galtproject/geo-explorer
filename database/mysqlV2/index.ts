@@ -1274,6 +1274,15 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   prepareCommunityVotingWhere(communityVotingQuery) {
     const allWheres: any = {};
 
+    if(communityVotingQuery.marker) {
+      allWheres[Op.and] = [{
+        [Op.or]: [
+          {'marker': {[Op.like]: communityVotingQuery.marker}},
+          {'name': {[Op.like]: communityVotingQuery.marker}}
+        ]
+      }];
+    }
+
     if(communityVotingQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityVotingQuery.communityAddress};
     }
@@ -1285,7 +1294,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityVotingWhere(communityVotingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress'])
+      where: resultWhere(allWheres, ['communityAddress', Op.and])
     }
   }
 
@@ -1351,12 +1360,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres: any = {};
 
     if(communityProposalQuery.marker) {
-      allWheres[Op.and] = [{
-        [Op.or]: [
-          {'marker': {[Op.like]: communityProposalQuery.marker}},
-          {'name': {[Op.like]: communityProposalQuery.marker}}
-        ]
-      }];
+      allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
 
     if(communityProposalQuery.communityAddress) {
