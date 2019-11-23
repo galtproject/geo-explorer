@@ -664,6 +664,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       proposalId,
       pmAddress,
       markerName: voting.name,
+      destination: voting.destination,
       creatorAddress: proposalData.creator,
       communityId: community.id,
       acceptedShare: ayeShare,

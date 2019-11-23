@@ -27,6 +27,9 @@ module.exports = async function (sequelize, models) {
     markerName: {
       type: Sequelize.STRING(100)
     },
+    destination: {
+      type: Sequelize.STRING(100)
+    },
     proposalId: {
       type: Sequelize.STRING(100)
     },
