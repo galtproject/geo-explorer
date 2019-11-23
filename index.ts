@@ -244,7 +244,7 @@ const config = require('./config');
       });
     });
 
-    await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, prevBlockNumber).then(async (events) => {
+    await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEach(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
