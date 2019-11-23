@@ -1364,7 +1364,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     if(communityProposalQuery.status) {
-      allWheres['status'] = communityProposalQuery.status;
+      allWheres['status'] = {[Op.in]: communityProposalQuery.status};
     }
 
     if(communityProposalQuery.communityAddress) {
