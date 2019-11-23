@@ -42,6 +42,12 @@ module.exports = async function (sequelize, models) {
     timeout: {
       type: Sequelize.INTEGER
     },
+    approvedProposalsCount: {
+      type: Sequelize.INTEGER
+    },
+    rejectedProposalsCount: {
+      type: Sequelize.INTEGER
+    },
     activeProposalsCount: {
       type: Sequelize.INTEGER
     },

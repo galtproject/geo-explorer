@@ -477,6 +477,8 @@ export interface ICommunityVoting {
   marker;
   activeProposalsCount?;
   totalProposalsCount?;
+  approvedProposalsCount?;
+  rejectedProposalsCount?;
   proposalManager?;
   name?;
   description?;
