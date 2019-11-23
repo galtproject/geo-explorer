@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     status: {
       type: Sequelize.STRING(100)
     },
+    data: {
+      type: Sequelize.TEXT
+    },
     dataLink: {
       type: Sequelize.STRING
     },

@@ -671,6 +671,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       declinedCount: proposalVotingData.nays.length,
       status,
       description: proposalData.dataLink,
+      data: proposalData.data,
       dataLink: proposalData.dataLink,
       requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),

@@ -503,6 +503,7 @@ export interface ICommunityProposal {
   marker;
   proposalId;
   status?;
+  data?;
   dataLink?;
   description?;
   acceptedShare?;
