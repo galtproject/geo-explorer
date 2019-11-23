@@ -1363,6 +1363,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
 
+    if(communityProposalQuery.status) {
+      allWheres['status'] = communityProposalQuery.status;
+    }
+
     if(communityProposalQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityProposalQuery.communityAddress};
     }
