@@ -655,9 +655,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
     let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
-    ayeShare /= 10000;
-    nayShare /= 10000;
-
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
