@@ -466,13 +466,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isPpr);
     const storageAddress = await this.chainService.callContractMethod(raContract, 'fundStorage', []);
 
-    const contract = await this.chainService.getCommunityContract(storageAddress, isPpr);
+    const contract = await this.chainService.getCommunityStorageContract(storageAddress, isPpr);
     const community = await this.database.getCommunity(raAddress);
 
     const multiSigAddress = await this.chainService.callContractMethod(contract, 'getMultiSig', []);
 
     const name = await contract.methods.name().call({});
-    const description = await contract.methods.description().call({});
+    const dataLink = await contract.methods.dataLink().call({});
     const activeFundRulesCount =  await this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number');
     const tokensCount = community ? await this.database.getCommunityTokensCount(community) : 0;
     console.log(raAddress, 'tokensCount', tokensCount);
@@ -494,7 +494,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       activeFundRulesCount,
       spaceTokenOwnersCount,
       reputationTotalSupply,
-      description,
+      dataLink,
       name,
       createdAtBlock
     });
@@ -504,7 +504,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunityMember(community: ICommunity, address) {
-    const contract = await this.chainService.getCommunityContract(community.storageAddress, community.isPpr);
+    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
     const fullNameHash = await this.chainService.callContractMethod(contract, 'getMemberIdentification', [address], 'bytes32');
 
@@ -562,15 +562,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityVoting(communityAddress, marker) {
     const community = await this.database.getCommunity(communityAddress);
 
-    const contract = await this.chainService.getCommunityContract(community.storageAddress, community.isPpr);
+    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
     const markerData = await contract.methods.getProposalMarker(marker).call({});
 
-    let threshold = await this.chainService.callContractMethod(contract, 'thresholds', [marker], 'number');
-    if(!threshold) {
-      threshold = await this.chainService.callContractMethod(contract, 'defaultProposalThreshold', [], 'number');
-    }
-    threshold /= 10000;
+    let {support, minAcceptQuorum, timeout} = await this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]);
+    support = this.chainService.weiToEther(support);
+    minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
+    timeout = parseInt(timeout.toString(10));
 
     const proposalManager = markerData._proposalManager;
     const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
@@ -582,9 +581,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       marker,
       proposalManager,
       name: this.chainService.hexToString(markerData._name),
-      description: markerData._description,
+      description: markerData._dataLink,
+      dataLink: markerData._dataLink,
       destination: markerData._destination,
-      threshold,
+      support,
+      minAcceptQuorum,
+      timeout,
       activeProposalsCount,
       totalProposalsCount: await this.database.filterCommunityProposalCount({communityAddress, marker})
     });
@@ -635,6 +637,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const proposalData = await proposalManagerContract.methods.proposals(proposalId).call({});
     const proposalVotingData = await proposalManagerContract.methods.getProposalVoting(proposalId).call({});
+    const proposalVotingProgress = await proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({});
 
     const status = {
       '0': null,
@@ -662,7 +665,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       declinedShare: nayShare,
       declinedCount: proposalVotingData.nays.length,
       status,
-      description: proposalData.description
+      description: proposalData.dataLink,
+      dataLink: proposalData.dataLink,
+      requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
+      currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
+      minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
+      timeoutAt: parseInt(proposalVotingProgress.timeoutAt.toString(10))
     });
     // console.log('newProposal', JSON.stringify(newProposal));
 

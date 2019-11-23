@@ -66,13 +66,15 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryContract(address): Promise<any>;
 
-  getCommunityContract(address, isPpr): Promise<any>;
+  getCommunityStorageContract(address, isPpr): Promise<any>;
 
   getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;
 
   hexToString(value): string;
+
+  weiToEther(value): string;
 }
 
 export enum ChainServiceEvents {

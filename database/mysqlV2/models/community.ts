@@ -27,8 +27,11 @@ module.exports = async function (sequelize, models) {
     name: {
       type: Sequelize.STRING(100)
     },
-    description: {
+    dataLink: {
       type: Sequelize.STRING
+    },
+    description: {
+      type: Sequelize.TEXT
     },
     activeFundRulesCount: {
       type: Sequelize.INTEGER

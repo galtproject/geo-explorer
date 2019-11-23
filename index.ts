@@ -295,7 +295,7 @@ const config = require('./config');
 
       const storageAddress = await await chainService.callContractMethod(contractRa, 'fundStorage', []);
 
-      const contractStorage = await chainService.getCommunityContract(storageAddress, isPpr);
+      const contractStorage = await chainService.getCommunityStorageContract(storageAddress, isPpr);
 
       await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityMint, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {

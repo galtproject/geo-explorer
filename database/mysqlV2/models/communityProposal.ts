@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     status: {
       type: Sequelize.STRING(100)
     },
+    dataLink: {
+      type: Sequelize.STRING
+    },
     description: {
       type: Sequelize.TEXT
     },
@@ -38,6 +41,18 @@ module.exports = async function (sequelize, models) {
     },
     declinedShare: {
       type: Sequelize.FLOAT
+    },
+    requiredSupport: {
+      type: Sequelize.FLOAT
+    },
+    currentSupport: {
+      type: Sequelize.FLOAT
+    },
+    minAcceptQuorum: {
+      type: Sequelize.FLOAT
+    },
+    timeoutAt: {
+      type: Sequelize.INTEGER
     },
     acceptedCount: {
       type: Sequelize.INTEGER
