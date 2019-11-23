@@ -1274,6 +1274,15 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   prepareCommunityVotingWhere(communityVotingQuery) {
     const allWheres: any = {};
 
+    if(communityVotingQuery.marker) {
+      allWheres[Op.and] = [{
+        [Op.or]: [
+          {'marker': {[Op.like]: communityVotingQuery.marker}},
+          {'name': {[Op.like]: communityVotingQuery.marker}}
+        ]
+      }];
+    }
+
     if(communityVotingQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityVotingQuery.communityAddress};
     }
@@ -1285,7 +1294,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityVotingWhere(communityVotingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress'])
+      where: resultWhere(allWheres, ['communityAddress', Op.and])
     }
   }
 
@@ -1296,7 +1305,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     // console.log('communityVotingQuery', communityVotingQuery);
 
-    const findAllParam: any = this.communityMemberQueryToFindAllParam(communityVotingQuery);
+    const findAllParam: any = this.communityVotingQueryToFindAllParam(communityVotingQuery);
 
     findAllParam.limit = communityVotingQuery.limit || 20;
     findAllParam.offset = communityVotingQuery.offset || 0;
@@ -1354,6 +1363,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
 
+    if(communityProposalQuery.status) {
+      allWheres['status'] = {[Op.in]: communityProposalQuery.status};
+    }
+
     if(communityProposalQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityProposalQuery.communityAddress};
     }
@@ -1369,7 +1382,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'marker'])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', Op.and])
     }
   }
 

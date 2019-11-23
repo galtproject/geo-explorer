@@ -27,11 +27,26 @@ module.exports = async function (sequelize, models) {
     description: {
       type: Sequelize.TEXT
     },
+    dataLink: {
+      type: Sequelize.STRING
+    },
     destination: {
       type: Sequelize.STRING(100)
     },
-    threshold: {
+    support: {
       type: Sequelize.FLOAT
+    },
+    minAcceptQuorum: {
+      type: Sequelize.FLOAT
+    },
+    timeout: {
+      type: Sequelize.INTEGER
+    },
+    approvedProposalsCount: {
+      type: Sequelize.INTEGER
+    },
+    rejectedProposalsCount: {
+      type: Sequelize.INTEGER
     },
     activeProposalsCount: {
       type: Sequelize.INTEGER

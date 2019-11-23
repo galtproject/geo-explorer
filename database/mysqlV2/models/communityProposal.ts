@@ -24,11 +24,23 @@ module.exports = async function (sequelize, models) {
     marker: {
       type: Sequelize.STRING(100)
     },
+    markerName: {
+      type: Sequelize.STRING(100)
+    },
+    destination: {
+      type: Sequelize.STRING(100)
+    },
     proposalId: {
       type: Sequelize.STRING(100)
     },
     status: {
       type: Sequelize.STRING(100)
+    },
+    data: {
+      type: Sequelize.TEXT
+    },
+    dataLink: {
+      type: Sequelize.STRING
     },
     description: {
       type: Sequelize.TEXT
@@ -38,6 +50,18 @@ module.exports = async function (sequelize, models) {
     },
     declinedShare: {
       type: Sequelize.FLOAT
+    },
+    requiredSupport: {
+      type: Sequelize.FLOAT
+    },
+    currentSupport: {
+      type: Sequelize.FLOAT
+    },
+    minAcceptQuorum: {
+      type: Sequelize.FLOAT
+    },
+    timeoutAt: {
+      type: Sequelize.INTEGER
     },
     acceptedCount: {
       type: Sequelize.INTEGER

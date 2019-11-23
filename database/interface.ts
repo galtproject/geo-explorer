@@ -439,13 +439,14 @@ export interface ICommunity {
   pmAddress?;
   multiSigAddress?;
   name?;
+  dataLink?;
   description?;
   activeFundRulesCount?;
   spaceTokenOwnersCount?;
   reputationTotalSupply?;
   tokensCount?;
   isPrivate?;
-  isDecentralized?;
+  isPpr?;
 
   createdAtBlock?;
   updatedAtBlock?;
@@ -475,13 +476,18 @@ export interface ICommunityVoting {
 
   communityAddress;
   marker;
-  threshold?;
   activeProposalsCount?;
   totalProposalsCount?;
+  approvedProposalsCount?;
+  rejectedProposalsCount?;
   proposalManager?;
   name?;
   description?;
+  dataLink?;
   destination?;
+  support?;
+  minAcceptQuorum?;
+  timeout?;
 
   destroy?();
 }
@@ -495,13 +501,21 @@ export interface ICommunityProposal {
   pmAddress;
   communityAddress;
   marker;
+  markerName;
+  destination;
   proposalId;
   status?;
+  data?;
+  dataLink?;
   description?;
   acceptedShare?;
   declinedShare?;
   acceptedCount?;
   declinedCount?;
+  requiredSupport?;
+  currentSupport?;
+  minAcceptQuorum?;
+  timeoutAt?;
 
   destroy?();
 }
