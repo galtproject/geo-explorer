@@ -1351,7 +1351,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres: any = {};
 
     if(communityProposalQuery.marker) {
-      allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
+      allWheres[Op.and] = [{
+        [Op.or]: [
+          {'marker': {[Op.like]: communityProposalQuery.marker}},
+          {'name': {[Op.like]: communityProposalQuery.marker}}
+        ]
+      }];
     }
 
     if(communityProposalQuery.communityAddress) {
@@ -1369,7 +1374,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'marker'])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', Op.and])
     }
   }
 
