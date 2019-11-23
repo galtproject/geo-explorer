@@ -1382,7 +1382,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', Op.and])
     }
   }
 
