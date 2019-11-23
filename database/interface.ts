@@ -501,6 +501,7 @@ export interface ICommunityProposal {
   pmAddress;
   communityAddress;
   marker;
+  markerName;
   proposalId;
   status?;
   data?;
