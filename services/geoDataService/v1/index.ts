@@ -652,8 +652,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       '4': 'rejected'
     }[proposalData.status];
 
-    let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'number');
-    let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'number');
+    let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
+    let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
     ayeShare /= 10000;
     nayShare /= 10000;
