@@ -338,7 +338,7 @@ const config = require('./config');
 
       chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityAddMarker, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityAddMarker event, blockNumber:', currentBlockNumber);
-        proposalManagersAddresses.push(newEvent.returnValues.proposalManager.toLowerCase());
+        subscribeToCommunityProposalManager(address, newEvent.returnValues.proposalManager.toLowerCase())
         await geoDataService.handleCommunityAddVotingEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
@@ -350,6 +350,7 @@ const config = require('./config');
       });
 
       proposalManagersAddresses = _.uniq(proposalManagersAddresses);
+      console.log('proposalManagersAddresses.length', proposalManagersAddresses.length)
       proposalManagersAddresses.forEach(pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
     }
 
