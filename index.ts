@@ -234,7 +234,7 @@ const config = require('./config');
       return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
     });
 
-    await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, prevBlockNumber).then(async (events) => {
+    await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEach(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
