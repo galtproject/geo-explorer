@@ -15,8 +15,8 @@ module.exports = {
   'propertyMarketName': 'propertyMarket',
   'spaceTokenName': 'spaceToken',
   'newPropertyManagerName': 'newPropertyManager',
-  'privatePropertyGlobalRegistryName': 'privatePropertyGlobalRegistry',
-  'privatePropertyMarketName': 'privatePropertyMarket',
+  'privatePropertyGlobalRegistryName': 'ppTokenRegistry',
+  'privatePropertyMarketName': 'ppMarket',
   'communityFactoryName': 'fundFactory',
   'communityMockFactoryName': 'mockFundFactory',
   'pprCommunityFactoryName': 'privateFundFactory'

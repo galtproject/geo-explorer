@@ -89,7 +89,7 @@ export enum ChainServiceEvents {
   NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
 
-  NewPrivatePropertyRegistry = 'Add',
+  NewPrivatePropertyRegistry = 'AddToken',
   SetPrivatePropertyDetails = 'SetDetails',
   NewCommunity = 'CreateFundFifthStep',
   CommunityMint = 'TokenMint',
