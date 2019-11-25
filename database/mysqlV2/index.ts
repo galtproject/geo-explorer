@@ -683,7 +683,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['level'] = {[Op.in]: spaceTokensQuery.level};
     }
 
-    ['tokenType', 'inLocker'].forEach((field) => {
+    ['tokenType', 'inLocker', 'isPpr'].forEach((field) => {
       if(!_.isUndefined(spaceTokensQuery[field]) && !_.isNull(spaceTokensQuery[field]))
         allWheres[field] = spaceTokensQuery[field];
     });
@@ -697,7 +697,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', 'level', 'levelNumber', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', 'level', 'levelNumber', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     }
