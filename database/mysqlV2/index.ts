@@ -673,7 +673,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['subtype'] = {[Op.in]: spaceTokensQuery.subtypes};
     }
 
-    if(spaceTokensQuery.tokensIds) {
+    if(spaceTokensQuery.tokensIds && spaceTokensQuery.tokensIds.length === 1) {
+      allWheres['tokenId'] = spaceTokensQuery.tokensIds[0];
+    } else if(spaceTokensQuery.tokensIds) {
       allWheres['tokenId'] = {[Op.in]: spaceTokensQuery.tokensIds};
     }
 
