@@ -537,8 +537,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
     const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
 
-    console.log('addSpaceTokens', propertyToken.tokenId);
-    await community.addSpaceTokens([propertyToken]);
+    await community.addSpaceTokens([propertyToken]).catch(() => {/* already in community */});
 
     await this.updateCommunityMember(community, propertyToken.owner);
 
