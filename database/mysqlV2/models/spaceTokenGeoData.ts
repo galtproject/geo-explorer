@@ -90,7 +90,7 @@ module.exports = async function (sequelize, models) {
     inLocker: {
       type: Sequelize.BOOLEAN,
     },
-    isPrivate: {
+    isPpr: {
       type: Sequelize.BOOLEAN,
     },
     ledgerIdentifier: {

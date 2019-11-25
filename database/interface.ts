@@ -170,7 +170,7 @@ export interface ISpaceTokenGeoData {
   featureArray;
   createdAtBlock;
   updatedAtBlock;
-  isPrivate;
+  isPpr;
 
   spaceTokensOrders?;
 }
@@ -191,7 +191,7 @@ export interface ISaleOrder {
   updatedAtBlock;
   dataJson?;
   contractAddress;
-  isPrivate;
+  isPpr;
 
   featureArray?;
   typesSubtypesArray?;
