@@ -74,6 +74,8 @@ export default interface IExplorerGeoDataService {
 
   handleCommunityBurnEvent(communityAddress, event: IExplorerCommunityBurnEvent, isPpr): Promise<void>;
 
+  handleCommunityTransferReputationEvent(communityAddress, event: IExplorerCommunityBurnEvent, isPpr): Promise<void>;
+
   handleCommunityAddVotingEvent(communityAddress, event);
 
   handleCommunityRemoveVotingEvent(communityAddress, event);

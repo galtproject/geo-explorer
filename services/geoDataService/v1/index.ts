@@ -555,6 +555,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.updateCommunity(communityAddress, isPpr);
   }
 
+  async handleCommunityTransferReputationEvent(communityAddress, event, isPpr) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    await this.updateCommunityMember(community, event.returnValues.from);
+    await this.updateCommunityMember(community, event.returnValues.to);
+
+    return this.updateCommunity(communityAddress, isPpr);
+  }
+
   async handleCommunityAddVotingEvent(communityAddress, event) {
     return this.updateCommunityVoting(communityAddress, event.returnValues.marker);
   }

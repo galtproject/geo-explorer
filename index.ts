@@ -309,6 +309,12 @@ const config = require('./config');
         });
       });
 
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityTransferReputation, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityTransferReputationEvent(address, e, isPpr);
+        });
+      });
+
       chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityMint, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityMint event, blockNumber:', currentBlockNumber);
         await geoDataService.handleCommunityMintEvent(address, newEvent, isPpr);
@@ -318,6 +324,12 @@ const config = require('./config');
       chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityBurn, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityBurn event, blockNumber:', currentBlockNumber);
         await geoDataService.handleCommunityBurnEvent(address, newEvent, isPpr);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityTransferReputation, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityTransferReputation event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityTransferReputationEvent(address, newEvent, isPpr);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
