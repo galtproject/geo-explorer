@@ -95,6 +95,7 @@ export enum ChainServiceEvents {
   CommunityMint = 'TokenMint',
   CommunityBurn = 'TokenBurn',
   CommunityTransferReputation = 'Transfer',
+  CommunityRevokeReputation = 'RevokeDelegated',
   CommunityAddMarker = 'AddProposalMarker',
   CommunityRemoveMarker = 'RemoveProposalMarker',
   CommunityNewProposal = 'NewProposal',
