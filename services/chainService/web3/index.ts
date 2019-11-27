@@ -393,7 +393,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['pprFundStorageAbi'] : this.contractsConfig['fundStorageAbi'], address);
+    const communityContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'], address);
     this.communityCache[address] = communityContract;
     return communityContract;
   }
@@ -403,7 +403,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityRaContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['pprFundRAAbi'] : this.contractsConfig['fundRAAbi'], address);
+    const communityRaContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['privateFundRAAbi'] : this.contractsConfig['fundRAAbi'], address);
     this.communityCache[address] = communityRaContract;
     return communityRaContract;
   }

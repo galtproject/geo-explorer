@@ -440,6 +440,7 @@ export interface ICommunity {
   multiSigAddress?;
   name?;
   dataLink?;
+  dataJson?;
   description?;
   activeFundRulesCount?;
   spaceTokenOwnersCount?;
@@ -484,6 +485,7 @@ export interface ICommunityVoting {
   name?;
   description?;
   dataLink?;
+  dataJson?;
   destination?;
   support?;
   minAcceptQuorum?;
@@ -507,6 +509,7 @@ export interface ICommunityProposal {
   status?;
   data?;
   dataLink?;
+  dataJson?;
   description?;
   acceptedShare?;
   declinedShare?;

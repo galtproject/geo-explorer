@@ -484,6 +484,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const isPrivate = (await contract.methods.getConfigValue(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
 
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
     const _community = await this.database.addOrUpdateCommunity({
       address: raAddress,
       storageAddress,
@@ -495,7 +503,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       spaceTokenOwnersCount,
       reputationTotalSupply,
       dataLink,
-      description: dataLink,
+      dataJson,
+      description,
       name,
       createdAtBlock
     });
@@ -596,14 +605,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [marker], 'number');
     const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [marker], 'number');
 
+    let dataLink = markerData._dataLink;
+    let description = markerData._dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
     await this.database.addOrUpdateCommunityVoting(community, {
       communityAddress,
       marker,
       proposalManager,
       name: this.chainService.hexToString(markerData._name),
-      description: markerData._dataLink,
-      dataLink: markerData._dataLink,
       destination: markerData._destination,
+      description,
+      dataLink,
+      dataJson,
       support,
       minAcceptQuorum,
       timeout,
@@ -672,6 +690,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
     let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
+    let dataLink = proposalData.dataLink;
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
@@ -686,9 +713,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       declinedShare: nayShare,
       declinedCount: proposalVotingData.nays.length,
       status,
-      description: proposalData.dataLink,
+      description,
+      dataLink,
+      dataJson,
       data: proposalData.data,
-      dataLink: proposalData.dataLink,
       requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
