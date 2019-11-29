@@ -435,8 +435,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const symbol = await contract.methods.symbol().call({});
     const owner = await contract.methods.owner().call({});
     const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
+    const dataLink = await contract.methods.tokenDataLink().call({});
 
-    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol});
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
+    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol, dataLink, dataJson, description});
   }
 
   async getPrivatePropertyRegistry(address) {
@@ -451,6 +460,63 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       list: await this.database.filterPrivatePropertyRegistry(filterQuery),
       total: await this.database.filterPrivatePropertyRegistryCount(filterQuery)
     };
+  }
+
+  async handlePrivatePropertyRegistryProposalEvent(registryAddress, event) {
+    // const pprContract = await this.chainService.getPropertyRegistryContract(registryAddress);
+    const controllerContract = await this.chainService.getPropertyRegistryControllerContract(event.contractAddress);
+
+    const proposalId = event.returnValues.proposalId;
+
+    const proposalData: any = {
+      registryAddress,
+      proposalId,
+      contractAddress: event.contractAddress,
+    };
+
+    if(event.returnValues.tokenId) {
+      proposalData['tokenId'] = event.returnValues.tokenId;
+      const spaceTokenGeoData = await this.getSpaceTokenById(proposalData['tokenId'], registryAddress);
+      proposalData['spaceGeoDataId'] = spaceTokenGeoData.id;
+    }
+    if(event.returnValues.creator) {
+      proposalData['creator'] = event.returnValues.creator
+    }
+
+    const proposal = await this.chainService.callContractMethod(controllerContract, 'proposals', [proposalId]);
+
+    const dataLink = proposal.dataLink;
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
+    const resultProposal = await this.database.addOrPrivatePropertyProposal({
+      ...proposalData,
+      dataLink,
+      description,
+      dataJson,
+      isExecuted: proposal.executed,
+      data: proposal.data,
+      isApprovedByTokenOwner: proposal.tokenOwnerApproved,
+      isApprovedByRegistryOwner: proposal.geoDataManagerApproved
+    });
+
+    const notExecutedProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+      registryAddress,
+      tokenId: resultProposal.tokenId
+    });
+
+    await this.database.addOrUpdateGeoData({
+      tokenId: resultProposal.tokenId,
+      contractAddress: registryAddress,
+      haveProposalToEdit: notExecutedProposalsCount > 0
+    } as any);
+
+    return resultProposal;
   }
 
   // =============================================================

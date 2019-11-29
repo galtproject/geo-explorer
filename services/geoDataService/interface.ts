@@ -32,7 +32,7 @@ import {
   CommunityVotingQuery,
   CommunityProposalQuery,
   ICommunityProposal,
-  ICommunityMember, CommunityMemberQuery, CommunityTokensQuery
+  ICommunityMember, CommunityMemberQuery, CommunityTokensQuery, IPrivatePropertyProposal
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -67,6 +67,8 @@ export default interface IExplorerGeoDataService {
   filterPrivatePropertyRegistries(pprQuery: FilterPrivatePropertyRegistryGeoQuery): Promise<IPrivatePropertyRegistryListResponse>;
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
+
+  handlePrivatePropertyRegistryProposalEvent(registryAddress, event: any): Promise<IPrivatePropertyProposal>;
 
   handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 

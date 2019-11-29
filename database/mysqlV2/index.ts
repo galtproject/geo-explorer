@@ -23,7 +23,7 @@ import IExplorerDatabase, {
   ICommunityMember,
   ICommunityVoting,
   ICommunityProposal,
-  CommunityVotingQuery, CommunityProposalQuery, CommunityMemberQuery, CommunityTokensQuery
+  CommunityVotingQuery, CommunityProposalQuery, CommunityMemberQuery, CommunityTokensQuery, PrivatePropertyProposalQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -1025,6 +1025,83 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.distinct = true;
 
     return this.models.PrivatePropertyRegistry.count(findAllParam);
+  }
+
+  async getPrivatePropertyProposal(contractAddress, proposalId) {
+    return this.models.PrivatePropertyRegistry.findOne({
+      where: {contractAddress: {[Op.like]: contractAddress}, proposalId}
+    });
+  }
+
+  async addOrPrivatePropertyProposal(proposal) {
+    let dbObject = await this.getPrivatePropertyProposal(proposal.contractAddress, proposal.proposalId);
+
+    proposal.contractAddress = proposal.contractAddress.toLowerCase();
+
+    if(dbObject) {
+      proposal.createdAtBlock = dbObject.createdAtBlock || proposal.createdAtBlock;
+      await this.models.PprTokenProposal.update(proposal, {
+        where: {contractAddress: {[Op.like]: proposal.contractAddress}, proposalId: proposal.proposalId}
+      });
+    } else {
+      await this.models.PprTokenProposal.create(proposal).catch(() => {
+        return this.models.PprTokenProposal.update(proposal, {
+          where: {contractAddress: {[Op.like]: proposal.contractAddress}, proposalId: proposal.proposalId}
+        });
+      });
+    }
+    return this.getPrivatePropertyProposal(proposal.contractAddress, proposal.proposalId);
+  }
+
+  preparePrivatePropertyProposalWhere(pprQuery) {
+    const allWheres: any = {};
+
+    ['tokenId', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted'].forEach((field) => {
+      if(!_.isUndefined(pprQuery[field]) && !_.isNull(pprQuery[field]))
+        allWheres[field] = {[Op.eq]: pprQuery[field]};
+    });
+
+    ['registryAddress'].forEach((field) => {
+      if(pprQuery[field])
+        allWheres[field] = {[Op.like]: pprQuery[field]};
+    });
+
+    return allWheres;
+  }
+
+  privatePropertyProposalQueryToFindAllParam(pprQuery: PrivatePropertyProposalQuery) {
+    const allWheres = this.preparePrivatePropertyProposalWhere(pprQuery);
+
+    const include: any = [{
+      model: this.models.SpaceTokenGeoData,
+      as: 'propertyToken',
+    }];
+
+    return {
+      where: resultWhere(allWheres, ['tokenId', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted']),
+      include: include
+    }
+  }
+
+  async filterPrivatePropertyProposal(pprQuery: PrivatePropertyProposalQuery) {
+    if(pprQuery.limit > 1000) {
+      pprQuery.limit = 1000;
+    }
+
+    console.log('pprQuery', pprQuery);
+
+    const findAllParam: any = this.privatePropertyProposalQueryToFindAllParam(pprQuery);
+
+    findAllParam.limit = pprQuery.limit || 20;
+    findAllParam.offset = pprQuery.offset || 0;
+
+    return this.models.PprTokenProposal.findAll(findAllParam);
+  }
+
+  async filterPrivatePropertyProposalCount(pprQuery: PrivatePropertyRegistryQuery) {
+    const findAllParam: any = this.privatePropertyProposalQueryToFindAllParam(pprQuery);
+
+    return this.models.PprTokenProposal.count(findAllParam);
   }
 
   // =============================================================

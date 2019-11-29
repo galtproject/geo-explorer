@@ -64,6 +64,14 @@ export default interface IExplorerDatabase {
 
   filterPrivatePropertyRegistryCount(filterQuery: PrivatePropertyRegistryQuery): Promise<number>;
 
+  addOrPrivatePropertyProposal(proposal: IPrivatePropertyProposal): Promise<IPrivatePropertyProposal>;
+
+  getPrivatePropertyProposal(contractAddress, proposalId): Promise<IPrivatePropertyProposal>;
+
+  filterPrivatePropertyProposal(filterQuery: PrivatePropertyProposalQuery): Promise<IPrivatePropertyProposal[]>;
+
+  filterPrivatePropertyProposalCount(filterQuery: PrivatePropertyProposalQuery): Promise<number>;
+
   // =============================================================
   // Communities
   // =============================================================
@@ -134,6 +142,7 @@ export default interface IExplorerDatabase {
 }
 
 export interface ISpaceTokenGeoData {
+  id?;
   tokenId;
   tokenType;
   type;
@@ -171,6 +180,7 @@ export interface ISpaceTokenGeoData {
   createdAtBlock;
   updatedAtBlock;
   isPpr;
+  haveProposalToEdit?;
 
   spaceTokensOrders?;
 }
@@ -414,6 +424,9 @@ export interface IPrivatePropertyRegistry {
   symbol?;
   owner?;
   totalSupply?;
+  dataLink?;
+  dataJson?;
+  description?;
 
   createdAtBlock?;
   updatedAtBlock?;
@@ -429,6 +442,42 @@ export interface PrivatePropertyRegistryQuery {
   address?: string;
   addresses?: string[];
   tokensIds?: string[];
+}
+
+export interface IPrivatePropertyProposal {
+  id?;
+
+  registryAddress;
+  creatorAddress?;
+  destination?;
+  contractAddress?;
+  proposalId?;
+  tokenId?;
+  status?;
+  data?;
+  dataLink?;
+  dataJson?;
+  description?;
+  isApprovedByTokenOwner?;
+  isApprovedByRegistryOwner?;
+  isExecuted?;
+
+  createdAtBlock?;
+  updatedAtBlock?;
+}
+
+export interface PrivatePropertyProposalQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  tokenId?: string;
+  registryAddress?: string;
+  isApprovedByTokenOwner?: boolean;
+  isApprovedByRegistryOwner?: boolean;
+  isExecuted?: boolean;
 }
 
 export interface ICommunity {
