@@ -507,7 +507,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const notExecutedProposalsCount = await this.database.filterPrivatePropertyProposalCount({
       registryAddress,
-      tokenId: resultProposal.tokenId
+      tokenId: resultProposal.tokenId,
+      isExecuted: false
     });
 
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {

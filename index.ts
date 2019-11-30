@@ -202,6 +202,8 @@ const config = require('./config');
         });
       });
 
+      console.log('PrivatePropertyNewProposal events done');
+
       chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyNewProposal, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New PrivatePropertyNewProposal event, blockNumber:', currentBlockNumber);
         await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
