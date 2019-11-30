@@ -10,7 +10,7 @@
 import IExplorerDatabase, {
   CommunityMemberQuery, CommunityProposalQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity,
-  ISaleOffer,
+  ISaleOffer, PrivatePropertyProposalQuery,
   PrivatePropertyRegistryQuery,
   SaleOffersQuery,
   SaleOrdersQuery
@@ -517,6 +517,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } as any);
 
     return resultProposal;
+  }
+
+  async filterPrivatePropertyTokeProposals(filterQuery: PrivatePropertyProposalQuery) {
+    return {
+      list: await this.database.filterPrivatePropertyProposal(filterQuery),
+      total: await this.database.filterPrivatePropertyProposalCount(filterQuery)
+    };
   }
 
   // =============================================================

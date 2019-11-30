@@ -32,7 +32,7 @@ import {
   CommunityVotingQuery,
   CommunityProposalQuery,
   ICommunityProposal,
-  ICommunityMember, CommunityMemberQuery, CommunityTokensQuery, IPrivatePropertyProposal
+  ICommunityMember, CommunityMemberQuery, CommunityTokensQuery, IPrivatePropertyProposal, PrivatePropertyProposalQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -69,6 +69,8 @@ export default interface IExplorerGeoDataService {
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
 
   handlePrivatePropertyRegistryProposalEvent(registryAddress, event: any): Promise<IPrivatePropertyProposal>;
+
+  filterPrivatePropertyTokeProposals(pprQuery: PrivatePropertyProposalQuery): Promise<IPrivatePropertyProposalListResponse>;
 
   handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 
@@ -131,6 +133,11 @@ export interface FilterPrivatePropertyRegistryGeoQuery extends PrivatePropertyRe
 
 export interface IPrivatePropertyRegistryListResponse {
   list: IPrivatePropertyRegistry[];
+  total: number;
+}
+
+export interface IPrivatePropertyProposalListResponse {
+  list: IPrivatePropertyProposal[];
   total: number;
 }
 
