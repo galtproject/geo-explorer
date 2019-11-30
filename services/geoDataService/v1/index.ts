@@ -510,9 +510,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       tokenId: resultProposal.tokenId
     });
 
-    await this.database.addOrUpdateGeoData({
-      tokenId: resultProposal.tokenId,
-      contractAddress: registryAddress,
+    await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
       haveProposalToEdit: notExecutedProposalsCount > 0
     } as any);
 

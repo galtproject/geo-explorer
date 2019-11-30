@@ -215,7 +215,7 @@ const config = require('./config');
       });
 
       chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyApproveProposal, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New PrivatePropertyNewProposal event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New PrivatePropertyApproveProposal event, blockNumber:', currentBlockNumber);
         await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
@@ -227,7 +227,7 @@ const config = require('./config');
       });
 
       chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyExecuteProposal, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New PrivatePropertyNewProposal event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New PrivatePropertyExecuteProposal event, blockNumber:', currentBlockNumber);
         await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
