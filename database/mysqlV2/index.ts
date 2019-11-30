@@ -63,14 +63,20 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async flushDatabase() {
     await this.models.GeohashSpaceToken.destroy({where: {}});
 
-    await this.models.Application.destroy({where: {}});
-    await this.models.SpaceTokensOrders.destroy({where: {}});
-    await this.models.SpaceTokenGeoData.destroy({where: {}});
+    await this.models.CommunityProposal.destroy({where: {}});
+    await this.models.CommunityVoting.destroy({where: {}});
+    await this.models.CommunityMember.destroy({where: {}});
+    await this.models.Community.destroy({where: {}});
 
     await this.models.SaleOffer.destroy({where: {}});
     await this.models.SaleOrder.destroy({where: {}});
 
+    await this.models.PprTokenProposal.destroy({where: {}});
     await this.models.PrivatePropertyRegistry.destroy({where: {}});
+
+    await this.models.Application.destroy({where: {}});
+    await this.models.SpaceTokensOrders.destroy({where: {}});
+    await this.models.SpaceTokenGeoData.destroy({where: {}});
 
     await this.models.Value.destroy({where: {}});
   }
