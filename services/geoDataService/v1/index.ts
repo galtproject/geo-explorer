@@ -109,22 +109,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let geoDataToSave = {
       contractAddress,
       isPpr: !this.chainService.spaceGeoData || contractAddress.toLowerCase() !== this.chainService.spaceGeoData._address.toLowerCase(),
-      tokenId: geoData.tokenId,
-      tokenType: geoData.spaceTokenType,
-      owner: geoData.owner,
-      locker: geoData.locker,
-      inLocker: geoData.inLocker,
       level: geoData.level || '0',
       levelNumber: parseFloat((geoData.level || '0').toString().match(/\d+/g)[0]),
-      area: geoData.area,
-      areaSource: geoData.areaSource,
+      tokenType: geoData.spaceTokenType,
       dataLink: dataLink,
-      humanAddress: geoData.humanAddress,
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       geohashesCount: geoData.geohashContour.length,
       heightsContourJson: JSON.stringify(geoData.heightsContour),
-      createdAtBlock: geoData.createdAtBlock,
-      updatedAtBlock: geoData.createdAtBlock
+      ...geoData
     };
 
     if (!isIpldHash(dataLink)) {
