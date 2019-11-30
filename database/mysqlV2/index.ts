@@ -1034,7 +1034,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async getPrivatePropertyProposal(contractAddress, proposalId) {
-    return this.models.PrivatePropertyRegistry.findOne({
+    return this.models.PprTokenProposal.findOne({
       where: {contractAddress: {[Op.like]: contractAddress}, proposalId}
     });
   }
@@ -1104,7 +1104,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.PprTokenProposal.findAll(findAllParam);
   }
 
-  async filterPrivatePropertyProposalCount(pprQuery: PrivatePropertyRegistryQuery) {
+  async filterPrivatePropertyProposalCount(pprQuery: PrivatePropertyProposalQuery) {
     const findAllParam: any = this.privatePropertyProposalQueryToFindAllParam(pprQuery);
 
     return this.models.PprTokenProposal.count(findAllParam);

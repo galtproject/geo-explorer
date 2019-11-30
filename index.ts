@@ -269,9 +269,10 @@ const config = require('./config');
       });
     });
 
-    await chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (e) => {
-      await subscribeToPrivatePropertyRegistry(e.returnValues.token);
-      return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
+    await chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New NewPrivatePropertyRegistry event, blockNumber:', currentBlockNumber, 'contractAddress:', newEvent.contractAddress);
+      await subscribeToPrivatePropertyRegistry(newEvent.returnValues.token);
+      return geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
     });
 
     // await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
