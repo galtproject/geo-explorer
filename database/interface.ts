@@ -131,6 +131,20 @@ export default interface IExplorerDatabase {
   filterCommunityProposalCount(filterQuery: CommunityProposalQuery): Promise<number>;
 
   // =============================================================
+  // Community Rules
+  // =============================================================
+
+  addOrUpdateCommunityRule(community: ICommunity, rule: ICommunityRule): Promise<ICommunityRule>;
+
+  getCommunityRule(communityId, ruleId): Promise<ICommunityRule>;
+
+  getCommunityRuleByCommunityAddress(communityAddress, ruleId): Promise<ICommunityRule>;
+
+  filterCommunityRule(filterQuery: CommunityRuleQuery): Promise<ICommunityRule[]>;
+
+  filterCommunityRuleCount(filterQuery: CommunityRuleQuery): Promise<number>;
+
+  // =============================================================
   // Values
   // =============================================================
 
@@ -572,6 +586,20 @@ export interface ICommunityProposal {
   destroy?();
 }
 
+export interface ICommunityRule {
+  id?;
+  votingId?;
+  communityId;
+
+  communityAddress;
+  ruleId;
+  dataLink?;
+  dataJson?;
+  description?;
+
+  destroy?();
+}
+
 export interface CommunityQuery {
   limit?: number;
   offset?: number;
@@ -620,5 +648,16 @@ export interface CommunityProposalQuery {
   marker?: number;
   creatorAddress?: string;
   pmAddress?: string;
+  communityAddress?: string;
+}
+
+
+export interface CommunityRuleQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
   communityAddress?: string;
 }

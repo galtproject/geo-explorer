@@ -8,7 +8,7 @@
  */
 
 import IExplorerDatabase, {
-  CommunityMemberQuery, CommunityProposalQuery, CommunityTokensQuery, CommunityVotingQuery,
+  CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity,
   ISaleOffer, PrivatePropertyProposalQuery,
   PrivatePropertyRegistryQuery,
@@ -793,6 +793,41 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     await this.updateCommunityVoting(communityAddress, marker);
   }
 
+  handleCommunityRuleEvent(communityAddress, event) {
+    return this.updateCommunityRule(communityAddress, event.returnValues.id);
+  }
+
+
+  async updateCommunityRule(communityAddress, ruleId) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress);
+
+    const ruleData = await this.chainService.callContractMethod(contract, 'fundRules', [ruleId]);
+
+    const {dataLink, ipfsHash, active: isActive, manager, createdAt} = ruleData;
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
+    await this.database.addOrUpdateCommunityRule(community, {
+      communityAddress,
+      ruleId,
+      communityId: community.id,
+      description,
+      dataLink,
+      dataJson,
+      ipfsHash
+    });
+    // console.log('newProposal', JSON.stringify(newProposal));
+
+    await this.updateCommunityVoting(communityAddress, marker);
+  }
+
   async getCommunity(address) {
     return this.database.getCommunity(address);
   }
@@ -832,6 +867,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterCommunityProposal(filterQuery),
       total: await this.database.filterCommunityProposalCount(filterQuery)
+    };
+  }
+
+  async filterCommunityRules(filterQuery: CommunityRuleQuery) {
+    return {
+      list: await this.database.filterCommunityRule(filterQuery),
+      total: await this.database.filterCommunityRuleCount(filterQuery)
     };
   }
 }

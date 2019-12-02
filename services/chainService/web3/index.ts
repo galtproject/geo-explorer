@@ -398,7 +398,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // Community
   // =============================================================
 
-  getCommunityStorageContract(address, isPpr) {
+  getCommunityStorageContract(address, isPpr = false) {
     if(this.communityCache[address]) {
       return this.communityCache[address];
     }
