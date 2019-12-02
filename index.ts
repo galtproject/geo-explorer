@@ -277,35 +277,35 @@ const config = require('./config');
       return geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
     });
 
-    // await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-    //   await pIteration.forEach(events, async (e) => {
-    //     const fundId = e.returnValues.fundId;
-    //     const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
-    //     fundDeployment.blockNumber = e.blockNumber;
-    //     await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-    //     return subscribeToCommunity(fundDeployment.fundRA, false);
-    //   });
-    // });
-    //
-    // await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-    //   await pIteration.forEach(events, async (e) => {
-    //     const fundId = e.returnValues.fundId;
-    //     const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
-    //     fundDeployment.blockNumber = e.blockNumber;
-    //     await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-    //     subscribeToCommunity(fundDeployment.fundRA, false);
-    //   });
-    // });
-    //
-    // chainService.subscribeForNewEvents(chainService.communityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
-    //   console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
-    //   const fundId = newEvent.returnValues.fundId;
-    //   const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
-    //   fundDeployment.blockNumber = newEvent.blockNumber;
-    //   await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-    //   await subscribeToCommunity(fundDeployment.fundRA, false);
-    //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
-    // });
+    await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
+      await pIteration.forEach(events, async (e) => {
+        const fundId = e.returnValues.fundId;
+        const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
+        fundDeployment.blockNumber = e.blockNumber;
+        await geoDataService.handleNewCommunityEvent(fundDeployment, false);
+        return subscribeToCommunity(fundDeployment.fundRA, false);
+      });
+    });
+
+    await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
+      await pIteration.forEach(events, async (e) => {
+        const fundId = e.returnValues.fundId;
+        const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+        fundDeployment.blockNumber = e.blockNumber;
+        await geoDataService.handleNewCommunityEvent(fundDeployment, false);
+        subscribeToCommunity(fundDeployment.fundRA, false);
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.communityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
+      const fundId = newEvent.returnValues.fundId;
+      const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+      fundDeployment.blockNumber = newEvent.blockNumber;
+      await geoDataService.handleNewCommunityEvent(fundDeployment, false);
+      await subscribeToCommunity(fundDeployment.fundRA, false);
+      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    });
 
     await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEach(events, async (e) => {
