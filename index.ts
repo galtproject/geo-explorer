@@ -191,6 +191,48 @@ const config = require('./config');
         await geoDataService.updatePrivatePropertyRegistry(address);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
+
+      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []);
+
+      const controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress);
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.PrivatePropertyNewProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyRegistryProposalEvent(address, e);
+        });
+      });
+
+      console.log('PrivatePropertyNewProposal events done');
+
+      chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyNewProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New PrivatePropertyNewProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.PrivatePropertyApproveProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyRegistryProposalEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyApproveProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New PrivatePropertyApproveProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.PrivatePropertyExecuteProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyRegistryProposalEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyExecuteProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New PrivatePropertyExecuteProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
     }
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, prevBlockNumber).then(async (events) => {
@@ -229,9 +271,10 @@ const config = require('./config');
       });
     });
 
-    await chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (e) => {
-      await subscribeToPrivatePropertyRegistry(e.returnValues.token);
-      return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
+    await chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (err, newEvent) => {
+      console.log('🛎 New NewPrivatePropertyRegistry event, blockNumber:', currentBlockNumber, 'contractAddress:', newEvent.contractAddress);
+      await subscribeToPrivatePropertyRegistry(newEvent.returnValues.token);
+      return geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
     });
 
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
@@ -267,7 +310,7 @@ const config = require('./config');
     await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEach(events, async (e) => {
         const fundId = e.returnValues.fundId;
-        const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+        const fundDeployment = await chainService.callContractMethod(chainService.pprCommunityFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
         await geoDataService.handleNewCommunityEvent(fundDeployment, true);
         subscribeToCommunity(fundDeployment.fundRA, true);
@@ -277,7 +320,7 @@ const config = require('./config');
     chainService.subscribeForNewEvents(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
       const fundId = newEvent.returnValues.fundId;
-      const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
+      const fundDeployment = await chainService.callContractMethod(chainService.pprCommunityFactory, 'fundContracts', [fundId]);
       fundDeployment.blockNumber = newEvent.blockNumber;
       await geoDataService.handleNewCommunityEvent(fundDeployment, true);
       await subscribeToCommunity(fundDeployment.fundRA, true);
@@ -309,6 +352,18 @@ const config = require('./config');
         });
       });
 
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityTransferReputation, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityTransferReputationEvent(address, e, isPpr);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contractRa, ChainServiceEvents.CommunityRevokeReputation, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleCommunityRevokeReputationEvent(address, e, isPpr);
+        });
+      });
+
       chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityMint, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityMint event, blockNumber:', currentBlockNumber);
         await geoDataService.handleCommunityMintEvent(address, newEvent, isPpr);
@@ -318,6 +373,18 @@ const config = require('./config');
       chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityBurn, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityBurn event, blockNumber:', currentBlockNumber);
         await geoDataService.handleCommunityBurnEvent(address, newEvent, isPpr);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityRevokeReputation, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityRevokeReputation event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityRevokeReputationEvent(address, newEvent, isPpr);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contractRa, ChainServiceEvents.CommunityTransferReputation, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityTransferReputation event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityTransferReputationEvent(address, newEvent, isPpr);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
@@ -338,7 +405,7 @@ const config = require('./config');
 
       chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityAddMarker, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New CommunityAddMarker event, blockNumber:', currentBlockNumber);
-        subscribeToCommunityProposalManager(address, newEvent.returnValues.proposalManager.toLowerCase())
+        subscribeToCommunityProposalManager(address, newEvent.returnValues.proposalManager.toLowerCase());
         await geoDataService.handleCommunityAddVotingEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });

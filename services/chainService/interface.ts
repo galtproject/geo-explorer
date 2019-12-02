@@ -66,6 +66,8 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryContract(address): Promise<any>;
 
+  getPropertyRegistryControllerContract(address): Promise<any>;
+
   getCommunityStorageContract(address, isPpr): Promise<any>;
 
   getCommunityRaContract(address, isPpr): Promise<any>;
@@ -91,9 +93,15 @@ export enum ChainServiceEvents {
 
   NewPrivatePropertyRegistry = 'AddToken',
   SetPrivatePropertyDetails = 'SetDetails',
+  PrivatePropertyNewProposal = 'NewProposal',
+  PrivatePropertyApproveProposal = 'ProposalApproval',
+  PrivatePropertyExecuteProposal = 'ProposalExecuted',
+
   NewCommunity = 'CreateFundFifthStep',
   CommunityMint = 'TokenMint',
   CommunityBurn = 'TokenBurn',
+  CommunityTransferReputation = 'Transfer',
+  CommunityRevokeReputation = 'RevokeDelegated',
   CommunityAddMarker = 'AddProposalMarker',
   CommunityRemoveMarker = 'RemoveProposalMarker',
   CommunityNewProposal = 'NewProposal',

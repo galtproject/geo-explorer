@@ -30,7 +30,7 @@ module.exports = async function (sequelize, models) {
     contractAddress: {
       type: Sequelize.STRING(100)
     },
-    isPrivate: {
+    isPpr: {
       type: Sequelize.BOOLEAN,
     },
     ask: {
@@ -57,7 +57,7 @@ module.exports = async function (sequelize, models) {
     updatedAtBlock: {
       type: Sequelize.INTEGER
     },
-    
+
     // SPACE TOKENS FIELDS
     featureArray: {
       type: Sequelize.TEXT
@@ -114,7 +114,7 @@ module.exports = async function (sequelize, models) {
       // {fields: ['owner']}
     ]
   });
-  
+
   models.SpaceTokensOrders = sequelize.define('spaceTokensOrders', {
     position: {type: Sequelize.INTEGER},
   } as any, {} as any);
@@ -128,6 +128,6 @@ module.exports = async function (sequelize, models) {
   await SaleOrder.sync({});
 
   await models.SpaceTokensOrders.sync({});
-  
+
   return SaleOrder;
 };

@@ -95,6 +95,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.getPrivatePropertyRegistry(req.params.address));
   });
 
+  service.post('/v1/ppr-token-proposals/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterPrivatePropertyTokeProposals(req.body));
+  });
+
   service.post('/v1/communities/get/:address', async (req, res) => {
     await respondByScheme(res, await geoDataService.getCommunity(req.params.address));
   });

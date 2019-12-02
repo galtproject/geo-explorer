@@ -27,6 +27,15 @@ module.exports = async function (sequelize, models) {
     totalSupply: {
       type: Sequelize.INTEGER
     },
+    dataLink: {
+      type: Sequelize.STRING
+    },
+    dataJson: {
+      type: Sequelize.TEXT
+    },
+    description: {
+      type: Sequelize.TEXT
+    },
     createdAtBlock: {
       type: Sequelize.INTEGER
     },
@@ -47,10 +56,10 @@ module.exports = async function (sequelize, models) {
   PrivatePropertyRegistry.belongsToMany(models.SpaceTokenGeoData, {as: 'spaceTokens', through: models.SpaceTokensPrivateRegistries});
   models.SpaceTokenGeoData.belongsToMany(PrivatePropertyRegistry, {as: 'privateRegistries', through: models.SpaceTokensPrivateRegistries});
 
-  await PrivatePropertyRegistry.sync({});
+  let result = await PrivatePropertyRegistry.sync({});
 
   await models.SpaceTokensPrivateRegistries.sync({});
-  
+
   //
   // PrivatePropertyRegistry.belongsTo(models.SpaceTokenGeoData, {as: 'tokenGeoData', foreignKey: 'tokenGeoDataId'});
   // models.SpaceTokenGeoData.hasMany(PrivatePropertyRegistry, {as: 'orders', foreignKey: 'tokenGeoDataId'});
@@ -58,6 +67,6 @@ module.exports = async function (sequelize, models) {
   // await PrivatePropertyRegistry.sync({});
   //
   // await models.SpaceTokensOrders.sync({});
-  
-  return PrivatePropertyRegistry;
+
+  return result;
 };

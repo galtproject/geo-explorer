@@ -10,7 +10,7 @@
 import IExplorerDatabase, {
   CommunityMemberQuery, CommunityProposalQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity,
-  ISaleOffer,
+  ISaleOffer, PrivatePropertyProposalQuery,
   PrivatePropertyRegistryQuery,
   SaleOffersQuery,
   SaleOrdersQuery
@@ -108,23 +108,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let geoDataToSave = {
       contractAddress,
-      isPrivate: !this.chainService.spaceGeoData || contractAddress.toLowerCase() !== this.chainService.spaceGeoData._address.toLowerCase(),
-      tokenId: geoData.tokenId,
-      tokenType: geoData.spaceTokenType,
-      owner: geoData.owner,
-      locker: geoData.locker,
-      inLocker: geoData.inLocker,
+      isPpr: !this.chainService.spaceGeoData || contractAddress.toLowerCase() !== this.chainService.spaceGeoData._address.toLowerCase(),
       level: geoData.level || '0',
       levelNumber: parseFloat((geoData.level || '0').toString().match(/\d+/g)[0]),
-      area: geoData.area,
-      areaSource: geoData.areaSource,
+      tokenType: geoData.spaceTokenType,
       dataLink: dataLink,
-      humanAddress: geoData.humanAddress,
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       geohashesCount: geoData.geohashContour.length,
       heightsContourJson: JSON.stringify(geoData.heightsContour),
-      createdAtBlock: geoData.createdAtBlock,
-      updatedAtBlock: geoData.createdAtBlock
+      ...geoData
     };
 
     if (!isIpldHash(dataLink)) {
@@ -250,7 +242,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       currencyName,
       statusName: chainOrder.statusName,
       contractAddress: event.contractAddress,
-      isPrivate: !this.chainService.propertyMarket || event.contractAddress.toLowerCase() !== this.chainService.propertyMarket._address.toLowerCase(),
+      isPpr: !this.chainService.propertyMarket || event.contractAddress.toLowerCase() !== this.chainService.propertyMarket._address.toLowerCase(),
       currencyAddress: chainOrder.tokenContract,
       ask: chainOrder.ask,
       seller: chainOrder.seller,
@@ -435,8 +427,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const symbol = await contract.methods.symbol().call({});
     const owner = await contract.methods.owner().call({});
     const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
+    const dataLink = await contract.methods.tokenDataLink().call({});
 
-    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol});
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
+    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol, dataLink, dataJson, description});
   }
 
   async getPrivatePropertyRegistry(address) {
@@ -450,6 +451,71 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterPrivatePropertyRegistry(filterQuery),
       total: await this.database.filterPrivatePropertyRegistryCount(filterQuery)
+    };
+  }
+
+  async handlePrivatePropertyRegistryProposalEvent(registryAddress, event) {
+    // const pprContract = await this.chainService.getPropertyRegistryContract(registryAddress);
+    const controllerContract = await this.chainService.getPropertyRegistryControllerContract(event.contractAddress);
+
+    const proposalId = event.returnValues.proposalId;
+
+    const proposalData: any = {
+      registryAddress,
+      proposalId,
+      contractAddress: event.contractAddress,
+    };
+
+    if(event.returnValues.tokenId) {
+      proposalData['tokenId'] = event.returnValues.tokenId;
+      const spaceTokenGeoData = await this.getSpaceTokenById(proposalData['tokenId'], registryAddress);
+      proposalData['spaceGeoDataId'] = spaceTokenGeoData.id;
+    }
+    if(event.returnValues.creator) {
+      proposalData['creator'] = event.returnValues.creator
+    }
+
+    const proposal = await this.chainService.callContractMethod(controllerContract, 'proposals', [proposalId]);
+
+    // console.log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
+
+    const dataLink = proposal.dataLink;
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
+    const resultProposal = await this.database.addOrPrivatePropertyProposal({
+      ...proposalData,
+      dataLink,
+      description,
+      dataJson,
+      isExecuted: proposal.executed,
+      data: proposal.data,
+      isApprovedByTokenOwner: proposal.tokenOwnerApproved,
+      isApprovedByRegistryOwner: proposal.geoDataManagerApproved
+    });
+
+    const notExecutedProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+      registryAddress,
+      tokenId: resultProposal.tokenId,
+      isExecuted: false
+    });
+
+    await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
+      haveProposalToEdit: notExecutedProposalsCount > 0
+    } as any);
+
+    return resultProposal;
+  }
+
+  async filterPrivatePropertyTokeProposals(filterQuery: PrivatePropertyProposalQuery) {
+    return {
+      list: await this.database.filterPrivatePropertyProposal(filterQuery),
+      total: await this.database.filterPrivatePropertyProposalCount(filterQuery)
     };
   }
 
@@ -484,6 +550,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const isPrivate = (await contract.methods.getConfigValue(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
 
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
     const _community = await this.database.addOrUpdateCommunity({
       address: raAddress,
       storageAddress,
@@ -495,7 +569,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       spaceTokenOwnersCount,
       reputationTotalSupply,
       dataLink,
-      description: dataLink,
+      dataJson,
+      description,
       name,
       createdAtBlock
     });
@@ -537,8 +612,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
     const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
 
-    console.log('addSpaceTokens', propertyToken.tokenId);
-    await community.addSpaceTokens([propertyToken]);
+    await community.addSpaceTokens([propertyToken]).catch(() => {/* already in community */});
 
     await this.updateCommunityMember(community, propertyToken.owner);
 
@@ -552,6 +626,24 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     await community.removeSpaceTokens([propertyToken]);
 
     await this.updateCommunityMember(community, propertyToken.owner);
+
+    return this.updateCommunity(communityAddress, isPpr);
+  }
+
+  async handleCommunityTransferReputationEvent(communityAddress, event, isPpr) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    await this.updateCommunityMember(community, event.returnValues.from);
+    await this.updateCommunityMember(community, event.returnValues.to);
+
+    return this.updateCommunity(communityAddress, isPpr);
+  }
+
+  async handleCommunityRevokeReputationEvent(communityAddress, event, isPpr) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    await this.updateCommunityMember(community, event.returnValues.from);
+    await this.updateCommunityMember(community, event.returnValues.owner);
 
     return this.updateCommunity(communityAddress, isPpr);
   }
@@ -579,14 +671,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [marker], 'number');
     const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [marker], 'number');
 
+    let dataLink = markerData._dataLink;
+    let description = markerData._dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
     await this.database.addOrUpdateCommunityVoting(community, {
       communityAddress,
       marker,
       proposalManager,
       name: this.chainService.hexToString(markerData._name),
-      description: markerData._dataLink,
-      dataLink: markerData._dataLink,
       destination: markerData._destination,
+      description,
+      dataLink,
+      dataJson,
       support,
       minAcceptQuorum,
       timeout,
@@ -655,6 +756,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
     let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
+    let dataLink = proposalData.dataLink;
+    let description = dataLink;
+    let dataJson = '';
+    if(isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink);
+      description = data.description;
+      dataJson = JSON.stringify(dataJson);
+    }
+
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
@@ -669,9 +779,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       declinedShare: nayShare,
       declinedCount: proposalVotingData.nays.length,
       status,
-      description: proposalData.dataLink,
+      description,
+      dataLink,
+      dataJson,
       data: proposalData.data,
-      dataLink: proposalData.dataLink,
       requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
