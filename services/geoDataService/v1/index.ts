@@ -477,7 +477,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const proposal = await this.chainService.callContractMethod(controllerContract, 'proposals', [proposalId]);
 
-    console.log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
+    // console.log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
 
     const dataLink = proposal.dataLink;
     let description = dataLink;
