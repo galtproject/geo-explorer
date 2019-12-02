@@ -552,7 +552,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
     const reputationTotalSupply = await this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei');
 
-    const isPrivate = (await contract.methods.getConfigValue(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const isPrivate = (await contract.methods.config(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
 
     let description = dataLink;
     let dataJson = '';
@@ -661,22 +661,22 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
-    const markerData = await contract.methods.getProposalMarker(marker).call({});
+    const markerData = await contract.methods.proposalMarkers(marker).call({});
 
     let {support, minAcceptQuorum, timeout} = await this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]);
     support = this.chainService.weiToEther(support);
     minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
     timeout = parseInt(timeout.toString(10));
 
-    const proposalManager = markerData._proposalManager;
+    const proposalManager = markerData.proposalManager;
     const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
 
     const activeProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getActiveProposalsCount', [marker], 'number');
     const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [marker], 'number');
     const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [marker], 'number');
 
-    let dataLink = markerData._dataLink;
-    let description = markerData._dataLink;
+    let dataLink = markerData.dataLink;
+    let description = markerData.dataLink;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
@@ -687,8 +687,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communityAddress,
       marker,
       proposalManager,
-      name: this.chainService.hexToString(markerData._name),
-      destination: markerData._destination,
+      name: this.chainService.hexToString(markerData.name),
+      destination: markerData.destination,
       description,
       dataLink,
       dataJson,

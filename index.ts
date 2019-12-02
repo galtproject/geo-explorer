@@ -336,11 +336,11 @@ const config = require('./config');
       subscribedToCommunity[address] = true;
       const contractRa = await chainService.getCommunityRaContract(address, isPpr);
 
-      const registryAddress = await this.chainService.callContractMethod(contractRa, 'fundRegistry', []);
+      const registryAddress = await chainService.callContractMethod(contractRa, 'fundRegistry', []);
 
-      const registryContract = await this.chainService.getCommunityFundRegistryContract(registryAddress);
+      const registryContract = await chainService.getCommunityFundRegistryContract(registryAddress);
 
-      const storageAddress = await this.chainService.callContractMethod(registryContract, 'getStorageAddress', []);
+      const storageAddress = await chainService.callContractMethod(registryContract, 'getStorageAddress', []);
 
       const contractStorage = await chainService.getCommunityStorageContract(storageAddress, isPpr);
 
