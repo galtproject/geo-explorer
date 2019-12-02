@@ -428,6 +428,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return communityProposalManagerContract;
   }
 
+  getCommunityFundRegistryContract(address) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityRegistryContract = new this.web3.eth.Contract(this.contractsConfig['fundRegistryAbi'], address);
+    this.communityCache[address] = communityRegistryContract;
+    return communityRegistryContract;
+  }
+
   // =============================================================
   // Common
   // =============================================================

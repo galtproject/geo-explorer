@@ -596,6 +596,9 @@ export interface ICommunityRule {
   dataLink?;
   dataJson?;
   description?;
+  ipfsHash?;
+  manager?;
+  isActive?;
 
   destroy?();
 }

@@ -74,6 +74,8 @@ export default interface IExplorerChainService {
 
   getCommunityProposalManagerContract(address): Promise<any>;
 
+  getCommunityFundRegistryContract(address): Promise<any>;
+
   hexToString(value): string;
 
   weiToEther(value): string;

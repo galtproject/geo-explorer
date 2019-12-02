@@ -530,12 +530,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunity(raAddress, isPpr, createdAtBlock?) {
     // console.log('updateCommunity', raAddress, isPpr);
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isPpr);
-    const storageAddress = await this.chainService.callContractMethod(raContract, 'fundStorage', []);
+    const registryAddress = await this.chainService.callContractMethod(raContract, 'fundRegistry', []);
+
+    const registryContract = await this.chainService.getCommunityFundRegistryContract(registryAddress);
+
+    const storageAddress = await this.chainService.callContractMethod(registryContract, 'getStorageAddress', []);
 
     const contract = await this.chainService.getCommunityStorageContract(storageAddress, isPpr);
     const community = await this.database.getCommunity(raAddress);
 
-    const multiSigAddress = await this.chainService.callContractMethod(contract, 'getMultiSig', []);
+    const multiSigAddress = await this.chainService.callContractMethod(registryContract, 'getMultiSigAddress', []);
 
     const name = await contract.methods.name().call({});
     const dataLink = await contract.methods.dataLink().call({});
@@ -582,7 +586,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityMember(community: ICommunity, address) {
     const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
-    const fullNameHash = await this.chainService.callContractMethod(contract, 'getMemberIdentification', [address], 'bytes32');
+    const fullNameHash = await this.chainService.callContractMethod(contract, 'membersIdentification', [address], 'bytes32');
 
     const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
 
@@ -823,9 +827,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       ipfsHash
     });
-    // console.log('newProposal', JSON.stringify(newProposal));
-
-    await this.updateCommunityVoting(communityAddress, marker);
   }
 
   async getCommunity(address) {
