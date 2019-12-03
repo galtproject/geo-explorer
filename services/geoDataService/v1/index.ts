@@ -488,12 +488,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson = JSON.stringify(data);
     }
 
+    proposal.status = ({
+      '0': 'null',
+      '1': 'pending',
+      '2': 'approved',
+      '3': 'executed',
+      '4': 'rejected'
+    })[proposal.status];
+
     const resultProposal = await this.database.addOrPrivatePropertyProposal({
       ...proposalData,
       dataLink,
       description,
       dataJson,
-      isExecuted: proposal.executed,
+      status: proposal.status,
+      isExecuted: proposal.status == 'executed',
       data: proposal.data,
       isApprovedByTokenOwner: proposal.tokenOwnerApproved,
       isApprovedByRegistryOwner: proposal.geoDataManagerApproved

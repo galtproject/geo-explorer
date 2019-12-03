@@ -1073,6 +1073,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.eq]: pprQuery[field]};
     });
 
+    if(pprQuery.status) {
+      allWheres['status'] = {[Op.in]: pprQuery.status};
+    }
+
     ['registryAddress'].forEach((field) => {
       if(pprQuery[field])
         allWheres[field] = {[Op.like]: pprQuery[field]};

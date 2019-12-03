@@ -33,6 +33,9 @@ module.exports = async function (sequelize, models) {
     status: {
       type: Sequelize.STRING(100)
     },
+    statusNumber: {
+      type: Sequelize.INTEGER
+    },
     data: {
       type: Sequelize.TEXT
     },

@@ -468,6 +468,7 @@ export interface IPrivatePropertyProposal {
   proposalId?;
   tokenId?;
   status?;
+  statusNumber?;
   data?;
   dataLink?;
   dataJson?;
