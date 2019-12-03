@@ -599,6 +599,7 @@ export interface ICommunityRule {
   ipfsHash?;
   manager?;
   isActive?;
+  type?;
 
   destroy?();
 }

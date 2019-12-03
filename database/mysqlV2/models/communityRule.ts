@@ -33,6 +33,9 @@ module.exports = async function (sequelize, models) {
     manager: {
       type: Sequelize.STRING(100)
     },
+    type: {
+      type: Sequelize.STRING(100)
+    },
     isActive: {
       type: Sequelize.BOOLEAN,
       defaultValue: false

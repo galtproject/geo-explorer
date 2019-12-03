@@ -15,7 +15,7 @@
     "@types/es6-promise": "^3.3.0",
     "axios": "^0.19.0",
     "fs": "0.0.1-security",
-    "geesome-libs": "git+ssh://git@github.com/galtproject/geesome-libs.git#cb53446",
+    "geesome-libs": "git://github.com/galtproject/geesome-libs.git#1c6d28a",
     "lodash": "^4.17.15",
     "mysql2": "^1.6.4",
     "p-iteration": "^1.1.7",

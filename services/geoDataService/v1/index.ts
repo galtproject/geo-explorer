@@ -434,7 +434,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
       description = data.description;
-      dataJson = JSON.stringify(dataJson);
+      dataJson = JSON.stringify(data);
     }
 
     await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol, dataLink, dataJson, description});
@@ -485,7 +485,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
       description = data.description;
-      dataJson = JSON.stringify(dataJson);
+      dataJson = JSON.stringify(data);
     }
 
     const resultProposal = await this.database.addOrPrivatePropertyProposal({
@@ -559,7 +559,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
       description = data.description;
-      dataJson = JSON.stringify(dataJson);
+      dataJson = JSON.stringify(data);
     }
 
     const _community = await this.database.addOrUpdateCommunity({
@@ -681,7 +681,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
       description = data.description;
-      dataJson = JSON.stringify(dataJson);
+      dataJson = JSON.stringify(data);
     }
     await this.database.addOrUpdateCommunityVoting(community, {
       communityAddress,
@@ -766,7 +766,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
       description = data.description;
-      dataJson = JSON.stringify(dataJson);
+      dataJson = JSON.stringify(data);
     }
 
     await this.database.addOrUpdateCommunityProposal(voting, {
@@ -811,11 +811,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const {dataLink, ipfsHash, active: isActive, manager, createdAt} = ruleData;
     let description = dataLink;
+    let type = null;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink);
-      description = data.description;
-      dataJson = JSON.stringify(dataJson);
+      // console.log('dataItem', dataItem);
+      try {
+        description = await this.geesome.getContentData(data.dataList[0]);
+        type = data.type;
+        console.log('description', description, 'type', type);
+        dataJson = JSON.stringify(data);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     await this.database.addOrUpdateCommunityRule(community, {
@@ -825,7 +833,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       description,
       dataLink,
       dataJson,
-      ipfsHash
+      ipfsHash,
+      isActive,
+      type,
+      manager
     });
   }
 

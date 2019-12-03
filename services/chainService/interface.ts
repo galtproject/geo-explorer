@@ -111,7 +111,8 @@ export enum ChainServiceEvents {
   CommunityAyeProposal = 'AyeProposal',
   CommunityApprovedProposal = 'Approved',
   CommunityRejectedProposal = 'Rejected',
-
+  CommunityAddRule = 'AddFundRule',
+  CommunityRemoveRule = 'DisableFundRule'
 }
 
 export interface ChainServiceSaleOrder {
