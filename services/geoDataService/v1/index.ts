@@ -514,8 +514,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       status: ['pending']
     });
 
+    console.log('notExecutedProposalsCount', notExecutedProposalsCount);
+
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
-      haveProposalToEdit: notExecutedProposalsCount > 0
+      proposalsToEditCount: notExecutedProposalsCount
     } as any);
 
     return resultProposal;

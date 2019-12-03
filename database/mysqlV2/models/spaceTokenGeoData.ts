@@ -93,8 +93,8 @@ module.exports = async function (sequelize, models) {
     isPpr: {
       type: Sequelize.BOOLEAN,
     },
-    haveProposalToEdit: {
-      type: Sequelize.BOOLEAN
+    proposalsToEditCount: {
+      type: Sequelize.INTEGER
     },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)

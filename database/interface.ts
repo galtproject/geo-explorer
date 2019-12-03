@@ -194,7 +194,7 @@ export interface ISpaceTokenGeoData {
   createdAtBlock;
   updatedAtBlock;
   isPpr;
-  haveProposalToEdit?;
+  proposalsToEditCount?;
 
   spaceTokensOrders?;
 }
