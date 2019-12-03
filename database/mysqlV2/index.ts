@@ -1094,7 +1094,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }];
 
     return {
-      where: resultWhere(allWheres, ['tokenId', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted']),
+      where: resultWhere(allWheres, ['tokenId', 'status', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted']),
       include: include
     }
   }
