@@ -493,6 +493,7 @@ export interface PrivatePropertyProposalQuery {
   isApprovedByTokenOwner?: boolean;
   isApprovedByRegistryOwner?: boolean;
   isExecuted?: boolean;
+  status?: string[];
 }
 
 export interface ICommunity {
