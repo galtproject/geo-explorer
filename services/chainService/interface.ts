@@ -13,6 +13,8 @@ export default interface IExplorerChainService {
   websocketProvider: any;
   web3: any;
 
+  configFile: string;
+
   spaceGeoData: any;
   propertyMarket: any;
   contractsConfig: any;

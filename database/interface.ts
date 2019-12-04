@@ -158,6 +158,7 @@ export default interface IExplorerDatabase {
 export interface ISpaceTokenGeoData {
   id?;
   tokenId;
+  imageHash?;
   tokenType;
   type;
   subtype;

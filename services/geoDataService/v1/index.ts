@@ -149,9 +149,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }, geoDataToSave);
     }
 
+    let imageHash;
+
+    if(photos[0]) {
+      const link = await this.geesome.getContentLink(photos[0], 'large').catch(() => '');
+      imageHash = _.last(link.split('/'))
+    }
+
     geoDataToSave = _.extend({
       type: details.type,
       subtype: details.subtype,
+      imageHash,
       photosCount: photos.length,
       floorPlansCount: floorPlans.length,
       bathroomsCount: details.bathrooms,
@@ -183,6 +191,37 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async getSpaceTokenById(tokenId, contractAddress) {
     return this.database.getSpaceToken(tokenId, contractAddress);
+  }
+
+  async getSpaceTokenMetadataById(tokenId, contractAddress) {
+    const spaceGeoData = await this.database.getSpaceToken(tokenId, contractAddress);
+
+    const tokenData = JSON.parse(spaceGeoData.dataJson);
+    let attributes = [];
+
+    attributes.push({
+      trait_type: 'type',
+      value: spaceGeoData.type
+    });
+    attributes.push({
+      trait_type: 'subtype',
+      value: spaceGeoData.subtype
+    });
+
+    attributes.push({
+      trait_type: 'area',
+      value: spaceGeoData.area
+    });
+
+    attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
+
+    return {
+      name: tokenData.details.addressTwo + ', ' + tokenData.details.addressOne,
+      description: tokenData.details.description,
+      attributes: attributes,
+      image: await this.geesome.getContentLink(spaceGeoData.imageHash).catch(() => null),
+      external_url: `https://app.galtproject.io/#/property/token/${tokenId}?contractAddress=${contractAddress}&network=${_.first(this.chainService.configFile.split('.'))}`
+    };
   }
 
   // =============================================================

@@ -65,6 +65,8 @@ export default interface IExplorerGeoDataService {
 
   getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
+  getSpaceTokenMetadataById(tokenId, contractAddress): Promise<any>;
+
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 
   updatePrivatePropertyRegistry(address): Promise<void>;

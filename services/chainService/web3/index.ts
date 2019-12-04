@@ -39,6 +39,8 @@ module.exports = async (extendConfig) => {
 
   const serviceInstance = new ExplorerChainWeb3Service(contractsConfig, wsServer);
 
+  serviceInstance.configFile = configFile;
+
   setInterval(async () => {
     const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
     if (newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
@@ -54,6 +56,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   websocketProvider: any;
   web3: any;
   wsServer: string;
+
+  configFile: string;
 
   spaceGeoData: any;
   propertyMarket: any;

@@ -102,6 +102,9 @@ module.exports = async function (sequelize, models) {
     areaSource: {
       type: Sequelize.STRING(100)
     },
+    imageHash: {
+      type: Sequelize.STRING(100)
+    },
     dataLink: {
       type: Sequelize.STRING
     },
