@@ -243,8 +243,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     let orderData: any = {};
-    if (chainOrder.details.dataAddress) {
-      orderData = await this.geesome.getObject(chainOrder.details.dataAddress).catch(() => ({}));
+    let dataLink = chainOrder.details.dataAddress || chainOrder.details.dataLink;
+    if (dataLink) {
+      orderData = await this.geesome.getObject(dataLink).catch(() => ({}));
     }
 
     let allFeatures = [];

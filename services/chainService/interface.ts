@@ -147,5 +147,6 @@ export interface ChainServiceSaleOffer {
 export interface ChainServiceSaleOrderDetails {
   tokenIds: string[];
   dataAddress: string;
+  dataLink: string;
   propertyToken?: string;
 }
