@@ -210,7 +210,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     attributes.push({
       trait_type: 'area',
-      value: Math.round(spaceGeoData.area).toString()
+      value: spaceGeoData.area
     });
 
     attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
