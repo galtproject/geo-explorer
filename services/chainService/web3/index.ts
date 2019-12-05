@@ -128,7 +128,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       if(e) {
         e.contractAddress = e.address;
       }
-      callback(error, e);
+      // delay for ethereum node to write new data from event to storage
+      setTimeout(() => {
+        callback(error, e);
+      }, 1000);
     });
   }
 
