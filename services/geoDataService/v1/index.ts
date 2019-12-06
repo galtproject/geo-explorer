@@ -130,6 +130,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       details = spaceData.data;
     }
 
+    if(!floorPlans) {
+      floorPlans = [];
+    }
+
     if (!details) {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
