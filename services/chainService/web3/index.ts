@@ -269,7 +269,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       contractAddress = this.spaceGeoData._address;
     }
     if(!tokenId) {
-      return {};
+      return {
+        dataLink: '',
+        geohashContour: []
+      };
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
 
