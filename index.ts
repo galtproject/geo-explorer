@@ -200,7 +200,7 @@ const config = require('./config');
       });
 
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.BurnPrivatePropertyToken, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New SpaceTokenTransfer event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New BurnPrivatePropertyToken event, blockNumber:', currentBlockNumber);
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
         await geoDataService.updatePrivatePropertyRegistry(address);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
