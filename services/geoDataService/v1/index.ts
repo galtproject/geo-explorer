@@ -520,6 +520,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(event.returnValues.tokenId) {
       proposalData['tokenId'] = event.returnValues.tokenId;
       const spaceTokenGeoData = await this.getSpaceTokenById(proposalData['tokenId'], registryAddress);
+      if(!spaceTokenGeoData) {
+        // token not exists
+        return;
+      }
       proposalData['spaceGeoDataId'] = spaceTokenGeoData.id;
     }
     if(event.returnValues.creator) {
