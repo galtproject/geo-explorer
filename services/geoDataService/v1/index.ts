@@ -72,7 +72,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async saveSpaceTokenById(contractAddress, tokenId, additionalData = {}) {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
-    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId);
+    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
     let level;
     if (geoData.humanAddress) {
@@ -173,10 +173,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.addOrUpdateGeoData(geoDataToSave);
   }
 
-  addOrUpdateGeoData(geoDataToSave) {
-    return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
-      return this.database.addOrUpdateGeoData(geoDataToSave);
-    });
+  async addOrUpdateGeoData(geoDataToSave) {
+    if(geoDataToSave.owner) {
+      return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
+        return this.database.addOrUpdateGeoData(geoDataToSave);
+      });
+    } else {
+      await this.database.deleteGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress);
+      return this.database.deleteContour(geoDataToSave.tokenId, geoDataToSave.contractAddress);
+    }
   }
 
   async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {

@@ -14,6 +14,8 @@ export default interface IExplorerDatabase {
 
   addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string, tokenType?: string): Promise<void>;
 
+  deleteContour(tokenId: number, contractAddress: string): Promise<void>;
+
   getContourBySpaceTokenId(tokenId, contractAddress?: string, level?: string): Promise<string[]>;
 
   getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
@@ -21,6 +23,8 @@ export default interface IExplorerDatabase {
   getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
+
+  deleteGeoData(tokenId: number, contractAddress: string): Promise<void>;
 
   getSaleOrder(orderId, contractAddress): Promise<ISaleOrder>;
 

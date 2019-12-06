@@ -172,6 +172,13 @@ const config = require('./config');
         });
       });
 
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.BurnPrivatePropertyToken, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+          return geoDataService.updatePrivatePropertyRegistry(address);
+        });
+      });
+
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetSpaceTokenContour, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
         await geohashService.handleChangeContourEvent(newEvent);
@@ -186,6 +193,13 @@ const config = require('./config');
       });
 
       chainService.subscribeForNewEvents(contract, ChainServiceEvents.SpaceTokenTransfer, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New SpaceTokenTransfer event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
+        await geoDataService.updatePrivatePropertyRegistry(address);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(contract, ChainServiceEvents.BurnPrivatePropertyToken, currentBlockNumber, async (err, newEvent) => {
         console.log('🛎 New SpaceTokenTransfer event, blockNumber:', currentBlockNumber);
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
         await geoDataService.updatePrivatePropertyRegistry(address);

@@ -99,6 +99,7 @@ export enum ChainServiceEvents {
 
   NewPrivatePropertyRegistry = 'AddToken',
   SetPrivatePropertyDetails = 'SetDetails',
+  BurnPrivatePropertyToken = 'Burn',
   SetPrivatePropertyBurnTimeout = 'SetBurnTimeout',
   InitiatePrivatePropertyBurnTimeout = 'InitiateTokenBurn',
   CancelPrivatePropertyBurnTimeout = 'CancelTokenBurn',

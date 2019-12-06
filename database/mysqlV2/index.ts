@@ -153,6 +153,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
 
+  async deleteContour(tokenId, contractAddress) {
+    return this.models.GeohashSpaceToken.destroy({ where: {tokenId, contractAddress: {[Op.like]: contractAddress} }});
+  }
+
   // =============================================================
   // SpaceGeoData
   // =============================================================
@@ -169,12 +173,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(dbObject) {
       geoData.createdAtBlock = dbObject.createdAtBlock || geoData.createdAtBlock;
       await this.models.SpaceTokenGeoData.update(geoData, {
-        where: {tokenId: geoData.tokenId, contractAddress: geoData.contractAddress}
+        where: {tokenId: geoData.tokenId, contractAddress: {[Op.like]: geoData.contractAddress}}
       });
     } else {
       return this.models.SpaceTokenGeoData.create(geoData).catch(() => {});
     }
     return this.getSpaceTokenGeoData(geoData.tokenId, geoData.contractAddress);
+  }
+
+  async deleteGeoData(tokenId, contractAddress) {
+    return this.models.SpaceTokenGeoData.destroy({ where: {tokenId, contractAddress: {[Op.like]: contractAddress} }});
   }
 
   // =============================================================
