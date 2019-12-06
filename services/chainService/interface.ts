@@ -81,6 +81,8 @@ export default interface IExplorerChainService {
   hexToString(value): string;
 
   weiToEther(value): string;
+
+  getContractMethod(contractName, methodName): any;
 }
 
 export enum ChainServiceEvents {
@@ -97,6 +99,9 @@ export enum ChainServiceEvents {
 
   NewPrivatePropertyRegistry = 'AddToken',
   SetPrivatePropertyDetails = 'SetDetails',
+  SetPrivatePropertyBurnTimeout = 'SetBurnTimeout',
+  InitiatePrivatePropertyBurnTimeout = 'InitiateTokenBurn',
+  CancelPrivatePropertyBurnTimeout = 'CancelTokenBurn',
   PrivatePropertyNewProposal = 'NewProposal',
   PrivatePropertyApproveProposal = 'ProposalApproval',
   PrivatePropertyExecuteProposal = 'ProposalExecuted',

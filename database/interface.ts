@@ -196,6 +196,7 @@ export interface ISpaceTokenGeoData {
   updatedAtBlock;
   isPpr;
   proposalsToEditCount?;
+  proposalsToBurnCount?;
 
   spaceTokensOrders?;
 }
@@ -471,6 +472,7 @@ export interface IPrivatePropertyProposal {
   status?;
   statusNumber?;
   data?;
+  signature?;
   dataLink?;
   dataJson?;
   description?;
@@ -494,7 +496,9 @@ export interface PrivatePropertyProposalQuery {
   isApprovedByTokenOwner?: boolean;
   isApprovedByRegistryOwner?: boolean;
   isExecuted?: boolean;
+  isBurnProposal?: boolean;
   status?: string[];
+  data?: string;
 }
 
 export interface ICommunity {

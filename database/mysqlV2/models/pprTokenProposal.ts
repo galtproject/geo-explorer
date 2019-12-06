@@ -39,6 +39,9 @@ module.exports = async function (sequelize, models) {
     data: {
       type: Sequelize.TEXT
     },
+    signature: {
+      type: Sequelize.STRING
+    },
     dataLink: {
       type: Sequelize.STRING
     },
@@ -59,6 +62,9 @@ module.exports = async function (sequelize, models) {
     isExecuted: {
       type: Sequelize.BOOLEAN,
       defaultValue: false
+    },
+    isBurnProposal: {
+      type: Sequelize.BOOLEAN
     }
   }, {
     indexes: [

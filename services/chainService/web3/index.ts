@@ -488,4 +488,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   async getCurrentBlock() {
     return this.web3.eth.getBlockNumber();
   }
+
+  getContractMethod(contractName, methodName) {
+    const contractAbi = this.contractsConfig[contractName + 'Abi'];
+    const methodAbi = _.find(contractAbi, {name: methodName});
+    if(!methodAbi.signature) {
+      methodAbi.signature = this.web3.eth.abi.encodeFunctionSignature(methodAbi)
+    }
+    return methodAbi;
+  }
+
 }

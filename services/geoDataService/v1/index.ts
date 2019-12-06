@@ -502,6 +502,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     // const pprContract = await this.chainService.getPropertyRegistryContract(registryAddress);
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(event.contractAddress);
 
+    const burnMethod = this.chainService.getContractMethod('ppToken', 'burn');
+
     const proposalId = event.returnValues.proposalId;
 
     const proposalData: any = {
@@ -540,6 +542,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       '4': 'rejected'
     })[proposal.status];
 
+    const signature = proposal.data.slice(0, 10);
+
     const resultProposal = await this.database.addOrPrivatePropertyProposal({
       ...proposalData,
       dataLink,
@@ -548,20 +552,33 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       status: proposal.status,
       isExecuted: proposal.status == 'executed',
       data: proposal.data,
+      signature,
+      isBurnProposal: burnMethod.signature === signature,
       isApprovedByTokenOwner: proposal.tokenOwnerApproved,
       isApprovedByRegistryOwner: proposal.geoDataManagerApproved
     });
 
-    const notExecutedProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+    console.log('proposal.data', proposal.data);
+
+    const pendingBurnProposalsCount = await this.database.filterPrivatePropertyProposalCount({
       registryAddress,
       tokenId: resultProposal.tokenId,
-      status: ['pending']
+      status: ['pending'],
+      isBurnProposal: true
     });
 
-    console.log('notExecutedProposalsCount', notExecutedProposalsCount);
+    const pendingEditProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+      registryAddress,
+      tokenId: resultProposal.tokenId,
+      status: ['pending'],
+      isBurnProposal: false
+    });
+
+    console.log('pendingBurnProposalsCount', pendingBurnProposalsCount);
 
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
-      proposalsToEditCount: notExecutedProposalsCount
+      proposalsToEditCount: pendingEditProposalsCount,
+      proposalsToBurnCount: pendingBurnProposalsCount
     } as any);
 
     return resultProposal;

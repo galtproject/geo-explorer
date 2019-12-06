@@ -96,6 +96,15 @@ module.exports = async function (sequelize, models) {
     proposalsToEditCount: {
       type: Sequelize.INTEGER
     },
+    proposalsToBurnCount: {
+      type: Sequelize.INTEGER
+    },
+    burnTimeout: {
+      type: Sequelize.INTEGER
+    },
+    burnOn: {
+      type: Sequelize.DATE
+    },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)
     },

@@ -1077,7 +1077,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['status'] = {[Op.in]: pprQuery.status};
     }
 
-    ['registryAddress'].forEach((field) => {
+    ['registryAddress', 'data'].forEach((field) => {
       if(pprQuery[field])
         allWheres[field] = {[Op.like]: pprQuery[field]};
     });
@@ -1094,7 +1094,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }];
 
     return {
-      where: resultWhere(allWheres, ['tokenId', 'status', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted']),
+      where: resultWhere(allWheres, ['tokenId', 'status', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted', 'data']),
       include: include
     }
   }
