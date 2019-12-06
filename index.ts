@@ -133,7 +133,7 @@ const config = require('./config');
     };
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         await subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
@@ -279,7 +279,7 @@ const config = require('./config');
     };
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, prevBlockNumber).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         await subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
@@ -292,7 +292,7 @@ const config = require('./config');
     });
 
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
@@ -302,12 +302,12 @@ const config = require('./config');
     });
 
     await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
         await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-        subscribeToCommunity(fundDeployment.fundRA, false);
+        return subscribeToCommunity(fundDeployment.fundRA, false);
       });
     });
 
@@ -322,12 +322,12 @@ const config = require('./config');
     });
 
     await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.pprCommunityFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
         await geoDataService.handleNewCommunityEvent(fundDeployment, true);
-        subscribeToCommunity(fundDeployment.fundRA, true);
+        return subscribeToCommunity(fundDeployment.fundRA, true);
       });
     });
 
