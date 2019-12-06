@@ -268,6 +268,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
     }
+    if(!tokenId) {
+      return;
+    }
     return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
 
       let ledgerIdentifier;
