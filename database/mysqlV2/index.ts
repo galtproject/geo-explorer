@@ -1068,7 +1068,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   preparePrivatePropertyProposalWhere(pprQuery) {
     const allWheres: any = {};
 
-    ['tokenId', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted'].forEach((field) => {
+    ['tokenId', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted', 'isBurnProposal'].forEach((field) => {
       if(!_.isUndefined(pprQuery[field]) && !_.isNull(pprQuery[field]))
         allWheres[field] = {[Op.eq]: pprQuery[field]};
     });
@@ -1094,7 +1094,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }];
 
     return {
-      where: resultWhere(allWheres, ['tokenId', 'status', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted', 'data']),
+      where: resultWhere(allWheres, ['tokenId', 'status', 'registryAddress', 'isApprovedByTokenOwner', 'isApprovedByRegistryOwner', 'isExecuted', 'isBurnProposal', 'data']),
       include: include
     }
   }

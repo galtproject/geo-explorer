@@ -523,7 +523,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const proposal = await this.chainService.callContractMethod(controllerContract, 'proposals', [proposalId]);
 
-    console.log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
+    // console.log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
 
     const dataLink = proposal.dataLink;
     let description = dataLink;
@@ -558,8 +558,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       isApprovedByRegistryOwner: proposal.geoDataManagerApproved
     });
 
-    console.log('proposal.data', proposal.data);
-
     const pendingBurnProposalsCount = await this.database.filterPrivatePropertyProposalCount({
       registryAddress,
       tokenId: resultProposal.tokenId,
@@ -574,7 +572,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       isBurnProposal: false
     });
 
-    console.log('pendingBurnProposalsCount', pendingBurnProposalsCount);
+    // console.log('isBurnProposal', burnMethod.signature === signature);
+    // console.log('pendingBurnProposalsCount', pendingBurnProposalsCount);
 
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
       proposalsToEditCount: pendingEditProposalsCount,
