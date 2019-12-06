@@ -215,10 +215,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
 
+    let description = tokenData.details.description;
+    if(tokenData.details.legalDescription) {
+      description += '\n\n' + tokenData.details.legalDescription;
+    }
     return {
       name: tokenData.details.addressTwo + ', ' + tokenData.details.addressOne,
-      description: tokenData.details.description,
-      attributes: attributes,
+      description,
+      attributes,
       image: await this.geesome.getContentLink(spaceGeoData.imageHash).catch(() => null),
       external_url: `https://app.galtproject.io/#/property/token/${tokenId}?contractAddress=${contractAddress}&network=${_.first(this.chainService.configFile.split('.'))}`
     };

@@ -281,6 +281,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         heightsContour.push(height / 100);
         geohashContour.push(galtUtils.numberToGeohash(geohash5));
       });
+      console.log('heightsContour', heightsContour);
       const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
       return {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
