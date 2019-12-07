@@ -611,8 +611,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
 
-    const burnOn = new Date();
-    burnOn.setTime(burnTimeoutAt);
+    let burnOn = null;
+    if(burnTimeoutAt) {
+      burnOn = new Date();
+      burnOn.setTime(burnTimeoutAt);
+    }
 
     return this.saveSpaceTokenById(registryAddress, tokenId, {
       burnTimeout: burnTimeoutDuration,
