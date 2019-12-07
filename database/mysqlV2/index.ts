@@ -1131,7 +1131,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async addLegalAgreement(legalAgreement) {
     legalAgreement.registryAddress = legalAgreement.registryAddress.toLowerCase();
 
-    return this.models.PprTokenProposal.create(legalAgreement).catch(() => {/* already created */});
+    return this.models.PprLegalAgreement.create(legalAgreement).catch(() => {/* already created */});
   }
 
   preparePrivatePropertyLegalAgreementWhere(pprQuery) {
