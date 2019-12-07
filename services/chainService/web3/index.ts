@@ -39,6 +39,8 @@ module.exports = async (extendConfig) => {
 
   const serviceInstance = new ExplorerChainWeb3Service(contractsConfig, wsServer);
 
+  serviceInstance.configFile = configFile;
+
   setInterval(async () => {
     const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
     if (newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
@@ -54,6 +56,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   websocketProvider: any;
   web3: any;
   wsServer: string;
+
+  configFile: string;
 
   spaceGeoData: any;
   propertyMarket: any;
@@ -124,7 +128,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       if(e) {
         e.contractAddress = e.address;
       }
-      callback(error, e);
+      // delay for ethereum node to write new data from event to storage
+      setTimeout(() => {
+        callback(error, e);
+      }, 1000);
     });
   }
 
@@ -214,8 +221,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async getLockerOwner(address) {
-    const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);
-    return contract.methods.owner().call({}).catch(() => null);
+    try {
+      const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);
+      return contract.methods.owner().call({}).catch(() => null);
+    } catch (e) {
+      return null;
+    }
   }
 
   public async getSpaceTokenOwner(contractAddress, tokenId) {
@@ -256,6 +267,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   public async getSpaceTokenData(contractAddress, tokenId) {
     if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
+    }
+    if(!tokenId) {
+      return {
+        dataLink: '',
+        geohashContour: []
+      };
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
 
@@ -480,4 +497,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   async getCurrentBlock() {
     return this.web3.eth.getBlockNumber();
   }
+
+  getContractMethod(contractName, methodName) {
+    const contractAbi = this.contractsConfig[contractName + 'Abi'];
+    const methodAbi = _.find(contractAbi, {name: methodName});
+    if(!methodAbi.signature) {
+      methodAbi.signature = this.web3.eth.abi.encodeFunctionSignature(methodAbi)
+    }
+    return methodAbi;
+  }
+
 }

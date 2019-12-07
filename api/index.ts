@@ -99,6 +99,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterPrivatePropertyTokeProposals(req.body));
   });
 
+  service.get('/v1/tm/:address/:tokenId', async (req, res) => {
+    res.send(await geoDataService.getSpaceTokenMetadataById(req.params.tokenId, req.params.address));
+  });
+
   service.post('/v1/communities/get/:address', async (req, res) => {
     await respondByScheme(res, await geoDataService.getCommunity(req.params.address));
   });

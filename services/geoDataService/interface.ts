@@ -65,6 +65,8 @@ export default interface IExplorerGeoDataService {
 
   getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
+  getSpaceTokenMetadataById(tokenId, contractAddress): Promise<any>;
+
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 
   updatePrivatePropertyRegistry(address): Promise<void>;
@@ -76,6 +78,10 @@ export default interface IExplorerGeoDataService {
   handlePrivatePropertyRegistryProposalEvent(registryAddress, event: any): Promise<IPrivatePropertyProposal>;
 
   filterPrivatePropertyTokeProposals(pprQuery: PrivatePropertyProposalQuery): Promise<IPrivatePropertyProposalListResponse>;
+
+  handlePrivatePropertyBurnTimeoutEvent(registryAddress, event: any): Promise<any>;
+
+  updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId: any): Promise<any>;
 
   handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 

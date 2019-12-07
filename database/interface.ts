@@ -14,6 +14,8 @@ export default interface IExplorerDatabase {
 
   addOrUpdateContour(contourGeohashes: string[], tokenId: number, contractAddress: string, level?: string, tokenType?: string): Promise<void>;
 
+  deleteContour(tokenId: number, contractAddress: string): Promise<void>;
+
   getContourBySpaceTokenId(tokenId, contractAddress?: string, level?: string): Promise<string[]>;
 
   getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
@@ -21,6 +23,8 @@ export default interface IExplorerDatabase {
   getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
 
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
+
+  deleteGeoData(tokenId: number, contractAddress: string): Promise<void>;
 
   getSaleOrder(orderId, contractAddress): Promise<ISaleOrder>;
 
@@ -158,6 +162,7 @@ export default interface IExplorerDatabase {
 export interface ISpaceTokenGeoData {
   id?;
   tokenId;
+  imageHash?;
   tokenType;
   type;
   subtype;
@@ -194,7 +199,8 @@ export interface ISpaceTokenGeoData {
   createdAtBlock;
   updatedAtBlock;
   isPpr;
-  haveProposalToEdit?;
+  proposalsToEditCount?;
+  proposalsToBurnCount?;
 
   spaceTokensOrders?;
 }
@@ -468,7 +474,9 @@ export interface IPrivatePropertyProposal {
   proposalId?;
   tokenId?;
   status?;
+  statusNumber?;
   data?;
+  signature?;
   dataLink?;
   dataJson?;
   description?;
@@ -492,6 +500,9 @@ export interface PrivatePropertyProposalQuery {
   isApprovedByTokenOwner?: boolean;
   isApprovedByRegistryOwner?: boolean;
   isExecuted?: boolean;
+  isBurnProposal?: boolean;
+  status?: string[];
+  data?: string;
 }
 
 export interface ICommunity {

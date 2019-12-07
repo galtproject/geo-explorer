@@ -72,7 +72,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async saveSpaceTokenById(contractAddress, tokenId, additionalData = {}) {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
-    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId);
+    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
     let level;
     if (geoData.humanAddress) {
@@ -130,6 +130,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       details = spaceData.data;
     }
 
+    if(!floorPlans) {
+      floorPlans = [];
+    }
+
     if (!details) {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
@@ -149,9 +153,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }, geoDataToSave);
     }
 
+    let imageHash;
+
+    if(photos[0]) {
+      const link = await this.geesome.getContentLink(photos[0], 'large').catch(() => '');
+      imageHash = _.last(link.split('/'))
+    }
+
     geoDataToSave = _.extend({
       type: details.type,
       subtype: details.subtype,
+      imageHash,
       photosCount: photos.length,
       floorPlansCount: floorPlans.length,
       bathroomsCount: details.bathrooms,
@@ -165,10 +177,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.addOrUpdateGeoData(geoDataToSave);
   }
 
-  addOrUpdateGeoData(geoDataToSave) {
-    return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
-      return this.database.addOrUpdateGeoData(geoDataToSave);
-    });
+  async addOrUpdateGeoData(geoDataToSave) {
+    if(geoDataToSave.owner) {
+      return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
+        return this.database.addOrUpdateGeoData(geoDataToSave);
+      });
+    } else {
+      await this.database.deleteGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress);
+      return this.database.deleteContour(geoDataToSave.tokenId, geoDataToSave.contractAddress);
+    }
   }
 
   async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
@@ -183,6 +200,41 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async getSpaceTokenById(tokenId, contractAddress) {
     return this.database.getSpaceToken(tokenId, contractAddress);
+  }
+
+  async getSpaceTokenMetadataById(tokenId, contractAddress) {
+    const spaceGeoData = await this.database.getSpaceToken(tokenId, contractAddress);
+
+    const tokenData = JSON.parse(spaceGeoData.dataJson);
+    let attributes = [];
+
+    attributes.push({
+      trait_type: 'type',
+      value: spaceGeoData.type
+    });
+    attributes.push({
+      trait_type: 'subtype',
+      value: spaceGeoData.subtype
+    });
+
+    attributes.push({
+      trait_type: 'area',
+      value: spaceGeoData.area
+    });
+
+    attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
+
+    let description = tokenData.details.description;
+    if(tokenData.details.legalDescription) {
+      description += '\n\n' + tokenData.details.legalDescription;
+    }
+    return {
+      name: tokenData.details.addressTwo + ', ' + tokenData.details.addressOne,
+      description,
+      attributes,
+      image: await this.geesome.getContentLink(spaceGeoData.imageHash).catch(() => null),
+      external_url: `https://app.galtproject.io/#/property/token/${tokenId}?contractAddress=${contractAddress}&network=${_.first(this.chainService.configFile.split('.'))}`
+    };
   }
 
   // =============================================================
@@ -204,8 +256,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     let orderData: any = {};
-    if (chainOrder.details.dataAddress) {
-      orderData = await this.geesome.getObject(chainOrder.details.dataAddress);
+    let dataLink = chainOrder.details.dataAddress || chainOrder.details.dataLink;
+    if (dataLink) {
+      orderData = await this.geesome.getObject(dataLink).catch(() => ({}));
     }
 
     let allFeatures = [];
@@ -432,7 +485,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink);
+      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
     }
@@ -458,6 +511,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     // const pprContract = await this.chainService.getPropertyRegistryContract(registryAddress);
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(event.contractAddress);
 
+    const burnMethod = this.chainService.getContractMethod('ppToken', 'burn');
+
     const proposalId = event.returnValues.proposalId;
 
     const proposalData: any = {
@@ -469,6 +524,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(event.returnValues.tokenId) {
       proposalData['tokenId'] = event.returnValues.tokenId;
       const spaceTokenGeoData = await this.getSpaceTokenById(proposalData['tokenId'], registryAddress);
+      if(!spaceTokenGeoData) {
+        // token not exists
+        return;
+      }
       proposalData['spaceGeoDataId'] = spaceTokenGeoData.id;
     }
     if(event.returnValues.creator) {
@@ -483,33 +542,87 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink);
+      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
     }
+
+    proposal.status = ({
+      '0': 'null',
+      '1': 'pending',
+      '2': 'approved',
+      '3': 'executed',
+      '4': 'rejected'
+    })[proposal.status];
+
+    const signature = proposal.data.slice(0, 10);
 
     const resultProposal = await this.database.addOrPrivatePropertyProposal({
       ...proposalData,
       dataLink,
       description,
       dataJson,
-      isExecuted: proposal.executed,
+      status: proposal.status,
+      isExecuted: proposal.status == 'executed',
       data: proposal.data,
+      signature,
+      isBurnProposal: burnMethod.signature === signature,
       isApprovedByTokenOwner: proposal.tokenOwnerApproved,
       isApprovedByRegistryOwner: proposal.geoDataManagerApproved
     });
 
-    const notExecutedProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+    const pendingBurnProposalsCount = await this.database.filterPrivatePropertyProposalCount({
       registryAddress,
       tokenId: resultProposal.tokenId,
-      isExecuted: false
+      status: ['pending'],
+      isBurnProposal: true
     });
 
+    const pendingEditProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+      registryAddress,
+      tokenId: resultProposal.tokenId,
+      status: ['pending'],
+      isBurnProposal: false
+    });
+
+    // console.log('isBurnProposal', burnMethod.signature === signature);
+    // console.log('pendingBurnProposalsCount', pendingBurnProposalsCount);
+
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
-      haveProposalToEdit: notExecutedProposalsCount > 0
+      proposalsToEditCount: pendingEditProposalsCount,
+      proposalsToBurnCount: pendingBurnProposalsCount
     } as any);
 
     return resultProposal;
+  }
+
+  async handlePrivatePropertyBurnTimeoutEvent(registryAddress, event) {
+    let tokenId: string = event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'] || event.returnValues['_spaceTokenId'] || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'];
+    return this.updatePrivatePropertyTokenTimeout(registryAddress, event.contractAddress, tokenId);
+  }
+
+  async updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId) {
+    const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controllerAddress);
+
+    let burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutDuration', [tokenId], 'number');
+    if(!burnTimeoutDuration) {
+      burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'defaultBurnTimeoutDuration', [], 'number');
+    }
+
+    console.log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
+
+    const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
+
+    let burnOn = null;
+    if(burnTimeoutAt) {
+      burnOn = new Date();
+      burnOn.setTime(burnTimeoutAt * 1000);
+    }
+
+    return this.saveSpaceTokenById(registryAddress, tokenId, {
+      burnTimeout: burnTimeoutDuration,
+      burnOn
+    } as any);
   }
 
   async filterPrivatePropertyTokeProposals(filterQuery: PrivatePropertyProposalQuery) {
@@ -557,7 +670,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink);
+      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
     }
@@ -679,7 +792,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = markerData.dataLink;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink);
+      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
     }
@@ -764,7 +877,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink);
+      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
     }
@@ -814,10 +927,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let type = null;
     let dataJson = '';
     if(isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink);
+      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       // console.log('dataItem', dataItem);
       try {
-        description = await this.geesome.getContentData(data.dataList[0]);
+        description = await this.geesome.getContentData(data.dataList[0]).catch(() => '');
         type = data.type;
         console.log('description', description, 'type', type);
         dataJson = JSON.stringify(data);

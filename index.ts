@@ -133,7 +133,7 @@ const config = require('./config');
     };
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         await subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
@@ -155,8 +155,17 @@ const config = require('./config');
       subscribedToPrivatePropertyRegistry[address] = true;
       const contract = chainService.getPropertyRegistryContract(address);
 
+      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []);
+
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetSpaceTokenContour, prevBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+          await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, {
+            contractAddress: controllerAddress,
+            returnValues: e.returnValues
+          });
+          return geohashService.handleChangeContourEvent(e);
+        });
       });
 
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetPrivatePropertyDetails, prevBlockNumber).then(async (events) => {
@@ -166,6 +175,13 @@ const config = require('./config');
       });
 
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SpaceTokenTransfer, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+          return geoDataService.updatePrivatePropertyRegistry(address);
+        });
+      });
+
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.BurnPrivatePropertyToken, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
           await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
           return geoDataService.updatePrivatePropertyRegistry(address);
@@ -192,7 +208,12 @@ const config = require('./config');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
-      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []);
+      chainService.subscribeForNewEvents(contract, ChainServiceEvents.BurnPrivatePropertyToken, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New BurnPrivatePropertyToken event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
+        await geoDataService.updatePrivatePropertyRegistry(address);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
 
       const controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress);
 
@@ -233,6 +254,45 @@ const config = require('./config');
         await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.SetPrivatePropertyBurnTimeout, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, e);
+        });
+      });
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.InitiatePrivatePropertyBurnTimeout, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, e);
+        });
+      });
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.CancelPrivatePropertyBurnTimeout, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.SetPrivatePropertyBurnTimeout, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New SetPrivatePropertyBurnTimeout event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, newEvent);
+        await geoDataService.updatePrivatePropertyRegistry(address);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.InitiatePrivatePropertyBurnTimeout, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New InitiatePrivatePropertyBurnTimeout event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, newEvent);
+        await geoDataService.updatePrivatePropertyRegistry(address);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.CancelPrivatePropertyBurnTimeout, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CancelPrivatePropertyBurnTimeout event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, newEvent);
+        await geoDataService.updatePrivatePropertyRegistry(address);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
     }
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, prevBlockNumber).then(async (events) => {
@@ -265,7 +325,7 @@ const config = require('./config');
     };
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, prevBlockNumber).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         await subscribeToPrivatePropertyRegistry(e.returnValues.token);
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
@@ -278,7 +338,7 @@ const config = require('./config');
     });
 
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
@@ -288,12 +348,12 @@ const config = require('./config');
     });
 
     await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
         await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-        subscribeToCommunity(fundDeployment.fundRA, false);
+        return subscribeToCommunity(fundDeployment.fundRA, false);
       });
     });
 
@@ -308,12 +368,12 @@ const config = require('./config');
     });
 
     await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEach(events, async (e) => {
+      await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
         const fundDeployment = await chainService.callContractMethod(chainService.pprCommunityFactory, 'fundContracts', [fundId]);
         fundDeployment.blockNumber = e.blockNumber;
         await geoDataService.handleNewCommunityEvent(fundDeployment, true);
-        subscribeToCommunity(fundDeployment.fundRA, true);
+        return subscribeToCommunity(fundDeployment.fundRA, true);
       });
     });
 

@@ -13,6 +13,8 @@ export default interface IExplorerChainService {
   websocketProvider: any;
   web3: any;
 
+  configFile: string;
+
   spaceGeoData: any;
   propertyMarket: any;
   contractsConfig: any;
@@ -79,6 +81,8 @@ export default interface IExplorerChainService {
   hexToString(value): string;
 
   weiToEther(value): string;
+
+  getContractMethod(contractName, methodName): any;
 }
 
 export enum ChainServiceEvents {
@@ -95,6 +99,10 @@ export enum ChainServiceEvents {
 
   NewPrivatePropertyRegistry = 'AddToken',
   SetPrivatePropertyDetails = 'SetDetails',
+  BurnPrivatePropertyToken = 'Burn',
+  SetPrivatePropertyBurnTimeout = 'SetBurnTimeout',
+  InitiatePrivatePropertyBurnTimeout = 'InitiateTokenBurn',
+  CancelPrivatePropertyBurnTimeout = 'CancelTokenBurn',
   PrivatePropertyNewProposal = 'NewProposal',
   PrivatePropertyApproveProposal = 'ProposalApproval',
   PrivatePropertyExecuteProposal = 'ProposalExecuted',
@@ -145,5 +153,6 @@ export interface ChainServiceSaleOffer {
 export interface ChainServiceSaleOrderDetails {
   tokenIds: string[];
   dataAddress: string;
+  dataLink: string;
   propertyToken?: string;
 }
