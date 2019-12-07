@@ -1166,6 +1166,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.order = [
       [pprQuery.sortBy || 'createdAt', pprQuery.sortDir || 'DESC']
     ];
+    console.log('findAllParam', findAllParam);
 
     return this.models.PprLegalAgreement.findAll(findAllParam);
   }
