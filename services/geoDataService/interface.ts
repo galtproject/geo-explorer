@@ -37,7 +37,7 @@ import {
   CommunityTokensQuery,
   IPrivatePropertyProposal,
   PrivatePropertyProposalQuery,
-  CommunityRuleQuery, ICommunityRule
+  CommunityRuleQuery, ICommunityRule, IPrivatePropertyLegalAgreement
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -82,6 +82,10 @@ export default interface IExplorerGeoDataService {
   handlePrivatePropertyBurnTimeoutEvent(registryAddress, event: any): Promise<any>;
 
   updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId: any): Promise<any>;
+
+  handlePrivatePropertyLegalAgreementEvent(registryAddress, event): Promise<any>;
+
+  filterPrivatePropertyLegalAgreements(query): Promise<IPrivatePropertyLegalAgreementsListResponse>;
 
   handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 
@@ -153,6 +157,11 @@ export interface IPrivatePropertyRegistryListResponse {
 
 export interface IPrivatePropertyProposalListResponse {
   list: IPrivatePropertyProposal[];
+  total: number;
+}
+
+export interface IPrivatePropertyLegalAgreementsListResponse {
+  list: IPrivatePropertyLegalAgreement[];
   total: number;
 }
 

@@ -19,6 +19,7 @@ module.exports = async function (sequelize) {
 
   models.PrivatePropertyRegistry = await require('./privatePropertyRegistry')(sequelize, models);
   models.PprTokenProposal = await require('./pprTokenProposal')(sequelize, models);
+  models.PprLegalAgreement = await require('./pprLegalAgreement')(sequelize, models);
 
   models.Community = await require('./community')(sequelize, models);
   models.CommunityMember = await require('./communityMember')(sequelize, models);

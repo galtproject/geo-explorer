@@ -1128,6 +1128,50 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.PprTokenProposal.count(findAllParam);
   }
 
+  async addLegalAgreement(legalAgreement) {
+    legalAgreement.registryAddress = legalAgreement.registryAddress.toLowerCase();
+
+    return this.models.PprTokenProposal.create(legalAgreement).catch(() => {/* already created */});
+  }
+
+  preparePrivatePropertyLegalAgreementWhere(pprQuery) {
+    const allWheres: any = {};
+
+    ['registryAddress'].forEach((field) => {
+      if(pprQuery[field])
+        allWheres[field] = {[Op.like]: pprQuery[field]};
+    });
+
+    return allWheres;
+  }
+
+  privatePropertyLegalAgreementQueryToFindAllParam(pprQuery) {
+    const allWheres = this.preparePrivatePropertyLegalAgreementWhere(pprQuery);
+
+    return {
+      where: resultWhere(allWheres, ['registryAddress'])
+    }
+  }
+
+  async filterPrivatePropertyLegalAgreement(pprQuery) {
+    if(pprQuery.limit > 1000) {
+      pprQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.privatePropertyLegalAgreementQueryToFindAllParam(pprQuery);
+
+    findAllParam.limit = pprQuery.limit || 20;
+    findAllParam.offset = pprQuery.offset || 0;
+
+    return this.models.PprLegalAgreement.findAll(findAllParam);
+  }
+
+  async filterPrivatePropertyLegalAgreementCount(pprQuery: PrivatePropertyProposalQuery) {
+    const findAllParam: any = this.privatePropertyLegalAgreementQueryToFindAllParam(pprQuery);
+
+    return this.models.PprLegalAgreement.count(findAllParam);
+  }
+
   // =============================================================
   // Communities
   // =============================================================
