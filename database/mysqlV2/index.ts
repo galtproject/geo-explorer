@@ -1163,6 +1163,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.limit = pprQuery.limit || 20;
     findAllParam.offset = pprQuery.offset || 0;
 
+    findAllParam.order = [
+      [pprQuery.sortBy || 'createdAt', pprQuery.sortDir || 'DESC']
+    ];
+
     return this.models.PprLegalAgreement.findAll(findAllParam);
   }
 
