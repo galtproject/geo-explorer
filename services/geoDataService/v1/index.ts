@@ -596,6 +596,30 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return resultProposal;
   }
 
+  async handlePrivatePropertyBurnTimeoutEvent(registryAddress, event) {
+    let tokenId: string = event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'] || event.returnValues['_spaceTokenId'] || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'];
+    return this.updatePrivatePropertyTokenTimeout(registryAddress, event.contractAddress, tokenId);
+  }
+
+  async updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId) {
+    const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controllerAddress);
+
+    let burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutDuration', [tokenId], 'number');
+    if(!burnTimeoutDuration) {
+      burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'defaultBurnTimeoutDuration', [], 'number');
+    }
+
+    const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
+
+    const burnOn = new Date();
+    burnOn.setTime(burnTimeoutAt);
+
+    return this.saveSpaceTokenById(registryAddress, tokenId, {
+      burnTimeout: burnTimeoutDuration,
+      burnOn
+    } as any);
+  }
+
   async filterPrivatePropertyTokeProposals(filterQuery: PrivatePropertyProposalQuery) {
     return {
       list: await this.database.filterPrivatePropertyProposal(filterQuery),

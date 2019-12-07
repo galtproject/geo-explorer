@@ -79,6 +79,10 @@ export default interface IExplorerGeoDataService {
 
   filterPrivatePropertyTokeProposals(pprQuery: PrivatePropertyProposalQuery): Promise<IPrivatePropertyProposalListResponse>;
 
+  handlePrivatePropertyBurnTimeoutEvent(registryAddress, event: any): Promise<any>;
+
+  updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId: any): Promise<any>;
+
   handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 
   handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isPpr): Promise<void>;
