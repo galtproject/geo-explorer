@@ -127,6 +127,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterCommunityProposals(req.body));
   });
 
+  service.post('/v1/community-rules/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunityRules(req.body));
+  });
+
   async function respondByScheme(res, data) {
     res.send({
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),

@@ -336,7 +336,11 @@ const config = require('./config');
       subscribedToCommunity[address] = true;
       const contractRa = await chainService.getCommunityRaContract(address, isPpr);
 
-      const storageAddress = await await chainService.callContractMethod(contractRa, 'fundStorage', []);
+      const registryAddress = await chainService.callContractMethod(contractRa, 'fundRegistry', []);
+
+      const registryContract = await chainService.getCommunityFundRegistryContract(registryAddress);
+
+      const storageAddress = await chainService.callContractMethod(registryContract, 'getStorageAddress', []);
 
       const contractStorage = await chainService.getCommunityStorageContract(storageAddress, isPpr);
 
@@ -417,8 +421,32 @@ const config = require('./config');
       });
 
       proposalManagersAddresses = _.uniq(proposalManagersAddresses);
-      console.log('proposalManagersAddresses.length', proposalManagersAddresses.length)
-      proposalManagersAddresses.forEach(pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
+      console.log('proposalManagersAddresses.length', proposalManagersAddresses.length);
+      await pIteration.forEachSeries(proposalManagersAddresses, pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
+
+      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityAddRule, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityRuleEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityAddRule, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityApprovedProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityRuleEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
+
+      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityRemoveRule, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityRuleEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityRemoveRule, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New CommunityApprovedProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handleCommunityRuleEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
     }
 
     async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
@@ -465,7 +493,6 @@ const config = require('./config');
 
       await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityApprovedProposal, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
-          console.log('CommunityApprovedProposal', _.pick(e,['contractAddress', 'returnValues']));
           await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
         });
       });

@@ -23,7 +23,12 @@ import IExplorerDatabase, {
   ICommunityMember,
   ICommunityVoting,
   ICommunityProposal,
-  CommunityVotingQuery, CommunityProposalQuery, CommunityMemberQuery, CommunityTokensQuery, PrivatePropertyProposalQuery
+  CommunityVotingQuery,
+  CommunityProposalQuery,
+  CommunityMemberQuery,
+  CommunityTokensQuery,
+  PrivatePropertyProposalQuery,
+  CommunityRuleQuery, ICommunityRule
 } from "../interface";
 
 const _ = require("lodash");
@@ -63,6 +68,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async flushDatabase() {
     await this.models.GeohashSpaceToken.destroy({where: {}});
 
+    await this.models.CommunityRule.destroy({where: {}});
     await this.models.CommunityProposal.destroy({where: {}});
     await this.models.CommunityVoting.destroy({where: {}});
     await this.models.CommunityMember.destroy({where: {}});
@@ -1492,6 +1498,83 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
 
     return this.models.CommunityProposal.count(findAllParam);
+  }
+
+  // =============================================================
+  // Community Rule
+  // =============================================================
+
+  async getCommunityRule(communityId, ruleId) {
+    return this.models.CommunityRule.findOne({
+      where: {communityId, ruleId}
+    });
+  }
+
+  async getCommunityRuleByCommunityAddress(communityAddress, ruleId) {
+    return this.models.CommunityRule.findOne({
+      where: {communityAddress: {[Op.like]: communityAddress}, ruleId}
+    });
+  }
+
+  async addOrUpdateCommunityRule(community: ICommunity, rule: ICommunityRule) {
+    let dbObject = await this.getCommunityRule(community.id, rule.ruleId);
+
+    rule.communityId = community.id;
+
+    if(dbObject) {
+      await this.models.CommunityRule.update(rule, {
+        where: {ruleId: rule.ruleId, communityId: community.id}
+      });
+    } else {
+      await this.models.CommunityRule.create(rule).catch((e) => {
+        return this.models.CommunityRule.update(rule, {
+          where: {ruleId: rule.ruleId, communityId: community.id}
+        });
+      });
+    }
+    return this.getCommunityRule(community.id, rule.ruleId);
+  }
+
+  prepareCommunityRuleWhere(communityRuleQuery) {
+    const allWheres: any = {};
+
+    if(communityRuleQuery.communityAddress) {
+      allWheres['communityAddress'] = {[Op.like]: communityRuleQuery.communityAddress};
+    }
+
+    ['isActive', 'type', 'ruleId'].forEach((field) => {
+      if(!_.isUndefined(communityRuleQuery[field]) && !_.isNull(communityRuleQuery[field]))
+        allWheres[field] = {[Op.eq]: communityRuleQuery[field]};
+    });
+
+    return allWheres;
+  }
+
+  communityRuleQueryToFindAllParam(communityRuleQuery: CommunityRuleQuery) {
+    const allWheres = this.prepareCommunityRuleWhere(communityRuleQuery);
+
+    return {
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and])
+    }
+  }
+
+  async filterCommunityRule(communityRuleQuery: CommunityRuleQuery) {
+    if(communityRuleQuery.limit > 1000) {
+      communityRuleQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.communityRuleQueryToFindAllParam(communityRuleQuery);
+
+    findAllParam.limit = communityRuleQuery.limit || 20;
+    findAllParam.offset = communityRuleQuery.offset || 0;
+
+    return this.models.CommunityRule.findAll(findAllParam);
+  }
+
+  async filterCommunityRuleCount(communityRuleQuery: CommunityRuleQuery) {
+    const findAllParam: any = this.communityRuleQueryToFindAllParam(communityRuleQuery);
+
+    return this.models.CommunityRule.count(findAllParam);
   }
 
   // =============================================================

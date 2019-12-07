@@ -24,6 +24,7 @@ module.exports = async function (sequelize) {
   models.CommunityMember = await require('./communityMember')(sequelize, models);
   models.CommunityVoting = await require('./communityVoting')(sequelize, models);
   models.CommunityProposal = await require('./communityProposal')(sequelize, models);
+  models.CommunityRule = await require('./communityRule')(sequelize, models);
 
   return models;
 };

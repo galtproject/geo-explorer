@@ -68,11 +68,13 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryControllerContract(address): Promise<any>;
 
-  getCommunityStorageContract(address, isPpr): Promise<any>;
+  getCommunityStorageContract(address, isPpr?): Promise<any>;
 
   getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;
+
+  getCommunityFundRegistryContract(address): Promise<any>;
 
   hexToString(value): string;
 
@@ -109,7 +111,8 @@ export enum ChainServiceEvents {
   CommunityAyeProposal = 'AyeProposal',
   CommunityApprovedProposal = 'Approved',
   CommunityRejectedProposal = 'Rejected',
-
+  CommunityAddRule = 'AddFundRule',
+  CommunityRemoveRule = 'DisableFundRule'
 }
 
 export interface ChainServiceSaleOrder {
