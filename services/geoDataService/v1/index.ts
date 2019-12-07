@@ -616,7 +616,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let burnOn = null;
     if(burnTimeoutAt) {
       burnOn = new Date();
-      burnOn.setTime(burnTimeoutAt);
+      burnOn.setTime(burnTimeoutAt * 1000);
     }
 
     return this.saveSpaceTokenById(registryAddress, tokenId, {

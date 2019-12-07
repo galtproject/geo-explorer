@@ -274,21 +274,21 @@ const config = require('./config');
       });
 
       chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.SetPrivatePropertyBurnTimeout, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New BurnPrivatePropertyToken event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New SetPrivatePropertyBurnTimeout event, blockNumber:', currentBlockNumber);
         await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, newEvent);
         await geoDataService.updatePrivatePropertyRegistry(address);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
       chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.InitiatePrivatePropertyBurnTimeout, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New BurnPrivatePropertyToken event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New InitiatePrivatePropertyBurnTimeout event, blockNumber:', currentBlockNumber);
         await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, newEvent);
         await geoDataService.updatePrivatePropertyRegistry(address);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
       chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.CancelPrivatePropertyBurnTimeout, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New BurnPrivatePropertyToken event, blockNumber:', currentBlockNumber);
+        console.log('🛎 New CancelPrivatePropertyBurnTimeout event, blockNumber:', currentBlockNumber);
         await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, newEvent);
         await geoDataService.updatePrivatePropertyRegistry(address);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
