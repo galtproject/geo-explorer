@@ -192,6 +192,10 @@ const config = require('./config');
         console.log('🛎 New SetSpaceTokenContour event, blockNumber:', currentBlockNumber);
         await geohashService.handleChangeContourEvent(newEvent);
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
+        await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, {
+          contractAddress: controllerAddress,
+          returnValues: newEvent.returnValues
+        });
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
