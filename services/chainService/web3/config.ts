@@ -19,5 +19,6 @@ module.exports = {
   'privatePropertyMarketName': 'ppMarket',
   'communityFactoryName': 'fundFactory',
   'communityMockFactoryName': 'mockFundFactory',
-  'pprCommunityFactoryName': 'privateFundFactory'
+  'pprCommunityFactoryName': 'privateFundFactory',
+  'tokenizableFactoryName': 'tokenizableLockerFactory'
 };

@@ -21,6 +21,8 @@ export default interface IExplorerChainService {
   spaceToken: any;
   newPropertyManager: any;
 
+  tokenizableFactory: any;
+
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
 
@@ -66,6 +68,8 @@ export default interface IExplorerChainService {
 
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
 
+  getTokenizableContract(address): Promise<any>;
+
   getPropertyRegistryContract(address): Promise<any>;
 
   getPropertyRegistryControllerContract(address): Promise<any>;
@@ -98,6 +102,9 @@ export enum ChainServiceEvents {
   NewPropertyApplication = 'NewApplication',
   NewPropertyValidationStatusChanged = 'ValidationStatusChanged',
   NewPropertyApplicationStatusChanged = 'ApplicationStatusChanged',
+
+  NewTokenizableContract = 'Build',
+  TransferTokenizableBalance = 'Transfer',
 
   NewPrivatePropertyRegistry = 'AddToken',
   SetPrivatePropertyDetails = 'SetDetails',

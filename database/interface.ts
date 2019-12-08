@@ -20,11 +20,9 @@ export default interface IExplorerDatabase {
 
   getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
 
-  getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
-
-  addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
-
-  deleteGeoData(tokenId: number, contractAddress: string): Promise<void>;
+  // =============================================================
+  // Sale Orders
+  // =============================================================
 
   getSaleOrder(orderId, contractAddress): Promise<ISaleOrder>;
 
@@ -34,19 +32,9 @@ export default interface IExplorerDatabase {
 
   filterSaleOrdersCount(filterQuery: SaleOrdersQuery): Promise<number>;
 
-  getApplication(applicationId, contractAddress): Promise<IApplication>;
-
-  addOrUpdateApplication(application: IApplication): Promise<IApplication>;
-
-  filterApplications(filterQuery: ApplicationsQuery): Promise<IApplication[]>;
-
-  filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
-
-  getSpaceToken(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
-
-  filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
-
-  filterSpaceTokensCount(filterQuery: SpaceTokensQuery): Promise<number>;
+  // =============================================================
+  // Sale Offers
+  // =============================================================
 
   addOrUpdateSaleOffer(saleOffer: ISaleOffer): Promise<ISaleOffer>;
 
@@ -55,6 +43,46 @@ export default interface IExplorerDatabase {
   filterSaleOffers(filterQuery: SaleOffersQuery): Promise<ISaleOffer[]>;
 
   filterSaleOffersCount(filterQuery: SaleOffersQuery): Promise<number>;
+
+  // =============================================================
+  // Applications
+  // =============================================================
+
+  getApplication(applicationId, contractAddress): Promise<IApplication>;
+
+  addOrUpdateApplication(application: IApplication): Promise<IApplication>;
+
+  filterApplications(filterQuery: ApplicationsQuery): Promise<IApplication[]>;
+
+  filterApplicationsCount(filterQuery: ApplicationsQuery): Promise<number>;
+
+  // =============================================================
+  // SpaceGeoData
+  // =============================================================
+
+  getSpaceTokenGeoData(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+
+  addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
+
+  deleteGeoData(tokenId: number, contractAddress: string): Promise<void>;
+
+  getSpaceToken(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+
+  filterSpaceTokens(filterQuery: SpaceTokensQuery): Promise<ISpaceTokenGeoData[]>;
+
+  filterSpaceTokensCount(filterQuery: SpaceTokensQuery): Promise<number>;
+
+  // =============================================================
+  // Tokenizable Members
+  // =============================================================
+
+  addOrUpdateTokenizableMember(contractAddress, member: ITokenizableMember): Promise<ITokenizableMember>;
+
+  getTokenizableMember(contractAddress, memberAddress): Promise<ITokenizableMember>;
+
+  filterTokenizableMember(filterQuery: TokenizableMemberQuery): Promise<ITokenizableMember[]>;
+
+  filterTokenizableMemberCount(filterQuery: TokenizableMemberQuery): Promise<number>;
 
   // =============================================================
   // Private Property Registries
@@ -68,6 +96,10 @@ export default interface IExplorerDatabase {
 
   filterPrivatePropertyRegistryCount(filterQuery: PrivatePropertyRegistryQuery): Promise<number>;
 
+  // =============================================================
+  // Ppr Token Proposals
+  // =============================================================
+
   addOrPrivatePropertyProposal(proposal: IPrivatePropertyProposal): Promise<IPrivatePropertyProposal>;
 
   getPrivatePropertyProposal(contractAddress, proposalId): Promise<IPrivatePropertyProposal>;
@@ -76,11 +108,27 @@ export default interface IExplorerDatabase {
 
   filterPrivatePropertyProposalCount(filterQuery: PrivatePropertyProposalQuery): Promise<number>;
 
+  // =============================================================
+  // Ppr Legal Agreements
+  // =============================================================
+
   addLegalAgreement(legalAgreement: IPrivatePropertyLegalAgreement): Promise<any>;
 
   filterPrivatePropertyLegalAgreement(filterQuery): Promise<IPrivatePropertyLegalAgreement[]>;
 
   filterPrivatePropertyLegalAgreementCount(filterQuery): Promise<number>;
+
+  // =============================================================
+  // Ppr Members
+  // =============================================================
+
+  addOrUpdatePprMember(ppr: IPrivatePropertyRegistry, member: IPprMember): Promise<IPprMember>;
+
+  getPprMember(registryAddress, memberAddress): Promise<IPprMember>;
+
+  filterPprMember(filterQuery: PprMemberQuery): Promise<IPprMember[]>;
+
+  filterPprMemberCount(filterQuery: PprMemberQuery): Promise<number>;
 
   // =============================================================
   // Communities
@@ -442,6 +490,27 @@ export interface SaleOffersQuery {
   bathroomsCountMin?: number;
 }
 
+export interface ITokenizableMember {
+  id?;
+
+  address;
+  contractAddress?;
+  balance?;
+
+  destroy?();
+}
+
+export interface TokenizableMemberQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  contractAddress?: string;
+  address?: string;
+}
+
 export interface IPrivatePropertyRegistry {
   id?;
 
@@ -522,6 +591,28 @@ export interface PrivatePropertyProposalQuery {
   isBurnProposal?: boolean;
   status?: string[];
   data?: string;
+}
+
+export interface IPprMember {
+  id?;
+  registryId?;
+
+  address;
+  registryAddress?;
+  tokensCount?;
+
+  destroy?();
+}
+
+export interface PprMemberQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  registryAddress?: string;
+  address?: string;
 }
 
 export interface ICommunity {

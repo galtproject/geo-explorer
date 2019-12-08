@@ -28,7 +28,7 @@ import IExplorerDatabase, {
   CommunityMemberQuery,
   CommunityTokensQuery,
   PrivatePropertyProposalQuery,
-  CommunityRuleQuery, ICommunityRule
+  CommunityRuleQuery, ICommunityRule, IPprMember, PprMemberQuery, ITokenizableMember, TokenizableMemberQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -942,6 +942,82 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   // =============================================================
+  // Tokenizable Members
+  // =============================================================
+
+  async getTokenizableMember(contractAddress, address) {
+    return this.models.PprMember.findOne({
+      where: {contractAddress: {[Op.like]: contractAddress}, address: {[Op.like]: address}}
+    });
+  }
+
+  async addOrUpdateTokenizableMember(contractAddress, member: ITokenizableMember) {
+    let dbObject = await this.getTokenizableMember(contractAddress, member.address);
+
+    member.contractAddress = contractAddress.toLowerCase();
+    member.address = member.address.toLowerCase();
+
+    if(dbObject) {
+      await this.models.TokenizableMember.update(member, {
+        where: {address: {[Op.like]: member.address}, contractAddress: {[Op.like]: contractAddress}}
+      });
+    } else {
+      await this.models.TokenizableMember.create(member).catch(() => {
+        return this.models.TokenizableMember.update(member, {
+          where: {address: {[Op.like]: member.address}, contractAddress: {[Op.like]: contractAddress}}
+        });
+      });
+    }
+    return this.getTokenizableMember(contractAddress, member.address);
+  }
+
+  prepareTokenizableMemberWhere(tokenizableMemberQuery) {
+    const allWheres: any = {};
+
+    if(tokenizableMemberQuery.address) {
+      allWheres['address'] = {[Op.like]: tokenizableMemberQuery.address};
+    }
+
+    if(tokenizableMemberQuery.contractAddress) {
+      allWheres['contractAddress'] = {[Op.like]: tokenizableMemberQuery.contractAddress};
+    }
+
+    return allWheres;
+  }
+
+  tokenizableMemberQueryToFindAllParam(tokenizableMemberQuery: TokenizableMemberQuery) {
+    const allWheres = this.prepareTokenizableMemberWhere(tokenizableMemberQuery);
+
+    return {
+      where: resultWhere(allWheres, ['contractAddress', 'address'])
+    }
+  }
+
+  async filterTokenizableMember(tokenizableMemberQuery: TokenizableMemberQuery) {
+    if(tokenizableMemberQuery.limit > 1000) {
+      tokenizableMemberQuery.limit = 1000;
+    }
+
+    console.log('tokenizableMemberQuery', tokenizableMemberQuery);
+
+    const findAllParam: any = this.tokenizableMemberQueryToFindAllParam(tokenizableMemberQuery);
+
+    findAllParam.limit = tokenizableMemberQuery.limit || 20;
+    findAllParam.offset = tokenizableMemberQuery.offset || 0;
+
+    return this.models.TokenizableMember.findAll(findAllParam);
+  }
+
+  async filterTokenizableMemberCount(communityQuery: TokenizableMemberQuery) {
+    const findAllParam: any = this.pprMemberQueryToFindAllParam(communityQuery);
+
+    // findAllParam.distinct = true;
+
+    // console.log('findAllParam', findAllParam);
+    return this.models.TokenizableMember.count(findAllParam);
+  }
+
+  // =============================================================
   // Private Property Registries
   // =============================================================
 
@@ -1047,6 +1123,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.PrivatePropertyRegistry.count(findAllParam);
   }
 
+  // =============================================================
+  // Ppr Token Proposals
+  // =============================================================
+
   async getPrivatePropertyProposal(contractAddress, proposalId) {
     return this.models.PprTokenProposal.findOne({
       where: {contractAddress: {[Op.like]: contractAddress}, proposalId}
@@ -1128,6 +1208,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.PprTokenProposal.count(findAllParam);
   }
 
+  // =============================================================
+  // Ppr Legal Agreements
+  // =============================================================
+
   async addLegalAgreement(legalAgreement) {
     legalAgreement.registryAddress = legalAgreement.registryAddress.toLowerCase();
 
@@ -1175,6 +1259,84 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const findAllParam: any = this.privatePropertyLegalAgreementQueryToFindAllParam(pprQuery);
 
     return this.models.PprLegalAgreement.count(findAllParam);
+  }
+
+  // =============================================================
+  // Ppr Members
+  // =============================================================
+
+  async getPprMember(registryAddress, address) {
+    return this.models.PprMember.findOne({
+      where: {registryAddress: {[Op.like]: registryAddress}, address: {[Op.like]: address}}
+    });
+  }
+
+  async addOrUpdatePprMember(ppr: IPrivatePropertyRegistry, member: IPprMember) {
+    let dbObject = await this.getPprMember(ppr.address, member.address);
+
+    member.registryId = ppr.id;
+    member.registryAddress = ppr.address.toLowerCase();
+    member.address = member.address.toLowerCase();
+
+    if(dbObject) {
+      await this.models.PprMember.update(member, {
+        where: {address: {[Op.like]: member.address}, registryAddress: {[Op.like]: ppr.address}}
+      });
+    } else {
+      await this.models.PprMember.create(member).catch(() => {
+        return this.models.PprMember.update(member, {
+          where: {address: {[Op.like]: member.address}, registryAddress: {[Op.like]: ppr.address}}
+        });
+      });
+    }
+    return this.getPprMember(ppr.id, member.address);
+  }
+
+  preparePprMemberWhere(pprMemberQuery) {
+    const allWheres: any = {};
+
+    if(pprMemberQuery.address) {
+      allWheres['address'] = {[Op.like]: pprMemberQuery.address};
+    }
+
+    if(pprMemberQuery.registryAddress) {
+      allWheres['registryAddress'] = {[Op.like]: pprMemberQuery.registryAddress};
+    }
+
+    return allWheres;
+  }
+
+  pprMemberQueryToFindAllParam(pprMemberQuery: PprMemberQuery) {
+    const allWheres = this.prepareCommunityMemberWhere(pprMemberQuery);
+
+    return {
+      where: resultWhere(allWheres, ['registryAddress', 'address']),
+      include: [{ association: 'registry'}]
+    }
+  }
+
+  async filterPprMember(pprMemberQuery: PprMemberQuery) {
+    if(pprMemberQuery.limit > 1000) {
+      pprMemberQuery.limit = 1000;
+    }
+
+    console.log('pprMemberQuery', pprMemberQuery);
+
+    const findAllParam: any = this.pprMemberQueryToFindAllParam(pprMemberQuery);
+
+    findAllParam.limit = pprMemberQuery.limit || 20;
+    findAllParam.offset = pprMemberQuery.offset || 0;
+
+    return this.models.PprMember.findAll(findAllParam);
+  }
+
+  async filterPprMemberCount(communityQuery: PprMemberQuery) {
+    const findAllParam: any = this.pprMemberQueryToFindAllParam(communityQuery);
+
+    // findAllParam.distinct = true;
+
+    // console.log('findAllParam', findAllParam);
+    return this.models.PprMember.count(findAllParam);
   }
 
   // =============================================================
@@ -1365,7 +1527,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return allWheres;
   }
 
-  communityMemberQueryToFindAllParam(communityMemberQuery: CommunityVotingQuery) {
+  communityMemberQueryToFindAllParam(communityMemberQuery: CommunityMemberQuery) {
     const allWheres = this.prepareCommunityMemberWhere(communityMemberQuery);
 
     return {

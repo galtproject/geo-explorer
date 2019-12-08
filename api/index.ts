@@ -87,6 +87,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.getApplicationById(req.params.id, req.params.contract));
   });
 
+  service.post('/v1/tokenizable-members/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterTokenizableMembers(req.body));
+  });
+
   service.post('/v1/ppr/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterPrivatePropertyRegistries(req.body));
   });
@@ -101,6 +105,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
 
   service.post('/v1/ppr-legal-agreements/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterPrivatePropertyLegalAgreements(req.body));
+  });
+
+  service.post('/v1/ppr-members/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterPrivatePropertyMembers(req.body));
   });
 
   service.get('/v1/tm/:address/:tokenId', async (req, res) => {

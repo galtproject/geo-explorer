@@ -10,10 +10,10 @@
 import IExplorerDatabase, {
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity,
-  ISaleOffer, PrivatePropertyProposalQuery,
+  ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery,
   PrivatePropertyRegistryQuery,
   SaleOffersQuery,
-  SaleOrdersQuery
+  SaleOrdersQuery, TokenizableMemberQuery
 } from "../../../database/interface";
 import {
   default as IExplorerGeoDataService,
@@ -181,10 +181,24 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async addOrUpdateGeoData(geoDataToSave) {
     if(geoDataToSave.owner) {
+      if(geoDataToSave.isPpr) {
+        const ppr = await this.database.getPrivatePropertyRegistry(geoDataToSave.contractAddress);
+        if(ppr) {
+          await this.database.addOrUpdatePprMember(ppr, {
+            address: geoDataToSave.owner
+          });
+        }
+      }
       return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
         return this.database.addOrUpdateGeoData(geoDataToSave);
       });
     } else {
+      if(geoDataToSave.isPpr) {
+        const pprMember = await this.database.getPprMember(geoDataToSave.contractAddress, geoDataToSave.owner);
+        if(pprMember) {
+          await pprMember.destroy();
+        }
+      }
       await this.database.deleteGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress);
       return this.database.deleteContour(geoDataToSave.tokenId, geoDataToSave.contractAddress);
     }
@@ -466,6 +480,35 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.database.getApplication(applicationId, contractAddress);
   }
 
+  async handleTokenizableTransferEvent(contractAddress, event) {
+    const tokenizableContract = await this.chainService.getTokenizableContract(contractAddress);
+
+    const memberFrom = event.returnValues._from;
+    const memberTo = event.returnValues._to;
+
+    await pIteration.forEach([memberFrom, memberTo], async (memberAddress) => {
+      const memberBalance = await this.chainService.callContractMethod(tokenizableContract, 'balanceOf', [memberAddress], 'wei');
+      if(memberBalance) {
+        return this.database.addOrUpdateTokenizableMember(contractAddress, {
+          balance: memberBalance,
+          address: memberAddress
+        });
+      } else {
+        const dbMember = await this.database.getTokenizableMember(contractAddress, memberAddress);
+        if(dbMember) {
+          return dbMember.destroy();
+        }
+      }
+    });
+  }
+
+  async filterTokenizableMembers(filterQuery: TokenizableMemberQuery) {
+    return {
+      list: await this.database.filterTokenizableMember(filterQuery),
+      total: await this.database.filterTokenizableMemberCount(filterQuery)
+    };
+  }
+
   // =============================================================
   // Private Property Registries
   // =============================================================
@@ -656,6 +699,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterPrivatePropertyLegalAgreement(filterQuery),
       total: await this.database.filterPrivatePropertyLegalAgreementCount(filterQuery)
+    };
+  }
+
+  async filterPrivatePropertyMembers(filterQuery: PprMemberQuery) {
+    return {
+      list: await this.database.filterPprMember(filterQuery),
+      total: await this.database.filterPprMemberCount(filterQuery)
     };
   }
 
@@ -940,7 +990,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   handleCommunityRuleEvent(communityAddress, event) {
     return this.updateCommunityRule(communityAddress, event.returnValues.id);
   }
-
 
   async updateCommunityRule(communityAddress, ruleId) {
     const community = await this.database.getCommunity(communityAddress);
