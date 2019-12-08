@@ -487,7 +487,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const memberTo = event.returnValues._to;
 
     await pIteration.forEach([memberFrom, memberTo], async (memberAddress) => {
-      const memberBalance = await this.chainService.callContractMethod(tokenizableContract, 'balanceOf', [memberAddress], 'wei');
+      const memberBalance = await this.chainService.callContractMethod(tokenizableContract, 'balanceOf', [memberAddress], 'wei').catch(() => 0);
+      console.log('memberBalance', memberFrom, memberBalance);
       if(memberBalance) {
         return this.database.addOrUpdateTokenizableMember(contractAddress, {
           balance: memberBalance,
