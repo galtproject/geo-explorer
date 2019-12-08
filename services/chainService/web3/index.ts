@@ -72,6 +72,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   communityFactory: any;
   pprCommunityFactory: any;
   communityMockFactory: any;
+  tokenizableFactory: any;
 
   contractsConfig: any;
 
@@ -79,6 +80,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   pprCache: any = {};
   communityCache: any = {};
+  tokenizableCache: any = {};
 
   redeployed = false;
 
@@ -176,8 +178,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   private createContractInstance() {
     this.pprCache = {};
     this.communityCache = {};
+    this.tokenizableCache = {};
 
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory'].forEach(contractName => {
+    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory', 'tokenizableFactory'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       console.log(contractName, 'address', contractAddress);
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
@@ -187,6 +190,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       this[contractName] = new this.web3.eth.Contract(contractAbi, contractAddress);
       console.log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
     });
+  }
+
+  getTokenizableContract(address) {
+    if(this.tokenizableCache[address]) {
+      return this.tokenizableCache[address];
+    }
+
+    const tokenizableContract = new this.web3.eth.Contract(this.contractsConfig['tokenizableLockerAbi'], address);
+    this.tokenizableCache[address] = tokenizableContract;
+    return tokenizableContract;
   }
 
   // =============================================================

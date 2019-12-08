@@ -37,7 +37,7 @@ import {
   CommunityTokensQuery,
   IPrivatePropertyProposal,
   PrivatePropertyProposalQuery,
-  CommunityRuleQuery, ICommunityRule, IPrivatePropertyLegalAgreement
+  CommunityRuleQuery, ICommunityRule, IPrivatePropertyLegalAgreement, IPprMember, ITokenizableMember
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -67,6 +67,10 @@ export default interface IExplorerGeoDataService {
 
   getSpaceTokenMetadataById(tokenId, contractAddress): Promise<any>;
 
+  handleTokenizableTransferEvent(contractAddress, event: any): Promise<any>;
+
+  filterTokenizableMembers(query): Promise<ITokenizableMembersListResponse>;
+
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 
   updatePrivatePropertyRegistry(address): Promise<void>;
@@ -86,6 +90,8 @@ export default interface IExplorerGeoDataService {
   handlePrivatePropertyLegalAgreementEvent(registryAddress, event): Promise<any>;
 
   filterPrivatePropertyLegalAgreements(query): Promise<IPrivatePropertyLegalAgreementsListResponse>;
+
+  filterPrivatePropertyMembers(query): Promise<IPrivatePropertyMembersListResponse>;
 
   handleNewCommunityEvent(address: string, isPpr): Promise<void>;
 
@@ -146,6 +152,11 @@ export interface FilterSpaceTokensGeoQuery extends SpaceTokensQuery {
   surroundingsGeohashBox?: string[];
 }
 
+export interface ITokenizableMembersListResponse {
+  list: ITokenizableMember[];
+  total: number;
+}
+
 export interface FilterPrivatePropertyRegistryGeoQuery extends PrivatePropertyRegistryQuery {
   surroundingsGeohashBox?: string[];
 }
@@ -162,6 +173,11 @@ export interface IPrivatePropertyProposalListResponse {
 
 export interface IPrivatePropertyLegalAgreementsListResponse {
   list: IPrivatePropertyLegalAgreement[];
+  total: number;
+}
+
+export interface IPrivatePropertyMembersListResponse {
+  list: IPprMember[];
   total: number;
 }
 
