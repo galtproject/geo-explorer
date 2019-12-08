@@ -309,6 +309,18 @@ const config = require('./config');
         await geoDataService.handlePrivatePropertyLegalAgreementEvent(address, newEvent);
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
+
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.PrivatePropertySetDataLink, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.updatePrivatePropertyRegistry(address);
+        });
+      });
+
+      chainService.subscribeForNewEvents(contract, ChainServiceEvents.PrivatePropertySetDataLink, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New PrivatePropertySetDataLink event, blockNumber:', currentBlockNumber);
+        await geoDataService.updatePrivatePropertyRegistry(address);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      });
     }
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, prevBlockNumber).then(async (events) => {

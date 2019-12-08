@@ -109,6 +109,7 @@ export enum ChainServiceEvents {
   PrivatePropertyApproveProposal = 'ProposalApproval',
   PrivatePropertyExecuteProposal = 'ProposalExecuted',
   PrivatePropertySetLegalAgreement = 'SetLegalAgreementIpfsHash',
+  PrivatePropertySetDataLink = 'SetDataLink',
 
   NewCommunity = 'CreateFundFifthStep',
   CommunityMint = 'TokenMint',
