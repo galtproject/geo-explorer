@@ -500,7 +500,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       } else {
         const dbMember = await this.database.getTokenizableMember(contractAddress, memberAddress);
         if(dbMember) {
-          return dbMember.destroy();
+          return dbMember.destroy().catch(() => {/* already destroyed */});
         }
       }
     });
