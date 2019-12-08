@@ -507,4 +507,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return methodAbi;
   }
 
+  async getBlockTimestamp(blockNumber) {
+    return (await this.web3.eth.getBlock(blockNumber)).timestamp;
+  }
 }

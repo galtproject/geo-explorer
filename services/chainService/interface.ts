@@ -83,6 +83,8 @@ export default interface IExplorerChainService {
   weiToEther(value): string;
 
   getContractMethod(contractName, methodName): any;
+
+  getBlockTimestamp(blockNumber):  Promise<number>;
 }
 
 export enum ChainServiceEvents {
@@ -106,6 +108,8 @@ export enum ChainServiceEvents {
   PrivatePropertyNewProposal = 'NewProposal',
   PrivatePropertyApproveProposal = 'ProposalApproval',
   PrivatePropertyExecuteProposal = 'ProposalExecuted',
+  PrivatePropertySetLegalAgreement = 'SetLegalAgreementIpfsHash',
+  PrivatePropertySetDataLink = 'SetDataLink',
 
   NewCommunity = 'CreateFundFifthStep',
   CommunityMint = 'TokenMint',

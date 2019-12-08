@@ -36,6 +36,8 @@ const pIteration = require("p-iteration");
 const {GeesomeClient} = require('geesome-libs/src/GeesomeClient');
 const {isIpldHash} = require('geesome-libs/src/ipfsHelper');
 
+const {bytes32ToIpfsHash} = require('@galtproject/utils');
+
 module.exports = async (database: IExplorerDatabase, geohashService: IExplorerGeohashService, chainService: IExplorerChainService) => {
   const geesome = new GeesomeClient({
     server: 'https://geesome-node.galtproject.io:7722',
@@ -629,6 +631,31 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterPrivatePropertyProposal(filterQuery),
       total: await this.database.filterPrivatePropertyProposalCount(filterQuery)
+    };
+  }
+
+  async handlePrivatePropertyLegalAgreementEvent(registryAddress, event) {
+    const timestamp = await this.chainService.getBlockTimestamp(event.blockNumber);
+
+    const setAt = new Date();
+    setAt.setTime(timestamp * 1000);
+
+    const ipfsHash = bytes32ToIpfsHash(event.returnValues.legalAgreementIpfsHash || event.returnValues._legalAgreementIpfsHash);
+
+    // const content = await this.geesome.getContentData(ipfsHash).catch(() => '');
+
+    return this.database.addLegalAgreement({
+      setAt,
+      registryAddress,
+      ipfsHash,
+      // content
+    });
+  }
+
+  async filterPrivatePropertyLegalAgreements(filterQuery: PrivatePropertyProposalQuery) {
+    return {
+      list: await this.database.filterPrivatePropertyLegalAgreement(filterQuery),
+      total: await this.database.filterPrivatePropertyLegalAgreementCount(filterQuery)
     };
   }
 

@@ -76,6 +76,12 @@ export default interface IExplorerDatabase {
 
   filterPrivatePropertyProposalCount(filterQuery: PrivatePropertyProposalQuery): Promise<number>;
 
+  addLegalAgreement(legalAgreement: IPrivatePropertyLegalAgreement): Promise<any>;
+
+  filterPrivatePropertyLegalAgreement(filterQuery): Promise<IPrivatePropertyLegalAgreement[]>;
+
+  filterPrivatePropertyLegalAgreementCount(filterQuery): Promise<number>;
+
   // =============================================================
   // Communities
   // =============================================================
@@ -483,6 +489,19 @@ export interface IPrivatePropertyProposal {
   isApprovedByTokenOwner?;
   isApprovedByRegistryOwner?;
   isExecuted?;
+
+  createdAtBlock?;
+  updatedAtBlock?;
+}
+
+export interface IPrivatePropertyLegalAgreement {
+  id?;
+
+  registryAddress;
+  ipfsHash;
+  content?;
+
+  setAt?;
 
   createdAtBlock?;
   updatedAtBlock?;
