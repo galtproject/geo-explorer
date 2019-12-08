@@ -24,6 +24,21 @@ module.exports = async function (sequelize, models) {
     owner: {
       type: Sequelize.STRING(100)
     },
+    minter: {
+      type: Sequelize.STRING(100)
+    },
+    controller: {
+      type: Sequelize.STRING(100)
+    },
+    geoDataManager: {
+      type: Sequelize.STRING(100)
+    },
+    feeManager: {
+      type: Sequelize.STRING(100)
+    },
+    burner: {
+      type: Sequelize.STRING(100)
+    },
     totalSupply: {
       type: Sequelize.INTEGER
     },

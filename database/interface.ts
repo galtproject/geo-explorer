@@ -518,6 +518,11 @@ export interface IPrivatePropertyRegistry {
   name?;
   symbol?;
   owner?;
+  minter?;
+  controller?;
+  geoDataManager?;
+  feeManager?;
+  burner?;
   totalSupply?;
   dataLink?;
   dataJson?;

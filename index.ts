@@ -166,8 +166,6 @@ const config = require('./config');
       });
     }
 
-    // return;
-
     const subscribedToPrivatePropertyRegistry = {
       // registryAddress => bool
     };

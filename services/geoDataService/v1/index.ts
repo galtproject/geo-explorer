@@ -194,13 +194,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       });
     } else {
       if(geoDataToSave.isPpr) {
-        const pprMember = await this.database.getPprMember(geoDataToSave.contractAddress, geoDataToSave.owner);
-        if(pprMember) {
-          await pprMember.destroy();
-        }
+        await this.deletePprMember(geoDataToSave.contractAddress, geoDataToSave.owner);
       }
       await this.database.deleteGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress);
       return this.database.deleteContour(geoDataToSave.tokenId, geoDataToSave.contractAddress);
+    }
+  }
+
+  async deletePprMember(registryAddress, memberAddress) {
+    const pprMember = await this.database.getPprMember(registryAddress, memberAddress);
+    if(pprMember) {
+      await pprMember.destroy();
     }
   }
 
@@ -527,6 +531,33 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const name = await contract.methods.name().call({});
     const symbol = await contract.methods.symbol().call({});
     const owner = await contract.methods.owner().call({});
+    const controller = await contract.methods.controller().call({});
+
+    const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
+
+    const roles = {
+      owner,
+      minter: await contract.methods.minter().call({}),
+      geoDataManager: await controllerContract.methods.geoDataManager().call({}),
+      feeManager: await controllerContract.methods.feeManager().call({}),
+      burner: await controllerContract.methods.burner().call({})
+    };
+
+    await this.database.addOrPrivatePropertyRegistry({address});
+
+    const dbObject = await this.database.getPrivatePropertyRegistry(address);
+
+    await pIteration.forEach(['owner', 'minter', 'geoDataManager', 'feeManager', 'burner'], async (roleName) => {
+      if(dbObject[roleName] != roles[roleName]) {
+        if(dbObject[roleName]) {
+          await this.deletePprMember(address, dbObject[roleName]);
+        }
+        await this.database.addOrUpdatePprMember(dbObject, {
+          address: roles[roleName]
+        });
+      }
+    });
+
     const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
     const dataLink = await contract.methods.tokenDataLink().call({});
 
@@ -538,7 +569,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson = JSON.stringify(data);
     }
 
-    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol, dataLink, dataJson, description});
+    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol, dataLink, dataJson, description, ...roles});
   }
 
   async getPrivatePropertyRegistry(address) {
