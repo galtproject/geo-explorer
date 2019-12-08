@@ -946,7 +946,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // =============================================================
 
   async getTokenizableMember(contractAddress, address) {
-    return this.models.PprMember.findOne({
+    return this.models.TokenizableMember.findOne({
       where: {contractAddress: {[Op.like]: contractAddress}, address: {[Op.like]: address}}
     });
   }
