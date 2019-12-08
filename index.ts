@@ -132,17 +132,17 @@ const config = require('./config');
       // contractAddress => bool
     };
 
-    await chainService.getEventsFromBlock(chainService.tokenizableFactory, ChainServiceEvents.NewTokenizableContract, 0).then(async (events) => {
-      await pIteration.forEachSeries(events, async (e) => {
-        await subscribeToTokenizableContract(e.returnValues.locker);
-      });
-    });
-
-    chainService.subscribeForNewEvents(chainService.tokenizableFactory, ChainServiceEvents.NewTokenizableContract, currentBlockNumber, async (err, newEvent) => {
-      console.log('🛎 New Add NewTokenizableContract event, blockNumber:', currentBlockNumber);
-      subscribeToTokenizableContract(newEvent.returnValues.locker);
-      await database.setValue('lastBlockNumber', currentBlockNumber.toString());
-    });
+    // await chainService.getEventsFromBlock(chainService.tokenizableFactory, ChainServiceEvents.NewTokenizableContract, 0).then(async (events) => {
+    //   await pIteration.forEachSeries(events, async (e) => {
+    //     await subscribeToTokenizableContract(e.returnValues.locker);
+    //   });
+    // });
+    //
+    // chainService.subscribeForNewEvents(chainService.tokenizableFactory, ChainServiceEvents.NewTokenizableContract, currentBlockNumber, async (err, newEvent) => {
+    //   console.log('🛎 New Add NewTokenizableContract event, blockNumber:', currentBlockNumber);
+    //   subscribeToTokenizableContract(newEvent.returnValues.locker);
+    //   await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+    // });
 
     async function subscribeToTokenizableContract (address) {
       if (subscribedToTokenizableContract[address]) {
