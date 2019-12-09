@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     fullNameHash: {
       type: Sequelize.STRING(100)
     },
+    isPpr: {
+      type: Sequelize.BOOLEAN
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

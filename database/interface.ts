@@ -656,6 +656,7 @@ export interface ICommunityMember {
   basicReputation?;
   tokensCount?;
   fullNameHash?;
+  isPpr?;
 
   destroy?();
 }
