@@ -652,26 +652,46 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       isApprovedByRegistryOwner: proposal.geoDataManagerApproved
     });
 
-    const pendingBurnProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+    const pendingBurnProposalsForTokenOwnerCount = await this.database.filterPrivatePropertyProposalCount({
       registryAddress,
       tokenId: resultProposal.tokenId,
       status: ['pending'],
-      isBurnProposal: true
+      isBurnProposal: true,
+      isApprovedByTokenOwner: false
     });
 
-    const pendingEditProposalsCount = await this.database.filterPrivatePropertyProposalCount({
+    const pendingEditProposalsForTokenOwnerCount = await this.database.filterPrivatePropertyProposalCount({
       registryAddress,
       tokenId: resultProposal.tokenId,
       status: ['pending'],
-      isBurnProposal: false
+      isBurnProposal: false,
+      isApprovedByTokenOwner: false
+    });
+
+    const pendingBurnProposalsForRegistryOwnerCount = await this.database.filterPrivatePropertyProposalCount({
+      registryAddress,
+      tokenId: resultProposal.tokenId,
+      status: ['pending'],
+      isBurnProposal: true,
+      isApprovedByRegistryOwner: false
+    });
+
+    const pendingEditProposalsForRegistryOwnerCount = await this.database.filterPrivatePropertyProposalCount({
+      registryAddress,
+      tokenId: resultProposal.tokenId,
+      status: ['pending'],
+      isBurnProposal: false,
+      isApprovedByRegistryOwner: false
     });
 
     // console.log('isBurnProposal', burnMethod.signature === signature);
-    // console.log('pendingBurnProposalsCount', pendingBurnProposalsCount);
+    // console.log('pendingBurnProposalsForTokenOwnerCount', pendingBurnProposalsForTokenOwnerCount);
 
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
-      proposalsToEditCount: pendingEditProposalsCount,
-      proposalsToBurnCount: pendingBurnProposalsCount
+      proposalsToEditForTokenOwnerCount: pendingEditProposalsForTokenOwnerCount,
+      proposalsToBurnForTokenOwnerCount: pendingBurnProposalsForTokenOwnerCount,
+      proposalsToEditForRegistryOwnerCount: pendingEditProposalsForRegistryOwnerCount,
+      proposalsToBurnForRegistryOwnerCount: pendingBurnProposalsForRegistryOwnerCount
     } as any);
 
     return resultProposal;

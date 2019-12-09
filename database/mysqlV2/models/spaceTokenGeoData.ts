@@ -93,10 +93,16 @@ module.exports = async function (sequelize, models) {
     isPpr: {
       type: Sequelize.BOOLEAN,
     },
-    proposalsToEditCount: {
+    proposalsToEditForTokenOwnerCount: {
       type: Sequelize.INTEGER
     },
-    proposalsToBurnCount: {
+    proposalsToBurnForTokenOwnerCount: {
+      type: Sequelize.INTEGER
+    },
+    proposalsToEditForRegistryOwnerCount: {
+      type: Sequelize.INTEGER
+    },
+    proposalsToBurnForRegistryOwnerCount: {
       type: Sequelize.INTEGER
     },
     burnTimeout: {
