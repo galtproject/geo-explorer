@@ -534,9 +534,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const controller = await contract.methods.controller().call({});
 
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
+    const controllerOwner = await controllerContract.methods.owner().call({});
 
     const roles = {
       owner,
+      controllerOwner,
       minter: await contract.methods.minter().call({}),
       geoDataManager: await controllerContract.methods.geoDataManager().call({}),
       feeManager: await controllerContract.methods.feeManager().call({}),

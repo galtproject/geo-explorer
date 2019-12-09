@@ -24,6 +24,9 @@ module.exports = async function (sequelize, models) {
     owner: {
       type: Sequelize.STRING(100)
     },
+    controllerOwner: {
+      type: Sequelize.STRING(100)
+    },
     minter: {
       type: Sequelize.STRING(100)
     },
