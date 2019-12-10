@@ -354,7 +354,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   saleOrdersQueryToFindAllParam(ordersQuery: SaleOrdersQuery) {
     const allWheres = this.prepareSaleOrdersWhere(ordersQuery);
 
-    // console.log('allWheres', allWheres);
+    console.log('allWheres', allWheres);
 
     // const queryOptions = {
     //   where: resultWhere(allWheres, ['ask', 'currency', 'currencyAddress']),

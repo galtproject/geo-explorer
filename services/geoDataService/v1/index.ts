@@ -309,6 +309,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     console.log(orderId, 'tokens types', dbSpaceTokens.map(s => [s.tokenType, s.area]));
 
+    console.log('chainOrder.statusName', chainOrder.statusName);
+
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
       currency,

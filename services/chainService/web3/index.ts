@@ -337,6 +337,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
 
+      console.log('result.status', result.status);
       result.statusName = {
         '0': 'inactive',
         '1': 'active'
