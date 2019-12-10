@@ -76,6 +76,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
+    // if(contractAddress === '0x1D956854805C7c9781530019D22dF714ABB6b680')
+    //   console.log('saveSpaceTokenById', tokenId, owner);
+
     let level;
     if (geoData.humanAddress) {
       const split = geoData.humanAddress.split('|\n');
@@ -714,7 +717,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'defaultBurnTimeoutDuration', [], 'number');
     }
 
-    console.log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
+    // console.log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
 
     const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
 
