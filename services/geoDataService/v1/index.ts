@@ -266,14 +266,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const chainOrder = await this.chainService.getSaleOrder(event.contractAddress, orderId);
 
-    const dbSpaceTokens = await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
+    const dbSpaceTokens = (await pIteration.map(chainOrder.details.tokenIds, async (id, position) => {
       const geoDataAddress = chainOrder.details.propertyToken || this.chainService.spaceGeoData._address;
       const spaceToken = await this.database.getSpaceTokenGeoData(id, geoDataAddress);
       if (spaceToken) {
         spaceToken.spaceTokensOrders = {position};
       }
       return spaceToken;
-    });
+    })).filter(t => t);
 
     let orderData: any = {};
     let dataLink = chainOrder.details.dataAddress || chainOrder.details.dataLink;
