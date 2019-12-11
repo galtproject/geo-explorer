@@ -9,7 +9,7 @@
 
 import IExplorerDatabase, {
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
-  ICommunity,
+  ICommunity, IPrivatePropertyRegistry,
   ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery,
   PrivatePropertyRegistryQuery,
   SaleOffersQuery,
@@ -529,10 +529,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleNewPrivatePropertyRegistryEvent(event) {
     const address = event.returnValues.token;
-    return this.updatePrivatePropertyRegistry(address);
+    const chainCreatedAt = await this.chainService.getBlockTimestamp(event.blockNumber);
+    return this.updatePrivatePropertyRegistry(address, chainCreatedAt);
   }
 
-  async updatePrivatePropertyRegistry(address) {
+  async updatePrivatePropertyRegistry(address, chainCreatedAt?) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
     const name = await contract.methods.name().call({});
@@ -542,6 +543,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
     const controllerOwner = await controllerContract.methods.owner().call({});
+    const defaultBurnTimeout = await controllerContract.methods.defaultBurnTimeoutDuration().call({});
 
     const roles = {
       owner,
@@ -578,7 +580,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson = JSON.stringify(data);
     }
 
-    await this.database.addOrPrivatePropertyRegistry({address, owner, totalSupply, name, symbol, dataLink, dataJson, description, ...roles});
+    const pprData: IPrivatePropertyRegistry = {
+      address, owner, totalSupply, name, symbol, dataLink, dataJson, description, defaultBurnTimeout, ...roles
+    };
+
+    if(chainCreatedAt) {
+      pprData.chainCreatedAt = chainCreatedAt;
+    }
+    await this.database.addOrPrivatePropertyRegistry(pprData);
   }
 
   async getPrivatePropertyRegistry(address) {

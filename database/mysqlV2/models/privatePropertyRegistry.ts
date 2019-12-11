@@ -42,6 +42,9 @@ module.exports = async function (sequelize, models) {
     burner: {
       type: Sequelize.STRING(100)
     },
+    defaultBurnTimeout: {
+      type: Sequelize.INTEGER
+    },
     totalSupply: {
       type: Sequelize.INTEGER
     },
@@ -59,6 +62,9 @@ module.exports = async function (sequelize, models) {
     },
     updatedAtBlock: {
       type: Sequelize.INTEGER
+    },
+    chainCreatedAt: {
+      type: Sequelize.DATE
     },
   }, {
     indexes: [

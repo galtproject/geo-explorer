@@ -527,6 +527,8 @@ export interface IPrivatePropertyRegistry {
   dataLink?;
   dataJson?;
   description?;
+  chainCreatedAt?;
+  defaultBurnTimeout?;
 
   createdAtBlock?;
   updatedAtBlock?;
