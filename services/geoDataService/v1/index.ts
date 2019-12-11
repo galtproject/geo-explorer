@@ -143,20 +143,20 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
 
-    if (details.region) {
-      geoDataToSave = _.extend({
-        fullRegion: details.region.join(', '),
-        regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
-        regionLvl2: details.region[1] || '',
-        regionLvl3: details.region[2] || '',
-        regionLvl4: details.region[3] || '',
-        regionLvl5: details.region[4] || '',
-        regionLvl6: details.region[5] || '',
-        regionLvl7: details.region[6] || '',
-        regionLvl8: details.region[7] || '',
-        regionLvl9: details.region[8] || '',
-      }, geoDataToSave);
-    }
+    // if (details.region) {
+    //   geoDataToSave = _.extend({
+    //     fullRegion: details.region.join(', '),
+    //     regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
+    //     regionLvl2: details.region[1] || '',
+    //     regionLvl3: details.region[2] || '',
+    //     regionLvl4: details.region[3] || '',
+    //     regionLvl5: details.region[4] || '',
+    //     regionLvl6: details.region[5] || '',
+    //     regionLvl7: details.region[6] || '',
+    //     regionLvl8: details.region[7] || '',
+    //     regionLvl9: details.region[8] || '',
+    //   }, geoDataToSave);
+    // }
 
     let imageHash;
 
