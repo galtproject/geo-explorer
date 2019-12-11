@@ -529,7 +529,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleNewPrivatePropertyRegistryEvent(event) {
     const address = event.returnValues.token;
-    const chainCreatedAt = await this.chainService.getBlockTimestamp(event.blockNumber);
+    const timestamp = await this.chainService.getBlockTimestamp(event.blockNumber);
+    const chainCreatedAt = new Date();
+    chainCreatedAt.setTime(timestamp * 1000);
     return this.updatePrivatePropertyRegistry(address, chainCreatedAt);
   }
 
