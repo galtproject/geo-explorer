@@ -256,7 +256,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       description,
       attributes,
       image: await this.geesome.getContentLink(spaceGeoData.imageHash).catch(() => null),
-      external_url: `https://app.galtproject.io/#/property/token/${tokenId}?contractAddress=${contractAddress}&network=${_.first(this.chainService.configFile.split('.'))}`
+      external_url: `https://app.galtproject.io/#/${_.first(this.chainService.configFile.split('.'))}/property/token/${tokenId}?contractAddress=${contractAddress}`
     };
   }
 
