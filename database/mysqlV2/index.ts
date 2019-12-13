@@ -114,7 +114,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     await pIteration.forEach(contourGeohashes, async (contourGeohash, position) => {
       // bind geohash to contour
       await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position, level, tokenType}).catch(e => {
-        console.warn('WARN GeohashSpaceToken.create', e);
+        console.warn('WARN GeohashSpaceToken.create', e.sqlMessage);
         // it exists so update it
         return this.models.GeohashSpaceToken.update({position, level, tokenType}, {where: {tokenId, contourGeohash, contractAddress}});
       });
