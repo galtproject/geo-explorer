@@ -75,6 +75,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       // bind geohash to contour
       await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, position}).catch(e => {
         // it exists so update it
+        console.warn('WARN GeohashSpaceToken.create', e);
         this.models.GeohashSpaceToken.update({position}, {where: {tokenId, contourGeohash}});
       });
     });
@@ -86,6 +87,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       while (parentGeohash.length > 1) {
         parentGeohash = parentGeohash.slice(0, -1);
         await this.models.GeohashParent.create({parentGeohash, contourGeohash}).catch(e => {
+          console.warn('WARN GeohashParent.create', e);
         });
       }
     })
@@ -128,7 +130,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     console.error("Not supported");
     return null;
   }
-  
+
   getSaleOrder(geoData) {
     console.error("Not supported");
     return null;
@@ -143,7 +145,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     console.error("Not supported");
     return null;
   }
-  
+
   filterSaleOrdersCount(params) {
     console.error("Not supported");
     return null;
@@ -208,7 +210,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     console.error("Not supported");
     return null;
   }
-  
+
   async getValue(key: string) {
     const valueObj = await this.models.Value.findOne({where: {key}});
     return valueObj ? valueObj.content : null;

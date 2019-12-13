@@ -192,7 +192,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           });
         }
       }
-      return this.database.addOrUpdateGeoData(geoDataToSave).catch(() => {
+      return this.database.addOrUpdateGeoData(geoDataToSave).catch((e) => {
+        console.warn('WARN addOrUpdateGeoData', e);
         return this.database.addOrUpdateGeoData(geoDataToSave);
       });
     } else {
