@@ -75,7 +75,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       // bind geohash to contour
       await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, position}).catch(e => {
         // it exists so update it
-        console.warn('WARN GeohashSpaceToken.create', e);
+        console.warn('WARN GeohashSpaceToken.create', e.sqlMessage);
         this.models.GeohashSpaceToken.update({position}, {where: {tokenId, contourGeohash}});
       });
     });
