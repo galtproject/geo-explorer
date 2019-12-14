@@ -118,6 +118,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       levelNumber: parseFloat((geoData.level || '0').toString().match(/\d+/g)[0]),
       tokenType: geoData.spaceTokenType,
       dataLink: dataLink,
+      contractContourJson: JSON.stringify(geoData.contractContour),
       geohashContourJson: JSON.stringify(geoData.geohashContour),
       geohashesCount: geoData.geohashContour.length,
       heightsContourJson: JSON.stringify(geoData.heightsContour),
