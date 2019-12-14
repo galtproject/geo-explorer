@@ -129,6 +129,9 @@ module.exports = async function (sequelize, models) {
     dataJson: {
       type: Sequelize.TEXT
     },
+    contractContourJson: {
+      type: Sequelize.TEXT
+    },
     geohashContourJson: {
       type: Sequelize.TEXT
     },

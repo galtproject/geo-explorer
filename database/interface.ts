@@ -246,6 +246,7 @@ export interface ISpaceTokenGeoData {
   ledgerIdentifier;
   dataLink;
   dataJson;
+  contractContourJson;
   geohashContourJson;
   geohashesCount;
   heightsContourJson;
