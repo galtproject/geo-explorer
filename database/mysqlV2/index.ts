@@ -114,7 +114,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     await pIteration.forEach(contourGeohashes, async (contourGeohash, position) => {
       // bind geohash to contour
       await this.models.GeohashSpaceToken.create({tokenId, contourGeohash, contractAddress, position, level, tokenType}).catch(e => {
-        console.warn('WARN GeohashSpaceToken.create', e.parent.sqlMessage);
+        // console.warn('WARN GeohashSpaceToken.create', e.parent.sqlMessage);
         // it exists so update it
         return this.models.GeohashSpaceToken.update({position, level, tokenType}, {where: {tokenId, contourGeohash, contractAddress}});
       });
@@ -178,7 +178,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       return this.models.SpaceTokenGeoData.create(geoData).catch((e) => {
-        console.warn('WARN SpaceTokenGeoData.create', e);
+        console.warn('WARN SpaceTokenGeoData.create', e.parent.sqlMessage);
       });
     }
     return this.getSpaceTokenGeoData(geoData.tokenId, geoData.contractAddress);
@@ -222,7 +222,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.SaleOrder.create(saleOrder).catch((e) => {
-        console.warn('WARN SaleOrder.create', e);
+        console.warn('WARN SaleOrder.create', e.parent.sqlMessage);
         return this.models.SaleOrder.update(saleOrder, {
           where: {orderId: saleOrder.orderId, contractAddress: {[Op.like]: saleOrder.contractAddress}}
         });
@@ -513,7 +513,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       return this.models.Application.create(application).catch((e) => {
-        console.warn('WARN Application.create', e);
+        console.warn('WARN Application.create', e.parent.sqlMessage);
       });
     }
     return this.getApplication(application.applicationId, application.contractAddress);
@@ -781,7 +781,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.SaleOffer.create(saleOffer).catch((e) => {
-        console.warn('WARN SaleOffer.create', e);
+        console.warn('WARN SaleOffer.create', e.parent.sqlMessage);
         return this.models.SaleOffer.update(saleOffer, {
           where: saleOfferParams
         });
@@ -970,7 +970,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.TokenizableMember.create(member).catch((e) => {
-        console.warn('WARN TokenizableMember.create', e);
+        console.warn('WARN TokenizableMember.create', e.parent.sqlMessage);
         return this.models.TokenizableMember.update(member, {
           where: {address: {[Op.like]: member.address}, contractAddress: {[Op.like]: contractAddress}}
         });
@@ -1051,7 +1051,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.PrivatePropertyRegistry.create(registry).catch((e) => {
-        console.warn('WARN PrivatePropertyRegistry.create', e);
+        console.warn('WARN PrivatePropertyRegistry.create', e.parent.sqlMessage);
         return this.models.PrivatePropertyRegistry.update(registry, {
           where: {address: {[Op.like]: registry.address}}
         });
@@ -1154,7 +1154,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.PprTokenProposal.create(proposal).catch((e) => {
-        console.warn('WARN PprTokenProposal.create', e);
+        console.warn('WARN PprTokenProposal.create', e.parent.sqlMessage);
         return this.models.PprTokenProposal.update(proposal, {
           where: {contractAddress: {[Op.like]: proposal.contractAddress}, proposalId: proposal.proposalId}
         });
@@ -1226,7 +1226,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     legalAgreement.registryAddress = legalAgreement.registryAddress.toLowerCase();
 
     return this.models.PprLegalAgreement.create(legalAgreement).catch((e) => {
-      console.warn('WARN PprLegalAgreement.create', e);
+      console.warn('WARN PprLegalAgreement.create', e.parent.sqlMessage);
     /* already created */
     });
   }
@@ -1297,7 +1297,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.PprMember.create(member).catch((e) => {
-        console.warn('WARN PprMember.create', e);
+        console.warn('WARN PprMember.create', e.parent.sqlMessage);
         return this.models.PprMember.update(member, {
           where: {address: {[Op.like]: member.address}, registryAddress: {[Op.like]: ppr.address}}
         });
@@ -1379,7 +1379,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.Community.create(community).catch((e) => {
-        console.warn('WARN Community.create', e);
+        console.warn('WARN Community.create', e.parent.sqlMessage);
         return this.models.Community.update(community, {
           where: {address: {[Op.like]: community.address}}
         });
@@ -1519,7 +1519,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.CommunityMember.create(member).catch((e) => {
-        console.warn('WARN CommunityMember.create', e);
+        console.warn('WARN CommunityMember.create', e.parent.sqlMessage);
         return this.models.CommunityMember.update(member, {
           where: {address: {[Op.like]: member.address}, communityId: community.id}
         });
@@ -1599,7 +1599,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.CommunityVoting.create(voting).catch((e) => {
-        console.warn('WARN CommunityVoting.create', e);
+        console.warn('WARN CommunityVoting.create', e.parent.sqlMessage);
         return this.models.CommunityVoting.update(voting, {
           where: {marker: {[Op.like]: voting.marker}, communityId: community.id}
         });
@@ -1685,7 +1685,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.CommunityProposal.create(proposal).catch((e) => {
-        console.warn('WARN CommunityProposal.create', e);
+        console.warn('WARN CommunityProposal.create', e.parent.sqlMessage);
         return this.models.CommunityProposal.update(proposal, {
           where: {proposalId: proposal.proposalId, votingId: voting.id}
         });
@@ -1770,7 +1770,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.CommunityRule.create(rule).catch((e) => {
-        console.warn('WARN CommunityRule.create', e);
+        console.warn('WARN CommunityRule.create', e.parent.sqlMessage);
         return this.models.CommunityRule.update(rule, {
           where: {ruleId: rule.ruleId, communityId: community.id}
         });

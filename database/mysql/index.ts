@@ -87,7 +87,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       while (parentGeohash.length > 1) {
         parentGeohash = parentGeohash.slice(0, -1);
         await this.models.GeohashParent.create({parentGeohash, contourGeohash}).catch(e => {
-          console.warn('WARN GeohashParent.create', e);
+          console.warn('WARN GeohashParent.create', e.parent.sqlMessage);
         });
       }
     })

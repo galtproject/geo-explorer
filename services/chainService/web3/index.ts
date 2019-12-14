@@ -299,8 +299,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       const geohashContour = [];
       const heightsContour = [];
 
-      result.contour.map((geohash5z) => {
-        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
+      result.contour.map((cPoint) => {
+
+        // '816050073896923135656885469806170'
+        // '843779930776915653814625853222151'
+        // '174301957531382001149179131304208'
+        if(tokenId.toString() === '6')
+          console.log('cPoint',cPoint.toString(10));
+        const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint.toString(10));
         heightsContour.push(height / 100);
         geohashContour.push(galtUtils.numberToGeohash(geohash5));
       });
