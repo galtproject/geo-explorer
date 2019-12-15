@@ -38,6 +38,13 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
       return {geohashContour: []};
     });
 
+    //TODO: remove
+    // if(event.contractAddress === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF') {
+    //   if(geohashContour.indexOf('sezuwtvgb8bj') !== -1) {
+    //     return;
+    //   }
+    // }
+
     let level;
     let tokenType;
     const spaceGeoData = await this.database.getSpaceTokenGeoData(event.contractAddress, tokenId);

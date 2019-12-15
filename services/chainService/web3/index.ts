@@ -315,6 +315,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       const contractContour = [];
       const heightsContour = [];
 
+      // if(contractAddress === '0x9934766335745AECb2d134b83D30e48538c50645'){
+      //   console.log('result.contour', result.contour);
+      // }
+
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 

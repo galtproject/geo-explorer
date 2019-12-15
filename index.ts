@@ -646,6 +646,9 @@ const config = require('./config');
       });
     }
 
+    // const contour = await database.getContourBySpaceTokenId(2,'0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF');
+    // console.log('contour', contour);
+
     // console.log('events finish');
     // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);
     // console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);

@@ -76,8 +76,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
-    // if(contractAddress === '0x1D956854805C7c9781530019D22dF714ABB6b680')
-    //   console.log('saveSpaceTokenById', tokenId, owner);
+    //TODO: remove
+    // if(contractAddress === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF') {
+    //   if(geoData.geohashContour.indexOf('sezuwtvgb8bj') !== -1) {
+    //     return;
+    //   }
+    // }
+      console.log('saveSpaceTokenById', tokenId, owner);
 
     let level;
     if (geoData.humanAddress) {
