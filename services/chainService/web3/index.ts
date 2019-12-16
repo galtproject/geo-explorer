@@ -126,7 +126,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     console.log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
 
-    contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
+    return contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
         e.contractAddress = e.address;
