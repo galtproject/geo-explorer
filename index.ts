@@ -155,8 +155,7 @@ const config = require('./config');
 
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.TransferTokenizableBalance, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleTokenizableTransferEvent(address, e);
-          return geoDataService.updatePrivatePropertyRegistry(address);
+          return geoDataService.handleTokenizableTransferEvent(address, e);
         });
       });
 
@@ -349,16 +348,32 @@ const config = require('./config');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
 
-      await chainService.getEventsFromBlock(contract, ChainServiceEvents.PrivatePropertySetDataLink, prevBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          return geoDataService.updatePrivatePropertyRegistry(address);
+      await pIteration.forEach(['PrivatePropertySetDataLink', 'PrivatePropertySetMinter', 'PrivatePropertyTransferOwnership', 'PrivatePropertySetController'], async eventName => {
+        await chainService.getEventsFromBlock(contract, ChainServiceEvents[eventName], prevBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            return geoDataService.updatePrivatePropertyRegistry(address);
+          });
+        });
+
+        chainService.subscribeForNewEvents(contract, ChainServiceEvents[eventName], currentBlockNumber, async (err, newEvent) => {
+          console.log('🛎 New ' + eventName + ' event, blockNumber:', currentBlockNumber);
+          await geoDataService.updatePrivatePropertyRegistry(address);
+          await database.setValue('lastBlockNumber', currentBlockNumber.toString());
         });
       });
 
-      chainService.subscribeForNewEvents(contract, ChainServiceEvents.PrivatePropertySetDataLink, currentBlockNumber, async (err, newEvent) => {
-        console.log('🛎 New PrivatePropertySetDataLink event, blockNumber:', currentBlockNumber);
-        await geoDataService.updatePrivatePropertyRegistry(address);
-        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      await pIteration.forEach(['PrivatePropertySetGeoDataManager', 'PrivatePropertySetFeeManager', 'PrivatePropertyTransferOwnership', 'PrivatePropertySetBurner'], async eventName => {
+        await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents[eventName], prevBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            return geoDataService.updatePrivatePropertyRegistry(address);
+          });
+        });
+
+        chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents[eventName], currentBlockNumber, async (err, newEvent) => {
+          console.log('🛎 New ' + eventName + ' event, blockNumber:', currentBlockNumber);
+          await geoDataService.updatePrivatePropertyRegistry(address);
+          await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+        });
       });
     }
 
@@ -631,6 +646,9 @@ const config = require('./config');
       });
     }
 
+    // const contour = await database.getContourBySpaceTokenId(2,'0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF');
+    // console.log('contour', contour);
+
     // console.log('events finish');
     // const byParentGeohashResult = await geohashService.getContoursByParentGeohash('w24q8r', chainService.spaceGeoData._address);
     // console.log('byParentGeohashResult for w24q8r', byParentGeohashResult);
@@ -645,19 +663,20 @@ const config = require('./config');
     // console.log('spaceTokens.list', spaceTokens.list.map(s => s.level));
     //
     // const orders = await geoDataService.filterOrders({
-    //   contractAddress: "0x2c174a91573C4Fbcf3A0091c95B212C260bB1ef4",
-    //   // landAreaMin: 3000,
-    //   // contractAddress: "0x24c03a7A07257231A6E3c941bCec54C039112af4",
-    //   // surroundingsGeohashBox: ['dpzpufr']
-    //   // surroundingsGeohashBox: ["9q534","9q535","9q53h","9q53j","9q53n","9q53p","9q590","9q591","9q594","9q595","9q59h","9q59j","9q536","9q537","9q53k","9q53m","9q53q","9q53r","9q592","9q593","9q596","9q597","9q59k","9q59m","9q53d","9q53e","9q53s","9q53t","9q53w","9q53x","9q598","9q599","9q59d","9q59e","9q59s","9q59t","9q53f","9q53g","9q53u","9q53v","9q53y","9q53z","9q59b","9q59c","9q59f","9q59g","9q59u","9q59v","9q564","9q565","9q56h","9q56j","9q56n","9q56p","9q5d0","9q5d1","9q5d4","9q5d5","9q5dh","9q5dj","9q566","9q567","9q56k","9q56m","9q56q","9q56r","9q5d2","9q5d3","9q5d6","9q5d7","9q5dk","9q5dm"],
-    //   // limit: 2
-    //   // types: ['land'],
-    //   // sortBy: 'createdAt',
-    //   // sortDir: 'desc',
-    //   //
-    //   // subtypes: ['beachLot'],
-    //   // bedroomsCountMin: 3,
-    //   // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
+    //   contractAddress: "0x2D026485A629C1e08AF5493959C2657844EB053a",
+    //   statusName: "inactive",
+    //   landAreaMin: 3000,
+      // contractAddress: "0x24c03a7A07257231A6E3c941bCec54C039112af4",
+      // surroundingsGeohashBox: ['dpzpufr']
+      // surroundingsGeohashBox: ["9q534","9q535","9q53h","9q53j","9q53n","9q53p","9q590","9q591","9q594","9q595","9q59h","9q59j","9q536","9q537","9q53k","9q53m","9q53q","9q53r","9q592","9q593","9q596","9q597","9q59k","9q59m","9q53d","9q53e","9q53s","9q53t","9q53w","9q53x","9q598","9q599","9q59d","9q59e","9q59s","9q59t","9q53f","9q53g","9q53u","9q53v","9q53y","9q53z","9q59b","9q59c","9q59f","9q59g","9q59u","9q59v","9q564","9q565","9q56h","9q56j","9q56n","9q56p","9q5d0","9q5d1","9q5d4","9q5d5","9q5dh","9q5dj","9q566","9q567","9q56k","9q56m","9q56q","9q56r","9q5d2","9q5d3","9q5d6","9q5d7","9q5dk","9q5dm"],
+      // limit: 2
+      // types: ['land'],
+      // sortBy: 'createdAt',
+      // sortDir: 'desc',
+      //
+      // subtypes: ['beachLot'],
+      // bedroomsCountMin: 3,
+      // features: ['greatViews']//, 'securitySystem', 'dishwasher', 'greatViews', 'securitySystem'
     // });
     // console.log('found orders', orders.list.map(order => order.spaceTokens[0].tokenType));
 

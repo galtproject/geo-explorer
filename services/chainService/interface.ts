@@ -117,6 +117,12 @@ export enum ChainServiceEvents {
   PrivatePropertyExecuteProposal = 'ProposalExecuted',
   PrivatePropertySetLegalAgreement = 'SetLegalAgreementIpfsHash',
   PrivatePropertySetDataLink = 'SetDataLink',
+  PrivatePropertySetMinter = 'SetMinter',
+  PrivatePropertySetController = 'SetController',
+  PrivatePropertyTransferOwnership = 'OwnershipTransferred',
+  PrivatePropertySetGeoDataManager = 'SetGeoDataManager',
+  PrivatePropertySetFeeManager = 'SetFeeManager',
+  PrivatePropertySetBurner = 'SetBurner',
 
   NewCommunity = 'CreateFundFifthStep',
   CommunityMint = 'TokenMint',

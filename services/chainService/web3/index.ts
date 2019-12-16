@@ -13,6 +13,7 @@ import {IExplorerChainContourEvent} from "../../interfaces";
 const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
 const axios = require('axios');
+const BN = require("bn.js");
 
 const Web3 = require("web3");
 const Web3Utils = require("web3-utils");
@@ -264,14 +265,28 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     return this.getPropertyRegistryContract(contractAddress).methods.getContour(tokenId).call({}).then(result => {
       const geohashContour = [];
+      const contractContour = [];
       const heightsContour = [];
-      result.map((geohash5z) => {
-        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
-        heightsContour.push(height / 100);
-        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      result.map((cPoint) => {
+        cPoint = cPoint.toString(10);
+
+        if(galtUtils.contractPoint.isContractPoint(cPoint)) {
+          contractContour.push(cPoint);
+          const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
+          const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
+          geohashContour.push(geohash);
+          heightsContour.push(height / 100);
+        } else {
+          const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
+          heightsContour.push(height / 100);
+          const geohash = galtUtils.numberToGeohash(geohash5);
+          geohashContour.push(geohash);
+          contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
+        }
       });
       return {
         geohashContour,
+        contractContour,
         heightsContour
       };
     })
@@ -297,17 +312,35 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       }
 
       const geohashContour = [];
+      const contractContour = [];
       const heightsContour = [];
 
-      result.contour.map((geohash5z) => {
-        const { geohash5, height } = galtUtils.geohash5zToGeohash5(geohash5z.toString(10));
-        heightsContour.push(height / 100);
-        geohashContour.push(galtUtils.numberToGeohash(geohash5));
+      // if(contractAddress === '0x9934766335745AECb2d134b83D30e48538c50645'){
+      //   console.log('result.contour', result.contour);
+      // }
+
+      result.contour.map((cPoint) => {
+        cPoint = cPoint.toString(10);
+
+        if(galtUtils.contractPoint.isContractPoint(cPoint)) {
+          contractContour.push(cPoint);
+          const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
+          const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
+          geohashContour.push(geohash);
+          heightsContour.push(height / 100);
+        } else {
+          const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
+          heightsContour.push(height / 100);
+          const geohash = galtUtils.numberToGeohash(geohash5);
+          geohashContour.push(geohash);
+          contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
+        }
       });
       const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
       return {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
         geohashContour,
+        contractContour,
         heightsContour,
         ledgerIdentifier,
         humanAddress: result.humanAddress,
@@ -337,6 +370,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
 
+      console.log('result.status', result.status);
       result.statusName = {
         '0': 'inactive',
         '1': 'active'

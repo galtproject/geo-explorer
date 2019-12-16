@@ -93,10 +93,16 @@ module.exports = async function (sequelize, models) {
     isPpr: {
       type: Sequelize.BOOLEAN,
     },
-    proposalsToEditCount: {
+    proposalsToEditForTokenOwnerCount: {
       type: Sequelize.INTEGER
     },
-    proposalsToBurnCount: {
+    proposalsToBurnForTokenOwnerCount: {
+      type: Sequelize.INTEGER
+    },
+    proposalsToEditForRegistryOwnerCount: {
+      type: Sequelize.INTEGER
+    },
+    proposalsToBurnForRegistryOwnerCount: {
       type: Sequelize.INTEGER
     },
     burnTimeout: {
@@ -121,6 +127,9 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.STRING
     },
     dataJson: {
+      type: Sequelize.TEXT
+    },
+    contractContourJson: {
       type: Sequelize.TEXT
     },
     geohashContourJson: {

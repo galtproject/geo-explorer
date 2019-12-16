@@ -32,12 +32,19 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
 
   async handleChangeContourEvent(event: IExplorerChainContourEvent) {
     let tokenId: string = event.returnValues.tokenId || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'] || event.returnValues['id'];
-    
-    const {geohashContour} = await this.chainService.getSpaceTokenContourData(event.contractAddress, tokenId).catch(() => {
-      console.log('contour error', event.contractAddress, tokenId);
+
+    const {geohashContour} = await this.chainService.getSpaceTokenContourData(event.contractAddress, tokenId).catch((e) => {
+      console.warn('WARN getSpaceTokenContourData', e);
       return {geohashContour: []};
     });
-    
+
+    //TODO: remove
+    // if(event.contractAddress === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF') {
+    //   if(geohashContour.indexOf('sezuwtvgb8bj') !== -1) {
+    //     return;
+    //   }
+    // }
+
     let level;
     let tokenType;
     const spaceGeoData = await this.database.getSpaceTokenGeoData(event.contractAddress, tokenId);
@@ -47,7 +54,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     if(spaceGeoData && spaceGeoData.tokenType) {
       tokenType = spaceGeoData.tokenType;
     }
-    
+
     let spaceTokenNumberId: number;
     if (_.startsWith(tokenId, '0x')) {
       spaceTokenNumberId = parseInt(galtUtils.tokenIdHexToTokenId(tokenId));
@@ -86,7 +93,7 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
         const tokenId = resultContour.tokenId;
         const contractAddress = resultContour.contractAddress;
         const contour = resultContour.contour;
-        
+
         if(!cachedIsGeohashInsideResultContour[contractAddress]) {
           cachedIsGeohashInsideResultContour[contractAddress] = {};
         }

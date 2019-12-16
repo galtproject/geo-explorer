@@ -246,6 +246,7 @@ export interface ISpaceTokenGeoData {
   ledgerIdentifier;
   dataLink;
   dataJson;
+  contractContourJson;
   geohashContourJson;
   geohashesCount;
   heightsContourJson;
@@ -518,10 +519,17 @@ export interface IPrivatePropertyRegistry {
   name?;
   symbol?;
   owner?;
+  minter?;
+  controller?;
+  geoDataManager?;
+  feeManager?;
+  burner?;
   totalSupply?;
   dataLink?;
   dataJson?;
   description?;
+  chainCreatedAt?;
+  defaultBurnTimeout?;
 
   createdAtBlock?;
   updatedAtBlock?;
@@ -651,6 +659,7 @@ export interface ICommunityMember {
   basicReputation?;
   tokensCount?;
   fullNameHash?;
+  isPpr?;
 
   destroy?();
 }
