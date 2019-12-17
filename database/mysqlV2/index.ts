@@ -1297,7 +1297,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     } else {
       await this.models.PprMember.create(member).catch((e) => {
-        console.warn('WARN PprMember.create', e.parent.sqlMessage);
+        console.warn('WARN PprMember.create e.parent.sqlMessage', e.parent.sqlMessage);
         return this.models.PprMember.update(member, {
           where: {address: {[Op.like]: member.address}, registryAddress: {[Op.like]: ppr.address}}
         });

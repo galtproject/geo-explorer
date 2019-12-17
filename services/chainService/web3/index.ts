@@ -126,7 +126,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     console.log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
 
-    contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
+    return contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       // console.log('event', e);
       if(e) {
         e.contractAddress = e.address;
@@ -270,6 +270,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
+        console.log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
@@ -322,6 +323,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
+        console.log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
