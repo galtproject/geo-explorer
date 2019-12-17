@@ -322,6 +322,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
+        console.log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
