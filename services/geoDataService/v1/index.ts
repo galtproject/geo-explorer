@@ -73,6 +73,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   };
 
   async saveSpaceTokenById(contractAddress, tokenId, additionalData = {}) {
+    console.log('getSpaceTokenData', tokenId);
+
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
@@ -100,6 +102,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const lockerOwner = await this.chainService.getLockerOwner(owner);
+    console.log('getLockerOwner',lockerOwner);
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
@@ -545,19 +548,36 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updatePrivatePropertyRegistry(address, chainCreatedAt?) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
+    console.log('updatePrivatePropertyRegistry')
     const name = await contract.methods.name().call({});
+    console.log('symbol')
     const symbol = await contract.methods.symbol().call({});
+    console.log('owner')
     const owner = await contract.methods.owner().call({});
+    console.log('controller')
     const controller = await contract.methods.controller().call({});
 
+    console.log('controllerContract')
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
     const controllerOwner = await controllerContract.methods.owner().call({});
     const defaultBurnTimeout = await controllerContract.methods.defaultBurnTimeoutDuration().call({});
 
+    console.log('get minter')
+    let minter;
+    //TODO: remove support for old registry
+    if(contract.methods.minter) {
+      console.log('contract.methods.minter')
+      minter = await contract.methods.minter().call({});
+    } else {
+      console.log('controllerContract.methods.minter')
+      minter = await controllerContract.methods.minter().call({});
+    }
+    console.log('roles')
+
     const roles = {
       owner,
       controllerOwner,
-      minter: await contract.methods.minter().call({}),
+      minter,
       geoDataManager: await controllerContract.methods.geoDataManager().call({}),
       feeManager: await controllerContract.methods.feeManager().call({}),
       burner: await controllerContract.methods.burner().call({})
@@ -579,7 +599,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
-    const dataLink = await contract.methods.tokenDataLink().call({});
+    //TODO: remove support for old registry
+    const dataLink = await (contract.methods.tokenDataLink || contract.methods.contractDataLink)().call({});
 
     let description = dataLink;
     let dataJson = '';
