@@ -447,6 +447,7 @@ const config = require('./config');
       return geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
     });
 
+    console.log('last communityMockFactory:');
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
@@ -457,6 +458,7 @@ const config = require('./config');
       });
     });
 
+    console.log('last communityFactory:');
     await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
@@ -467,6 +469,7 @@ const config = require('./config');
       });
     });
 
+    console.log('new communityFactory:');
     chainService.subscribeForNewEvents(chainService.communityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
       const fundId = newEvent.returnValues.fundId;
@@ -477,6 +480,7 @@ const config = require('./config');
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
 
+    console.log('last pprCommunityFactory:');
     await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
         const fundId = e.returnValues.fundId;
@@ -487,6 +491,7 @@ const config = require('./config');
       });
     });
 
+    console.log('new pprCommunityFactory:');
     chainService.subscribeForNewEvents(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
       const fundId = newEvent.returnValues.fundId;
@@ -496,6 +501,7 @@ const config = require('./config');
       await subscribeToCommunity(fundDeployment.fundRA, true);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
+    console.log('community done');
 
     async function subscribeToCommunity (address, isPpr) {
       if(subscribedToCommunity[address]) {
