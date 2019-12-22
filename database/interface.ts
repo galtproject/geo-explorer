@@ -239,6 +239,7 @@ export interface ISpaceTokenGeoData {
   bedroomsCount;
   yearBuilt;
   area;
+  highestPoint;
   owner;
   locker;
   inLocker;

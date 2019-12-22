@@ -81,6 +81,9 @@ module.exports = async function (sequelize, models) {
     area: {
       type: Sequelize.FLOAT
     },
+    highestPoint: {
+      type: Sequelize.FLOAT
+    },
     owner: {
       type: Sequelize.STRING(100)
     },

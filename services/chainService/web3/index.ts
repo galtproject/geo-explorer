@@ -345,6 +345,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         contractContour,
         heightsContour,
         ledgerIdentifier,
+        highestPoint: this.weiToEther(result.highestPoint),
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
         spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[tokenType]
