@@ -106,6 +106,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       console.log(`✖️ Event ${eventName} getting events ignored, contract not found`);
       return new Promise((resolve) => resolve([]));
     }
+    if(!contract.events[eventName]) {
+      console.log(`✖️ Event ${eventName} getting events ignored, event not found`);
+      return new Promise((resolve) => resolve([]));
+    }
     if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
       blockNumber = this.contractsConfig.blockNumber;
     }
@@ -116,12 +120,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         e.contractAddress = e.address;
         return e;
       })
+    }).catch(() => {
+      console.warn(`✖️ Event ${eventName} getting events ignored, get events failed`);
+      return [];
     });
   }
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback) {
     if(!contract) {
       console.log(`✖️ Event ${eventName} subscribing ignored, contract not found`);
+      return;
+    }
+    if(!contract.events[eventName]) {
+      console.log(`✖️ Event ${eventName} subscribing ignored, event not found`);
       return;
     }
     console.log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
@@ -193,6 +204,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
   }
 
+  getPPTokenRegistryContract(address) {
+    if(this.pprCache[address]) {
+      return this.pprCache[address];
+    }
+
+    const pprTokenRegistry = new this.web3.eth.Contract(this.contractsConfig['ppTokenRegistryAbi'], address);
+    this.pprCache[address] = pprTokenRegistry;
+    return pprTokenRegistry;
+  }
+
   getTokenizableContract(address) {
     if(this.tokenizableCache[address]) {
       return this.tokenizableCache[address];
@@ -207,7 +228,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // Space Tokens
   // =============================================================
 
-  getPropertyRegistryContract(address) {
+  getPropertyRegistryContract(address, old?) {
     if(this.isContractAddress(this.spaceToken, address)) {
       return this.spaceToken;
     }
@@ -219,17 +240,115 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
 
-    const privatePropertyContract = new this.web3.eth.Contract(this.contractsConfig['ppTokenAbi'], address);
+    let abi;
+    if(old) {
+      //TODO: remove support for old registry
+      abi = _.clone(this.contractsConfig['ppTokenAbi']);
+      abi.forEach(abiItem => {
+        if(abiItem['name'] === 'getDetails') {
+          abiItem['outputs'] = [
+            {
+              "internalType": "enum IPPToken.TokenType",
+              "name": "tokenType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "contour",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "int256",
+              "name": "highestPoint",
+              "type": "int256"
+            },
+            {
+              "internalType": "enum IPPToken.AreaSource",
+              "name": "areaSource",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "area",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "ledgerIdentifier",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "humanAddress",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "dataLink",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "setupStage",
+              "type": "uint256"
+            }
+          ];
+        }
+      });
+
+      abi.push({
+        "constant": true,
+        "inputs": [],
+        "name": "minter",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      });
+
+      abi.push({
+        "constant": true,
+        "inputs": [],
+        "name": "tokenDataLink",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      });
+    } else {
+      abi = this.contractsConfig['ppTokenAbi'];
+    }
+
+    const privatePropertyContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyContract;
     return privatePropertyContract;
   }
 
-  getPropertyRegistryControllerContract(address) {
+  getPropertyRegistryControllerContract(address, old?) {
     if(this.pprCache[address]) {
       return this.pprCache[address];
     }
+    let abi;
+    if(old) {
+      abi = _.clone(this.contractsConfig['ppTokenControllerAbi']);
+      abi = abi.filter(abiItem => abiItem['name'] != 'SetMinter')
+    } else {
+      abi = this.contractsConfig['ppTokenControllerAbi'];
+    }
 
-    const privatePropertyControllerContract = new this.web3.eth.Contract(this.contractsConfig['ppTokenControllerAbi'], address);
+    const privatePropertyControllerContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyControllerContract;
     return privatePropertyControllerContract;
   }
@@ -270,7 +389,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
-        console.log('cPoint', cPoint);
+        // console.log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
@@ -323,7 +442,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
-        console.log('cPoint', cPoint);
+        // console.log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
@@ -373,7 +492,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
 
-      console.log('result.status', result.status);
+      // console.log('result.status', result.status);
       result.statusName = {
         '0': 'inactive',
         '1': 'active'

@@ -68,11 +68,13 @@ export default interface IExplorerChainService {
 
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
 
+  getPPTokenRegistryContract(address): Promise<any>;
+
   getTokenizableContract(address): Promise<any>;
 
-  getPropertyRegistryContract(address): Promise<any>;
+  getPropertyRegistryContract(address, old?): Promise<any>;
 
-  getPropertyRegistryControllerContract(address): Promise<any>;
+  getPropertyRegistryControllerContract(address, old?): Promise<any>;
 
   getCommunityStorageContract(address, isPpr?): Promise<any>;
 
@@ -117,7 +119,7 @@ export enum ChainServiceEvents {
   PrivatePropertyRejectProposal = 'ProposalRejection',
   PrivatePropertyExecuteProposal = 'ProposalExecuted',
   PrivatePropertySetLegalAgreement = 'SetLegalAgreementIpfsHash',
-  PrivatePropertySetDataLink = 'SetDataLink',
+  PrivatePropertySetDataLink = 'SetContractDataLink',
   PrivatePropertySetMinter = 'SetMinter',
   PrivatePropertySetController = 'SetController',
   PrivatePropertyTransferOwnership = 'OwnershipTransferred',

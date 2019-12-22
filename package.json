@@ -6,6 +6,9 @@
   "scripts": {
     "start": "./node_modules/.bin/ts-node ./index.ts",
     "test": "./node_modules/.bin/mocha -r ts-node/register 'test/**/*.test.ts'",
+    "drop-database": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_v2;'",
+    "create-database": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_v2; ALTER DATABASE geo_explorer_v2 CHARACTER SET utf8 COLLATE utf8_general_ci;'",
+    "recreate-database": "npm run drop-database; npm run create-database;",
     "testCoverage": "./node_modules/.bin/nyc -r lcov -e .ts -x \"*.test.ts\" ./node_modules/.bin/mocha -r ts-node/register test/**/*.test.ts && nyc report"
   },
   "author": "",
