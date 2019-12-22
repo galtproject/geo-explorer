@@ -211,6 +211,9 @@ const config = require('./config');
       }
       function unsubscribe() {
         subscriptions.forEach(subscription => {
+          if(!subscription) {
+            return;
+          }
           subscription.unsubscribe();
         });
         subscribedToPrivatePropertyRegistry[address] = false;
