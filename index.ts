@@ -308,6 +308,19 @@ const config = require('./config');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       }));
 
+
+      await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.PrivatePropertyRejectProposal, prevBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.handlePrivatePropertyRegistryProposalEvent(address, e);
+        });
+      });
+
+      addSubscription(chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents.PrivatePropertyRejectProposal, currentBlockNumber, async (err, newEvent) => {
+        console.log('🛎 New PrivatePropertyRejectProposal event, blockNumber:', currentBlockNumber);
+        await geoDataService.handlePrivatePropertyRegistryProposalEvent(address, newEvent);
+        await database.setValue('lastBlockNumber', currentBlockNumber.toString());
+      }));
+
       await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents.SetPrivatePropertyBurnTimeout, prevBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
           return geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, e);

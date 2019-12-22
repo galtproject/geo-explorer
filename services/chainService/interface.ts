@@ -114,6 +114,7 @@ export enum ChainServiceEvents {
   CancelPrivatePropertyBurnTimeout = 'CancelTokenBurn',
   PrivatePropertyNewProposal = 'NewProposal',
   PrivatePropertyApproveProposal = 'ProposalApproval',
+  PrivatePropertyRejectProposal = 'ProposalRejection',
   PrivatePropertyExecuteProposal = 'ProposalExecuted',
   PrivatePropertySetLegalAgreement = 'SetLegalAgreementIpfsHash',
   PrivatePropertySetDataLink = 'SetDataLink',
