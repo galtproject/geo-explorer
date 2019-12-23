@@ -185,14 +185,14 @@ const config = require('./config');
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
-        await subscribeToPrivatePropertyRegistry(e.returnValues.token);
+        await subscribeToPrivatePropertyRegistry(e.returnValues.token, e.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase());
         return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
     });
 
     chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add PrivatePropertyRegistry event, blockNumber:', currentBlockNumber);
-      subscribeToPrivatePropertyRegistry(newEvent.returnValues.token);
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.token, newEvent.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase());
       await geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
