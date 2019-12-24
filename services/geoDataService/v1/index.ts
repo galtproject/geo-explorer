@@ -269,7 +269,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let name = '';
 
     if(tokenData.humanAddress) {
-      name = tokenData.humanAddress.countyRegion || '';
+      name = tokenData.humanAddress.countryRegion || '';
 
       if(name) {
         name += ', ';
