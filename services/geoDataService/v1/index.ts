@@ -255,20 +255,39 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       value: spaceGeoData.area
     });
 
-    attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
+    let description = '';
 
-    let description = tokenData.details.description;
-    if(tokenData.details.legalDescription) {
-      description += '\n\n' + tokenData.details.legalDescription;
+    if(tokenData.details) {
+      attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
+
+      description = tokenData.details.description;
+      if(tokenData.details.legalDescription) {
+        description += '\n\n' + tokenData.details.legalDescription;
+      }
     }
-    let name = tokenData.humanAddress.countyRegion + ', ' + tokenData.humanAddress.cityStreet;
 
-    if(spaceGeoData.tokenType === 'room') {
-      if(tokenData.humanAddress.floor)
-        name += ', Floor ' + tokenData.humanAddress.floor;
+    let name = '';
 
-      if(tokenData.humanAddress.litera)
-        name += ', ' + tokenData.humanAddress.litera;
+    if(tokenData.humanAddress) {
+      name = tokenData.humanAddress.countyRegion || '';
+
+      if(name) {
+        name += ', ';
+      }
+
+      if(tokenData.humanAddress.cityStreet) {
+        name += tokenData.humanAddress.cityStreet;
+      }
+
+      if(spaceGeoData.tokenType === 'room') {
+        if(tokenData.humanAddress.floor)
+          name += ', Floor ' + tokenData.humanAddress.floor;
+
+        if(tokenData.humanAddress.litera)
+          name += ', ' + tokenData.humanAddress.litera;
+      }
+    } else {
+      name = spaceGeoData.ledgerIdentifier || 'Token #' + spaceGeoData.tokenId;
     }
 
     return {
