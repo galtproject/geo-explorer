@@ -261,8 +261,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(tokenData.details.legalDescription) {
       description += '\n\n' + tokenData.details.legalDescription;
     }
+    let name = tokenData.humanAddress.countyRegion + ', ' + tokenData.humanAddress.cityStreet;
+
+    if(spaceGeoData.tokenType === 'room') {
+      if(tokenData.humanAddress.floor)
+        name += ', Floor ' + tokenData.humanAddress.floor;
+
+      if(tokenData.humanAddress.litera)
+        name += ', ' + tokenData.humanAddress.litera;
+    }
+
     return {
-      name: tokenData.details.addressTwo + ', ' + tokenData.details.addressOne,
+      name,
       description,
       attributes,
       image: await this.geesome.getContentLink(spaceGeoData.imageHash).catch(() => null),
