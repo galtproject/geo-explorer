@@ -220,6 +220,12 @@ const config = require('./config');
       }
       const contract = chainService.getPropertyRegistryContract(address, old);
 
+      const owner = await chainService.callContractMethod(contract, 'owner', []);
+
+      if(owner === '0x0000000000000000000000000000000000000000') {
+        return;
+      }
+
       const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []);
 
       const controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
@@ -456,19 +462,6 @@ const config = require('./config');
     const subscribedToCommunity = {
       // communityAddress => bool
     };
-
-    await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, prevBlockNumber).then(async (events) => {
-      await pIteration.forEachSeries(events, async (e) => {
-        await subscribeToPrivatePropertyRegistry(e.returnValues.token);
-        return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
-      });
-    });
-
-    await chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, currentBlockNumber, async (err, newEvent) => {
-      console.log('🛎 New NewPrivatePropertyRegistry event, blockNumber:', currentBlockNumber, 'contractAddress:', newEvent.contractAddress);
-      await subscribeToPrivatePropertyRegistry(newEvent.returnValues.token);
-      return geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
-    });
 
     console.log('last communityMockFactory:');
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {

@@ -534,6 +534,8 @@ export interface IPrivatePropertyRegistry {
 
   createdAtBlock?;
   updatedAtBlock?;
+
+  destroy?();
 }
 
 export interface PrivatePropertyRegistryQuery {

@@ -577,12 +577,20 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updatePrivatePropertyRegistry(address, chainCreatedAt?) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
+    console.log('owner')
+    const owner = await contract.methods.owner().call({});
+
+    if(owner === '0x0000000000000000000000000000000000000000') {
+      const ppr = await this.database.getPrivatePropertyRegistry(address);
+      if(ppr) {
+        return ppr.destroy();
+      }
+      return;
+    }
     console.log('updatePrivatePropertyRegistry')
     const name = await contract.methods.name().call({});
     console.log('symbol')
     const symbol = await contract.methods.symbol().call({});
-    console.log('owner')
-    const owner = await contract.methods.owner().call({});
     console.log('controller')
     const controller = await contract.methods.controller().call({});
 
