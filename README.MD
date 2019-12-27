@@ -1,4 +1,4 @@
-![Galt Project Geo explorer](https://raw.githubusercontent.com/galtproject/galtproject-docs/master/images/Artboard7.png)
+p align="center"> <img src="https://raw.githubusercontent.com/galtproject/galtproject-docs/master/images/Artboard7.png" alt="Accurate land plots coordinates in smart contract" width="300"/></p>
 # Galt Project Geo explorer
 
 Working with SpaceGeoData contract in GaltProject contracts.
