@@ -1,4 +1,5 @@
-# Geo explorer
+![Galt Project Geo explorer](https://raw.githubusercontent.com/galtproject/galtproject-docs/master/images/Artboard7.png)
+# Galt Project Geo explorer
 
 Working with SpaceGeoData contract in GaltProject contracts.
 
