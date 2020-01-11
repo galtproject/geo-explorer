@@ -1705,6 +1705,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['markerName'] = {[Op.in]: communityProposalQuery.markerName};
     }
 
+    if(communityProposalQuery.markerNameNot) {
+      allWheres['markerName'] = {[Op.notIn]: communityProposalQuery.markerNameNot};
+    }
+
     if(communityProposalQuery.status) {
       allWheres['status'] = {[Op.in]: communityProposalQuery.status};
     }

@@ -784,6 +784,7 @@ export interface CommunityProposalQuery {
 
   marker?: number;
   markerName?: string[];
+  markerNameNot?: string[];
   status?: string[];
   creatorAddress?: string;
   pmAddress?: string;
