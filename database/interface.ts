@@ -783,6 +783,8 @@ export interface CommunityProposalQuery {
   sortDir?: string;
 
   marker?: number;
+  markerName?: string[];
+  status?: string[];
   creatorAddress?: string;
   pmAddress?: string;
   communityAddress?: string;
