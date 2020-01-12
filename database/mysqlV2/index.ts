@@ -1739,6 +1739,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
 
+    findAllParam.order = [
+      [communityProposalQuery.sortBy || 'createdAt', communityProposalQuery.sortDir || 'DESC']
+    ];
+
     findAllParam.limit = communityProposalQuery.limit || 20;
     findAllParam.offset = communityProposalQuery.offset || 0;
 
