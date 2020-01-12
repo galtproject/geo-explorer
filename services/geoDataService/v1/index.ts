@@ -1112,6 +1112,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       acceptedCount: proposalVotingData.ayes.length,
       declinedShare: nayShare,
       declinedCount: proposalVotingData.nays.length,
+      createdAtBlock: parseInt(proposalVotingData.creationBlock.toString(10)),
       status,
       description,
       dataLink,

@@ -72,6 +72,9 @@ module.exports = async function (sequelize, models) {
     declinedCount: {
       type: Sequelize.INTEGER
     },
+    createdAtBlock: {
+      type: Sequelize.INTEGER
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

@@ -715,6 +715,7 @@ export interface ICommunityProposal {
   currentSupport?;
   minAcceptQuorum?;
   timeoutAt?;
+  createdAtBlock?;
 
   destroy?();
 }
