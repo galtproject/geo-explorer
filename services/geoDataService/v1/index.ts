@@ -1085,6 +1085,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const proposalVotingData = await proposalManagerContract.methods.getProposalVoting(proposalId).call({});
     const proposalVotingProgress = await proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({});
 
+    const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
+
     const status = {
       '0': null,
       '1': 'active',
@@ -1093,9 +1095,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       '4': 'rejected'
     }[proposalData.status];
 
-
     if(status === 'executed' && (!proposal || !proposal.executeTxId)) {
-      const approvedEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Approved', proposal.createdAtBlock);
+      const approvedEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Approved', createdAtBlock);
       if(approvedEvents.length) {
         txData.executeTxId = approvedEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(approvedEvents[0]['blockNumber'].toString(10));
@@ -1117,7 +1118,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson = JSON.stringify(data);
     }
 
-    const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
     const createdAt = new Date();
     createdAt.setTime((await this.chainService.getBlockTimestamp(createdAtBlock)) * 1000);
