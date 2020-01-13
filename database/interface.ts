@@ -716,6 +716,12 @@ export interface ICommunityProposal {
   minAcceptQuorum?;
   timeoutAt?;
   createdAtBlock?;
+  proposeTxId?;
+  executeTxId?;
+
+  createdAt?;
+  closedAt?;
+  closedAtBlock?;
 
   destroy?();
 }

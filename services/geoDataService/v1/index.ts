@@ -1053,18 +1053,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleCommunityAddProposalEvent(communityAddress, event) {
-    return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
+    return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId, event.transactionHash);
   }
 
   async handleCommunityUpdateProposalEvent(communityAddress, event) {
     return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
   }
 
-  async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId) {
+  async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId, proposeTxId?) {
     const community = await this.database.getCommunity(communityAddress);
 
+    let proposal = await this.database.getCommunityProposalByVotingAddress(pmAddress, proposalId);
     if(!marker) {
-      const proposal = await this.database.getCommunityProposalByVotingAddress(pmAddress, proposalId);
       if(!proposal) {
         return console.error('Not found proposal', proposalId, 'in', pmAddress);
       }
@@ -1074,6 +1074,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const voting = await this.database.getCommunityVoting(community.id, marker);
 
     const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(pmAddress);
+
+    let txData: any = {};
+
+    if(proposeTxId) {
+      txData.proposeTxId = proposeTxId;
+    }
 
     const proposalData = await proposalManagerContract.methods.proposals(proposalId).call({});
     const proposalVotingData = await proposalManagerContract.methods.getProposalVoting(proposalId).call({});
@@ -1087,6 +1093,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       '4': 'rejected'
     }[proposalData.status];
 
+
+    if(status === 'executed' && (!proposal || !proposal.executeTxId)) {
+      const approvedEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Approved', proposal.createdAtBlock);
+      if(approvedEvents.length) {
+        txData.executeTxId = approvedEvents[0]['transactionHash'];
+        txData.closedAtBlock = parseInt(approvedEvents[0]['blockNumber'].toString(10));
+        const closedAt = new Date();
+        closedAt.setTime((await this.chainService.getBlockTimestamp(txData.closedAtBlock)) * 1000);
+        txData.closedAt = closedAt;
+      }
+    }
+
     let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
     let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
@@ -1098,6 +1116,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       description = data.description;
       dataJson = JSON.stringify(data);
     }
+
+    const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
+
+    const createdAt = new Date();
+    createdAt.setTime((await this.chainService.getBlockTimestamp(createdAtBlock)) * 1000);
 
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
@@ -1112,7 +1135,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       acceptedCount: proposalVotingData.ayes.length,
       declinedShare: nayShare,
       declinedCount: proposalVotingData.nays.length,
-      createdAtBlock: parseInt(proposalVotingData.creationBlock.toString(10)),
+      createdAtBlock,
+      createdAt,
+      ...txData,
       status,
       description,
       dataLink,

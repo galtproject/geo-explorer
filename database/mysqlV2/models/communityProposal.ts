@@ -33,6 +33,12 @@ module.exports = async function (sequelize, models) {
     proposalId: {
       type: Sequelize.STRING(100)
     },
+    proposeTxId: {
+      type: Sequelize.STRING(100)
+    },
+    executeTxId: {
+      type: Sequelize.STRING(100)
+    },
     status: {
       type: Sequelize.STRING(100)
     },
@@ -74,6 +80,12 @@ module.exports = async function (sequelize, models) {
     },
     createdAtBlock: {
       type: Sequelize.INTEGER
+    },
+    closedAtBlock: {
+      type: Sequelize.INTEGER
+    },
+    closedAt: {
+      type: Sequelize.DATE
     },
   }, {
     indexes: [
