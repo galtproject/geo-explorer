@@ -1172,7 +1172,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       // console.log('dataItem', dataItem);
       try {
-        description = await this.geesome.getContentData(data.dataList[0]).catch(() => '');
+        if(data.text) {
+          description = await this.geesome.getContentData(data.text).catch(() => '');
+        }
         type = data.type;
         console.log('description', description, 'type', type);
         dataJson = JSON.stringify(data);
