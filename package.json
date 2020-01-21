@@ -21,6 +21,7 @@
     "geesome-libs": "git://github.com/galtproject/geesome-libs.git#521dc43",
     "lodash": "^4.17.15",
     "mysql2": "^1.6.4",
+    "p-fifo": "^1.0.0",
     "p-iteration": "^1.1.7",
     "restana": "^2.7.0",
     "sequelize": "5.19.0",

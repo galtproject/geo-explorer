@@ -1090,9 +1090,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const status = {
       '0': null,
       '1': 'active',
-      '2': 'approved',
-      '3': 'executed',
-      '4': 'rejected'
+      '2': 'executed'
     }[proposalData.status];
 
     if(status === 'executed' && (!proposal || !proposal.executeTxId)) {

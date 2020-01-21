@@ -127,7 +127,7 @@ export enum ChainServiceEvents {
   PrivatePropertySetFeeManager = 'SetFeeManager',
   PrivatePropertySetBurner = 'SetBurner',
 
-  NewCommunity = 'CreateFundFifthStep',
+  NewCommunity = 'CreateFundFourthStep',
   CommunityMint = 'TokenMint',
   CommunityBurn = 'TokenBurn',
   CommunityTransferReputation = 'Transfer',
