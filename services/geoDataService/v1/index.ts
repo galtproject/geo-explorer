@@ -999,11 +999,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     timeout = parseInt(timeout.toString(10));
 
     const proposalManager = markerData.proposalManager;
-    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
+    // const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
 
-    const activeProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getActiveProposalsCount', [marker], 'number');
-    const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [marker], 'number');
-    const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [marker], 'number');
+    //TODO: get from database
+    // const activeProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getActiveProposalsCount', [marker], 'number');
+    // const approvedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getApprovedProposalsCount', [marker], 'number');
+    // const rejectedProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getRejectedProposalsCount', [marker], 'number');
 
     let dataLink = markerData.dataLink;
     let description = markerData.dataLink;
@@ -1025,9 +1026,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       support,
       minAcceptQuorum,
       timeout,
-      activeProposalsCount,
-      approvedProposalsCount,
-      rejectedProposalsCount,
+      // activeProposalsCount,
+      // approvedProposalsCount,
+      // rejectedProposalsCount,
       totalProposalsCount: await this.database.filterCommunityProposalCount({communityAddress, marker})
     });
 
