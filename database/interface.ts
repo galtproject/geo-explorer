@@ -715,6 +715,13 @@ export interface ICommunityProposal {
   currentSupport?;
   minAcceptQuorum?;
   timeoutAt?;
+  createdAtBlock?;
+  proposeTxId?;
+  executeTxId?;
+
+  createdAt?;
+  closedAt?;
+  closedAtBlock?;
 
   destroy?();
 }
@@ -783,6 +790,9 @@ export interface CommunityProposalQuery {
   sortDir?: string;
 
   marker?: number;
+  markerName?: string[];
+  markerNameNot?: string[];
+  status?: string[];
   creatorAddress?: string;
   pmAddress?: string;
   communityAddress?: string;

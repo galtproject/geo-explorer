@@ -1701,6 +1701,14 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
 
+    if(communityProposalQuery.markerName) {
+      allWheres['markerName'] = {[Op.in]: communityProposalQuery.markerName};
+    }
+
+    if(communityProposalQuery.markerNameNot) {
+      allWheres['markerName'] = {[Op.notIn]: communityProposalQuery.markerNameNot};
+    }
+
     if(communityProposalQuery.status) {
       allWheres['status'] = {[Op.in]: communityProposalQuery.status};
     }
@@ -1720,7 +1728,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', Op.and])
     }
   }
 
@@ -1730,6 +1738,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     const findAllParam: any = this.communityProposalQueryToFindAllParam(communityProposalQuery);
+
+    findAllParam.order = [
+      [communityProposalQuery.sortBy || 'createdAt', communityProposalQuery.sortDir || 'DESC']
+    ];
 
     findAllParam.limit = communityProposalQuery.limit || 20;
     findAllParam.offset = communityProposalQuery.offset || 0;
