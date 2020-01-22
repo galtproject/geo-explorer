@@ -1107,17 +1107,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
 
+    let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
+    let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
+
     if(status === 'active') {
       const timeoutDate = new Date();
       timeoutDate.setTime(timeoutAt * 1000);
       if(new Date() >= timeoutDate) {
-        status = 'closed';
+        if(ayeShare > voting.minAcceptQuorum && ayeShare > voting.support) {
+          status = 'approved';
+        } else {
+          status = 'rejected';
+        }
         txData.closedAt = timeoutDate;
       }
     }
-
-    let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
-    let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
     let dataLink = proposalData.dataLink;
     let description = dataLink;
