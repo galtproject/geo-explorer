@@ -1697,6 +1697,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   prepareCommunityProposalWhere(communityProposalQuery) {
     const allWheres: any = {};
 
+    if(communityProposalQuery.proposalId) {
+      allWheres['proposalId'] = communityProposalQuery.proposalId.toString();
+    }
+
     if(communityProposalQuery.marker) {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
@@ -1728,7 +1732,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', Op.and])
     }
   }
 
