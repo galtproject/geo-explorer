@@ -946,7 +946,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
     const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
 
-    await community.addSpaceTokens([propertyToken]).catch(() => {/* already in community */});
+    const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
+    let isMinted;
+    if(community.isPpr) {
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.registry, event.returnValues.tokenId]);
+    } else {
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.tokenId]);
+    }
+
+    if(isMinted) {
+      await community.addSpaceTokens([propertyToken]).catch(() => {/* already in community */});
+    }
 
     await this.updateCommunityMember(community, propertyToken.owner);
 
@@ -957,7 +967,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
     const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
 
-    await community.removeSpaceTokens([propertyToken]);
+    const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
+
+    let isMinted;
+    if(community.isPpr) {
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.registry, event.returnValues.tokenId]);
+    } else {
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.tokenId]);
+    }
+
+    if(!isMinted) {
+      await community.removeSpaceTokens([propertyToken]);
+    }
 
     await this.updateCommunityMember(community, propertyToken.owner);
 
