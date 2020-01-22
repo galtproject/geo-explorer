@@ -874,11 +874,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const dataLink = await contract.methods.dataLink().call({});
     const activeFundRulesCount =  await this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number');
     const tokensCount = community ? await this.database.getCommunityTokensCount(community) : 0;
-    console.log(raAddress, 'tokensCount', tokensCount);
 
     const spaceTokenOwnersCount = await this.database.filterCommunityMemberCount({
       communityAddress: raAddress
     });
+    console.log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount);
     const reputationTotalSupply = await this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei');
 
     const isPrivate = (await contract.methods.config(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
