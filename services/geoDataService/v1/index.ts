@@ -1095,10 +1095,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }[proposalData.status];
 
     if(status === 'executed' && (!proposal || !proposal.executeTxId)) {
-      const approvedEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Approved', createdAtBlock);
-      if(approvedEvents.length) {
-        txData.executeTxId = approvedEvents[0]['transactionHash'];
-        txData.closedAtBlock = parseInt(approvedEvents[0]['blockNumber'].toString(10));
+      const executeEvents = (await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock)).filter((e: any) => e.returnValues.success);
+      if(executeEvents.length) {
+        txData.executeTxId = executeEvents[0]['transactionHash'];
+        txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
         const closedAt = new Date();
         closedAt.setTime((await this.chainService.getBlockTimestamp(txData.closedAtBlock)) * 1000);
         txData.closedAt = closedAt;
