@@ -78,6 +78,12 @@ module.exports = async function (sequelize, models) {
     declinedCount: {
       type: Sequelize.INTEGER
     },
+    totalAccepted: {
+      type: Sequelize.FLOAT
+    },
+    totalDeclined: {
+      type: Sequelize.FLOAT
+    },
     createdAtBlock: {
       type: Sequelize.INTEGER
     },

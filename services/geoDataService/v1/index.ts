@@ -1159,6 +1159,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
+      totalAccepted: this.chainService.weiToEther(proposalVotingProgress.totalAyes),
+      totalDeclined: this.chainService.weiToEther(proposalVotingProgress.totalNays),
       timeoutAt
     });
     // console.log('newProposal', JSON.stringify(newProposal));
