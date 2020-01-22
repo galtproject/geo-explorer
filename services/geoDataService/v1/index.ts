@@ -1088,7 +1088,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
-    const status = {
+    let status = {
       '0': null,
       '1': 'active',
       '2': 'executed'
@@ -1105,6 +1105,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
+    let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
+
+    if(status === 'active') {
+      const timeoutDate = new Date();
+      timeoutDate.setTime(timeoutAt * 1000);
+      if(new Date() >= timeoutDate) {
+        status = 'closed';
+        txData.closedAt = timeoutDate;
+      }
+    }
+
     let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
     let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
 
@@ -1116,7 +1127,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       description = data.description;
       dataJson = JSON.stringify(data);
     }
-
 
     const createdAt = new Date();
     createdAt.setTime((await this.chainService.getBlockTimestamp(createdAtBlock)) * 1000);
@@ -1145,7 +1155,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
-      timeoutAt: parseInt(proposalVotingProgress.timeoutAt.toString(10))
+      timeoutAt
     });
     // console.log('newProposal', JSON.stringify(newProposal));
 
