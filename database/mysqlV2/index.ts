@@ -1397,6 +1397,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityQuery.addresses) {
       allWheres['address'] = {[Op.in]: communityQuery.addresses.map(a => a.toLowerCase())};
     }
+    if(!_.isUndefined(communityQuery.isPpr) && !_.isNull(communityQuery.isPpr)) {
+      allWheres['isPpr'] = communityQuery.isPpr;
+    }
 
     return allWheres;
   }
