@@ -799,10 +799,10 @@ const config = require('./config');
     // console.log('found spaceTokens', spaceTokens.list.map(st => st));
 
     const approvedCommunities = await geoDataService.filterCommunitiesWithApprovedTokens({
-      tokenOwner: '0x2260c8685F404EB1D08cbf7BC21d16508150957D'
+      tokenOwner: '0xf0430bbb78C3c359c22d4913484081A563B86170'
     });
 
-    console.log('found approved', approvedCommunities.list);
+    console.log('found approved', approvedCommunities.list.length);
 
     // const communityTokenOwnersCount = await database.filterCommunityTokensCount({
     //   groupBy: 'owner',

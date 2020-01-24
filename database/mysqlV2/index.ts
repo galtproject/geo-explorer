@@ -1887,8 +1887,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     }
 
     const include: any = [{
-      model: this.models.SpaceTokenGeoData,
-      as: 'approvedSpaceTokens',
+      association: 'approvedSpaceTokens',
       where: resultWhere(allWheres, ['owner', 'contractAddress', 'tokenId'])
     }];
     return {
