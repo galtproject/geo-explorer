@@ -37,7 +37,12 @@ import {
   CommunityTokensQuery,
   IPrivatePropertyProposal,
   PrivatePropertyProposalQuery,
-  CommunityRuleQuery, ICommunityRule, IPrivatePropertyLegalAgreement, IPprMember, ITokenizableMember
+  CommunityRuleQuery,
+  ICommunityRule,
+  IPrivatePropertyLegalAgreement,
+  IPprMember,
+  ITokenizableMember,
+  CommunityApprovedQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -113,6 +118,8 @@ export default interface IExplorerGeoDataService {
 
   handleCommunityRuleEvent(communityAddress, event);
 
+  handleCommunityTokenApprovedEvent(communityAddress, event);
+
   updateCommunity(address, isPpr): Promise<void>;
 
   filterCommunities(communityQuery: FilterCommunityGeoQuery): Promise<ICommunityListResponse>;
@@ -128,6 +135,8 @@ export default interface IExplorerGeoDataService {
   filterCommunityRules(communityQuery: CommunityRuleQuery): Promise<ICommunityRuleListResponse>;
 
   filterCommunityMembers(communityQuery: CommunityMemberQuery): Promise<ICommunityMemberListResponse>;
+
+  filterCommunitiesWithApprovedTokens(communityQuery: CommunityApprovedQuery): Promise<IApprovedTokensInCommunitiesListResponse>;
 }
 
 export interface FilterSaleOrdersGeoQuery extends SaleOrdersQuery {
@@ -217,6 +226,10 @@ export interface ICommunityMemberListResponse {
 }
 export interface ICommunityTokensListResponse {
   list: ISpaceTokenGeoData[];
+  total: number;
+}
+export interface IApprovedTokensInCommunitiesListResponse {
+  list: ICommunity[];
   total: number;
 }
 

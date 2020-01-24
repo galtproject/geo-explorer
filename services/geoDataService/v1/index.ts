@@ -8,6 +8,7 @@
  */
 
 import IExplorerDatabase, {
+  CommunityApprovedQuery,
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity, IPrivatePropertyRegistry,
   ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery,
@@ -1233,6 +1234,31 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
   }
 
+  handleCommunityTokenApprovedEvent(communityAddress, event) {
+    return this.updateCommunityTokenApproved(communityAddress, event.returnValues.tokenId, event.returnValues.registry);
+  }
+
+  async updateCommunityTokenApproved(communityAddress, tokenId, registryAddress?) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress);
+    const isApproved = await this.chainService.callContractMethod(contract, 'isMintApproved', [registryAddress, tokenId]);
+
+    const propertyToken = await this.database.getSpaceToken(tokenId, registryAddress || this.chainService.spaceGeoData._address);
+
+    if(isApproved) {
+      const expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [registryAddress, tokenId]);
+
+      if(expelledResult.isExpelled) {
+        await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
+      } else {
+        await community.addApprovedSpaceTokens([propertyToken]).catch(() => {/* already in community */});
+      }
+    } else {
+      await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
+    }
+  }
+
   async getCommunity(address) {
     return this.database.getCommunity(address);
   }
@@ -1279,6 +1305,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterCommunityRule(filterQuery),
       total: await this.database.filterCommunityRuleCount(filterQuery)
+    };
+  }
+
+  async filterCommunitiesWithApprovedTokens(filterQuery: CommunityApprovedQuery) {
+    return {
+      list: await this.database.filterCommunitiesWithApprovedTokens(filterQuery),
+      total: await this.database.filterCommunitiesWithApprovedTokensCount(filterQuery)
     };
   }
 }
