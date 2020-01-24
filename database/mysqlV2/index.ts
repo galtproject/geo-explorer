@@ -1878,10 +1878,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['owner'] = {[Op.like]: communityApprovedQuery.tokenOwner};
     }
 
+    if(communityApprovedQuery.registryAddress) {
+      allWheres['contractAddress'] = {[Op.like]: communityApprovedQuery.registryAddress};
+    }
+
+    if(communityApprovedQuery.tokenId) {
+      allWheres['tokenId'] = communityApprovedQuery.tokenId.toString();
+    }
+
     const include: any = [{
       model: this.models.SpaceTokenGeoData,
       as: 'approvedSpaceTokens',
-      where: resultWhere(allWheres, ['owner'])
+      where: resultWhere(allWheres, ['owner', 'contractAddress', 'tokenId'])
     }];
     return {
       where: resultWhere(allWheres, ['address', 'isPpr', Op.and]),

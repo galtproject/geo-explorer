@@ -828,4 +828,6 @@ export interface CommunityApprovedQuery {
   isPpr?: boolean;
   addresses?: string[];
   tokenOwner?: string;
+  registryAddress?: string;
+  tokenId?: string;
 }
