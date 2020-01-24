@@ -1251,8 +1251,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const propertyToken = await this.database.getSpaceToken(tokenId, registryAddress || this.chainService.spaceGeoData._address);
 
     if(isApproved) {
-      const expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [registryAddress, tokenId]);
-
+      let expelledResult;
+      if(community.isPpr) {
+        expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [registryAddress, tokenId]);
+      } else {
+        expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [tokenId]);
+      }
       if(expelledResult.isExpelled) {
         await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
       } else {
