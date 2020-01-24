@@ -1397,6 +1397,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityQuery.addresses) {
       allWheres['address'] = {[Op.in]: communityQuery.addresses.map(a => a.toLowerCase())};
     }
+    if(!_.isUndefined(communityQuery.isPpr) && !_.isNull(communityQuery.isPpr)) {
+      allWheres['isPpr'] = communityQuery.isPpr;
+    }
 
     return allWheres;
   }
@@ -1405,7 +1408,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityWhere(communityQuery);
 
     return {
-      where: resultWhere(allWheres, ['address', 'tokenId']),
+      where: resultWhere(allWheres, ['address', 'tokenId', 'isPpr']),
       include: [{
         model: this.models.SpaceTokenGeoData,
         as: 'spaceTokens'
@@ -1697,6 +1700,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   prepareCommunityProposalWhere(communityProposalQuery) {
     const allWheres: any = {};
 
+    if(communityProposalQuery.proposalId) {
+      allWheres['proposalId'] = communityProposalQuery.proposalId.toString();
+    }
+
     if(communityProposalQuery.marker) {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
@@ -1728,7 +1735,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', Op.and])
     }
   }
 

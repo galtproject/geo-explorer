@@ -711,6 +711,8 @@ export interface ICommunityProposal {
   declinedShare?;
   acceptedCount?;
   declinedCount?;
+  totalAccepted?;
+  totalDeclined?;
   requiredSupport?;
   currentSupport?;
   minAcceptQuorum?;
