@@ -1408,7 +1408,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityWhere(communityQuery);
 
     return {
-      where: resultWhere(allWheres, ['address', 'tokenId']),
+      where: resultWhere(allWheres, ['address', 'tokenId', 'isPpr']),
       include: [{
         model: this.models.SpaceTokenGeoData,
         as: 'spaceTokens'
