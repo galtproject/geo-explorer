@@ -76,8 +76,8 @@ module.exports = async function (sequelize, models) {
 
   models.ApprovedSpaceTokensCommunities = sequelize.define('approvedSpaceTokensCommunities', {} as any, {} as any);
 
-  Community.belongsToMany(models.SpaceTokenGeoData, {as: 'approvedSpaceTokens', through: models.SpaceTokensCommunities});
-  models.SpaceTokenGeoData.belongsToMany(Community, {as: 'approvedInCommunities', through: models.SpaceTokensCommunities});
+  Community.belongsToMany(models.SpaceTokenGeoData, {as: 'approvedSpaceTokens', through: models.ApprovedSpaceTokensCommunities});
+  models.SpaceTokenGeoData.belongsToMany(Community, {as: 'approvedInCommunities', through: models.ApprovedSpaceTokensCommunities});
 
   await Community.sync({});
 

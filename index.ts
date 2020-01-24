@@ -802,7 +802,9 @@ const config = require('./config');
       tokenOwner: '0xf0430bbb78C3c359c22d4913484081A563B86170'
     });
 
-    console.log('found approved', approvedCommunities.list.length);
+    console.log('found approved', JSON.stringify(
+      approvedCommunities.list
+    , null, 2));
 
     // const communityTokenOwnersCount = await database.filterCommunityTokensCount({
     //   groupBy: 'owner',
