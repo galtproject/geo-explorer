@@ -1241,9 +1241,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityTokenApproved(communityAddress, tokenId, registryAddress?) {
     const community = await this.database.getCommunity(communityAddress);
 
-    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress);
-    const isApproved = await this.chainService.callContractMethod(contract, 'isMintApproved', [registryAddress, tokenId]);
-
+    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
+    let isApproved;
+    if(community.isPpr) {
+      isApproved = await this.chainService.callContractMethod(contract, 'isMintApproved', [registryAddress, tokenId]);
+    } else {
+      isApproved = await this.chainService.callContractMethod(contract, 'isMintApproved', [tokenId]);
+    }
     const propertyToken = await this.database.getSpaceToken(tokenId, registryAddress || this.chainService.spaceGeoData._address);
 
     if(isApproved) {
