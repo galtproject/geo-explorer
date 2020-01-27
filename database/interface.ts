@@ -202,6 +202,10 @@ export default interface IExplorerDatabase {
 
   filterCommunityRuleCount(filterQuery: CommunityRuleQuery): Promise<number>;
 
+  filterCommunitiesWithApprovedTokens(filterQuery: CommunityApprovedQuery): Promise<ICommunity[]>;
+
+  filterCommunitiesWithApprovedTokensCount(filterQuery: CommunityApprovedQuery): Promise<number>;
+
   // =============================================================
   // Values
   // =============================================================
@@ -650,6 +654,9 @@ export interface ICommunity {
   addSpaceTokens?(tokensObjects);
   removeSpaceTokens?(tokensObjects);
   setSpaceTokens?(tokensObjects);
+
+  addApprovedSpaceTokens?(tokensObjects);
+  removeApprovedSpaceTokens?(tokensObjects);
 }
 
 export interface ICommunityMember {
@@ -809,4 +816,18 @@ export interface CommunityRuleQuery {
   sortDir?: string;
 
   communityAddress?: string;
+}
+
+export interface CommunityApprovedQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  isPpr?: boolean;
+  addresses?: string[];
+  tokenOwner?: string;
+  registryAddress?: string;
+  tokenId?: string;
 }

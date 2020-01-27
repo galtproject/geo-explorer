@@ -28,7 +28,13 @@ import IExplorerDatabase, {
   CommunityMemberQuery,
   CommunityTokensQuery,
   PrivatePropertyProposalQuery,
-  CommunityRuleQuery, ICommunityRule, IPprMember, PprMemberQuery, ITokenizableMember, TokenizableMemberQuery
+  CommunityRuleQuery,
+  ICommunityRule,
+  IPprMember,
+  PprMemberQuery,
+  ITokenizableMember,
+  TokenizableMemberQuery,
+  CommunityApprovedQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -1838,6 +1844,92 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const findAllParam: any = this.communityRuleQueryToFindAllParam(communityRuleQuery);
 
     return this.models.CommunityRule.count(findAllParam);
+  }
+
+  // =============================================================
+  // Approved Tokens
+  // =============================================================
+
+  prepareCommunitiesWithApprovedTokensWhere(communityApprovedQuery) {
+    const allWheres: any = {};
+
+    if(communityApprovedQuery.communityAddress) {
+      allWheres['communityAddress'] = {[Op.like]: communityApprovedQuery.communityAddress};
+    }
+
+    ['isActive', 'type', 'ruleId'].forEach((field) => {
+      if(!_.isUndefined(communityApprovedQuery[field]) && !_.isNull(communityApprovedQuery[field]))
+        allWheres[field] = {[Op.eq]: communityApprovedQuery[field]};
+    });
+
+    return allWheres;
+  }
+
+  communitiesWithApprovedTokensQueryToFindAllParam(communityApprovedQuery: CommunityApprovedQuery) {
+    const allWheres = this.prepareCommunitiesWithApprovedTokensWhere(communityApprovedQuery);
+
+    if(communityApprovedQuery.addresses) {
+      allWheres['address'] = {[Op.in]: communityApprovedQuery.addresses.map(a => a.toLowerCase())};
+    }
+    if(!_.isUndefined(communityApprovedQuery.isPpr) && !_.isNull(communityApprovedQuery.isPpr)) {
+      allWheres['isPpr'] = communityApprovedQuery.isPpr;
+    }
+    if(communityApprovedQuery.tokenOwner) {
+      allWheres['owner'] = {[Op.like]: communityApprovedQuery.tokenOwner};
+    }
+
+    if(communityApprovedQuery.registryAddress) {
+      allWheres['contractAddress'] = {[Op.like]: communityApprovedQuery.registryAddress};
+    }
+
+    if(communityApprovedQuery.tokenId) {
+      allWheres['tokenId'] = communityApprovedQuery.tokenId.toString();
+    }
+
+    const include: any = [{
+      association: 'approvedSpaceTokens',
+      where: resultWhere(allWheres, ['owner', 'contractAddress', 'tokenId'])
+    }];
+    return {
+      where: resultWhere(allWheres, ['address', 'isPpr', Op.and]),
+      include
+    }
+  }
+
+  async filterCommunitiesWithApprovedTokens(communityApprovedQuery: CommunityApprovedQuery) {
+    if(communityApprovedQuery.limit > 1000) {
+      communityApprovedQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.communitiesWithApprovedTokensQueryToFindAllParam(communityApprovedQuery);
+
+    findAllParam.limit = communityApprovedQuery.limit || 20;
+    findAllParam.offset = communityApprovedQuery.offset || 0;
+
+    return this.models.Community.findAll(findAllParam);
+    //
+    // findAllParam.where = { id: { [ Op.in]: communities.map(o => o.id) } };
+    // findAllParam.include.forEach(i => {
+    //   i.where = null;
+    // });
+    //
+    // findAllParam.order = [
+    //   [communityApprovedQuery.sortBy || 'createdAt', communityApprovedQuery.sortDir || 'DESC']
+    // ];
+    //
+    // // TODO: fix by issue https://github.com/sequelize/sequelize/issues/10962
+    // delete findAllParam.limit;
+    // delete findAllParam.offset;
+    //
+    // return this.models.Community.findAll(findAllParam);
+  }
+
+  async filterCommunitiesWithApprovedTokensCount(communityApprovedQuery: CommunityApprovedQuery) {
+    const findAllParam: any = this.communitiesWithApprovedTokensQueryToFindAllParam(communityApprovedQuery);
+
+    findAllParam.distinct = true;
+
+    return this.models.Community.count(findAllParam);
   }
 
   // =============================================================
