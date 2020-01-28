@@ -7,13 +7,12 @@
  * [Basic Agreement](ipfs/QmaCiXUmSrP16Gz8Jdzq6AJESY1EAANmmwha15uR3c1bsS)).
  */
 
-import IExplorerChainService, {ChainServiceEvents} from "../interface";
+import IExplorerChainService from "../interface";
 import {IExplorerChainContourEvent} from "../../interfaces";
 
 const galtUtils = require('@galtproject/utils');
 const _ = require('lodash');
 const axios = require('axios');
-const BN = require("bn.js");
 
 const Web3 = require("web3");
 const Web3Utils = require("web3-utils");
@@ -209,7 +208,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityFactory = new this.web3.eth.Contract(this.contractsConfig['communityFactoryAbi'], address);
+    const communityFactory = new this.web3.eth.Contract(this.contractsConfig['fundFactoryAbi'] || this.contractsConfig['privateFundFactoryAbi'], address);
     this.communityCache[address] = communityFactory;
     return communityFactory;
   }

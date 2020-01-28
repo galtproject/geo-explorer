@@ -466,55 +466,40 @@ const config = require('./config');
     console.log('last communityMockFactory:');
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
-        const fundId = e.returnValues.fundId;
-        const fundDeployment = await chainService.callContractMethod(chainService.communityMockFactory, 'fundContracts', [fundId]);
-        fundDeployment.blockNumber = e.blockNumber;
-        await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-        return subscribeToCommunity(fundDeployment.fundRA, false);
+        const community = await geoDataService.handleNewCommunityEvent(e, false);
+        return subscribeToCommunity(community.address, false);
       });
     });
 
     console.log('last communityFactory:');
     await chainService.getEventsFromBlock(chainService.communityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
-        const fundId = e.returnValues.fundId;
-        const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
-        fundDeployment.blockNumber = e.blockNumber;
-        await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-        return subscribeToCommunity(fundDeployment.fundRA, false);
+        const community = await geoDataService.handleNewCommunityEvent(e, false);
+        return subscribeToCommunity(community.address, false);
       });
     });
 
     console.log('new communityFactory:');
     chainService.subscribeForNewEvents(chainService.communityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
-      const fundId = newEvent.returnValues.fundId;
-      const fundDeployment = await chainService.callContractMethod(chainService.communityFactory, 'fundContracts', [fundId]);
-      fundDeployment.blockNumber = newEvent.blockNumber;
-      await geoDataService.handleNewCommunityEvent(fundDeployment, false);
-      await subscribeToCommunity(fundDeployment.fundRA, false);
+      const community = await geoDataService.handleNewCommunityEvent(newEvent, false);
+      await subscribeToCommunity(community.address, false);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
 
     console.log('last pprCommunityFactory:');
     await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
-        const fundId = e.returnValues.fundId;
-        const fundDeployment = await chainService.callContractMethod(chainService.pprCommunityFactory, 'fundContracts', [fundId]);
-        fundDeployment.blockNumber = e.blockNumber;
-        await geoDataService.handleNewCommunityEvent(fundDeployment, true);
-        return subscribeToCommunity(fundDeployment.fundRA, true);
+        const community = await geoDataService.handleNewCommunityEvent(e, true);
+        return subscribeToCommunity(community.address, true);
       });
     });
 
     console.log('new pprCommunityFactory:');
     chainService.subscribeForNewEvents(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, currentBlockNumber, async (err, newEvent) => {
       console.log('🛎 New Add Community event, blockNumber:', currentBlockNumber);
-      const fundId = newEvent.returnValues.fundId;
-      const fundDeployment = await chainService.callContractMethod(chainService.pprCommunityFactory, 'fundContracts', [fundId]);
-      fundDeployment.blockNumber = newEvent.blockNumber;
-      await geoDataService.handleNewCommunityEvent(fundDeployment, true);
-      await subscribeToCommunity(fundDeployment.fundRA, true);
+      const community = await geoDataService.handleNewCommunityEvent(newEvent, true);
+      await subscribeToCommunity(community.address, true);
       await database.setValue('lastBlockNumber', currentBlockNumber.toString());
     });
     console.log('community done');
