@@ -204,6 +204,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
   }
 
+  getCommunityFactoryContract(address) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityFactory = new this.web3.eth.Contract(this.contractsConfig['communityFactoryAbi'], address);
+    this.communityCache[address] = communityFactory;
+    return communityFactory;
+  }
+
   getPPTokenRegistryContract(address) {
     if(this.pprCache[address]) {
       return this.pprCache[address];
