@@ -68,6 +68,8 @@ export default interface IExplorerChainService {
 
   getNewPropertyApplicationOracle(applicationId, roleName): Promise<{ status: string, address: string, reward: number }>;
 
+  getCommunityFactoryContract(address): Promise<any>;
+
   getPPTokenRegistryContract(address): Promise<any>;
 
   getTokenizableContract(address): Promise<any>;
@@ -127,7 +129,7 @@ export enum ChainServiceEvents {
   PrivatePropertySetFeeManager = 'SetFeeManager',
   PrivatePropertySetBurner = 'SetBurner',
 
-  NewCommunity = 'CreateFundFourthStep',
+  NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',
   CommunityBurn = 'TokenBurn',
   CommunityTransferReputation = 'Transfer',

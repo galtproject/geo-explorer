@@ -98,7 +98,7 @@ export default interface IExplorerGeoDataService {
 
   filterPrivatePropertyMembers(query): Promise<IPrivatePropertyMembersListResponse>;
 
-  handleNewCommunityEvent(address: string, isPpr): Promise<void>;
+  handleNewCommunityEvent(address: string, isPpr): Promise<ICommunity>;
 
   handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isPpr): Promise<void>;
 

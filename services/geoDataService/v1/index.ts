@@ -854,7 +854,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   // =============================================================
 
   async handleNewCommunityEvent(event, isPpr) {
-    return this.updateCommunity(event.fundRA, isPpr, event.blockNumber);
+    const factoryContract = await this.chainService.getCommunityFactoryContract(event.contractAddress);
+    const { fundRegistry } = await this.chainService.callContractMethod(factoryContract, 'fundContracts', [event.returnValues.fundId]);
+    const registryContract = await this.chainService.getCommunityFundRegistryContract(fundRegistry);
+
+    const raAddress = await this.chainService.callContractMethod(registryContract, 'getRAAddress', []);
+    await this.updateCommunity(raAddress, isPpr, event.blockNumber);
+    return this.database.getCommunity(raAddress);
   }
 
   async updateCommunity(raAddress, isPpr, createdAtBlock?) {
