@@ -16,6 +16,7 @@ const axios = require('axios');
 
 const Web3 = require("web3");
 const Web3Utils = require("web3-utils");
+const log = require('../../logService');
 
 const config = require('./config');
 if (!config.wsServer) {
@@ -25,7 +26,7 @@ if (!config.wsServer) {
 
 module.exports = async (extendConfig) => {
   const wsServer = extendConfig.wsServer || config.wsServer;
-  console.log('wsServer', wsServer);
+  log('wsServer', wsServer);
   // const web3 = new Web3(new Web3.providers.WebsocketProvider(wsServer));
   //
   // const netId = await web3.eth.net.getId();
@@ -33,7 +34,7 @@ module.exports = async (extendConfig) => {
   let configFile = extendConfig.configFile || config.configFile;
   let contractsConfigUrl = _.template(config.contractsConfigUrl)({ configFile });
 
-  console.log('📄 contractsConfigUrl', contractsConfigUrl);
+  log('📄 contractsConfigUrl', contractsConfigUrl);
 
   const {data: contractsConfig} = await axios.get(contractsConfigUrl);
 
@@ -44,7 +45,7 @@ module.exports = async (extendConfig) => {
   setInterval(async () => {
     const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
     if (newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
-      console.log('😱 New contracts, reset database', contractsConfigUrl);
+      log('😱 New contracts, reset database', contractsConfigUrl);
       serviceInstance.setContractsConfig(newContractsConfig, true);
     }
   }, 1000 * 60);
@@ -102,20 +103,20 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
     if(!contract) {
-      console.log(`✖️ Event ${eventName} getting events ignored, contract not found`);
+      log(`✖️ Event ${eventName} getting events ignored, contract not found`);
       return new Promise((resolve) => resolve([]));
     }
     if(!contract.events[eventName]) {
-      console.log(`✖️ Event ${eventName} getting events ignored, event not found`);
+      log(`✖️ Event ${eventName} getting events ignored, event not found`);
       return new Promise((resolve) => resolve([]));
     }
     if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
       blockNumber = this.contractsConfig.blockNumber;
     }
     return contract.getPastEvents(eventName, {fromBlock: blockNumber}).then(events => {
-      console.log(`✅️ Event ${eventName} got ${events.length} items, by contract ${contract._address}`);
+      log(`✅️ Event ${eventName} got ${events.length} items, by contract ${contract._address}`);
       return events.map(e => {
-        // console.log('event', e);
+        // log('event', e);
         e.contractAddress = e.address;
         return e;
       })
@@ -127,17 +128,17 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback) {
     if(!contract) {
-      console.log(`✖️ Event ${eventName} subscribing ignored, contract not found`);
+      log(`✖️ Event ${eventName} subscribing ignored, contract not found`);
       return;
     }
     if(!contract.events[eventName]) {
-      console.log(`✖️ Event ${eventName} subscribing ignored, event not found`);
+      log(`✖️ Event ${eventName} subscribing ignored, event not found`);
       return;
     }
-    console.log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
+    log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
 
     return contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
-      // console.log('event', e);
+      // log('event', e);
       if(e) {
         e.contractAddress = e.address;
       }
@@ -155,7 +156,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   private subscribeForReconnect() {
     this.websocketProvider.on('end', () => {
       setTimeout(() => {
-        console.log(new Date().toISOString().slice(0, 19).replace('T', ' '), '🔁 Websocket reconnect');
+        log(new Date().toISOString().slice(0, 19).replace('T', ' '), '🔁 Websocket reconnect');
 
         this.websocketProvider = new Web3.providers.WebsocketProvider(this.wsServer);
         this.web3 = new Web3(this.websocketProvider);
@@ -193,13 +194,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory', 'tokenizableFactory'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
-      console.log(contractName, 'address', contractAddress);
+      log(contractName, 'address', contractAddress);
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
       if(!contractAddress) {
-        return console.log(`✖️ Contract ${contractName} not found in config`);
+        return log(`✖️ Contract ${contractName} not found in config`);
       }
       this[contractName] = new this.web3.eth.Contract(contractAbi, contractAddress);
-      console.log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
+      log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
     });
   }
 
@@ -398,7 +399,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
-        // console.log('cPoint', cPoint);
+        // log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
@@ -445,13 +446,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       const heightsContour = [];
 
       // if(contractAddress === '0x9934766335745AECb2d134b83D30e48538c50645'){
-      //   console.log('result.contour', result.contour);
+      //   log('result.contour', result.contour);
       // }
 
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
-        // console.log('cPoint', cPoint);
+        // log('cPoint', cPoint);
         if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
@@ -501,7 +502,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.details = await propertyMarketContract.methods.getSaleOrderDetails(orderId).call({});
       result.details.tokenIds = result.details.tokenIds || result.details['spaceTokenIds'] || result.details['propertyTokenIds'];
 
-      // console.log('result.status', result.status);
+      // log('result.status', result.status);
       result.statusName = {
         '0': 'inactive',
         '1': 'active'
@@ -653,7 +654,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   public async getContractSymbol(address) {
     const contract = new this.web3.eth.Contract([{"constant":true,"inputs":[],"name":"_symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function","signature":"0xb09f1266"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}], address);
-    // console.log(this.contractsConfig['spaceLockerAbi']);
+    // log(this.contractsConfig['spaceLockerAbi']);
     return contract.methods.symbol().call({})
       .catch(() =>
         contract.methods._symbol().call({}).catch(() => null)
