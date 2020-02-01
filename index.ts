@@ -1,5 +1,5 @@
 /*
- * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * Copyright ©️ 2019 Galt•Project Society Construction and Terraforming Company
  * (Founded by [Nikolai Popeka](https://github.com/npopeka)
  *
  * Copyright ©️ 2019 Galt•Core Blockchain Company
@@ -458,7 +458,6 @@ const config = require('./config');
       });
     });
 
-
     const subscribedToCommunity = {
       // communityAddress => bool
     };
@@ -650,7 +649,16 @@ const config = require('./config');
       });
     }
 
+    const subscribedToProposalManager = {
+      // pmAddress => bool
+    };
+
     async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
+      if(!subscribedToProposalManager[proposalManagerAddress]) {
+        return;
+      }
+      subscribedToProposalManager[proposalManagerAddress] = true;
+
       const contractPm = await chainService.getCommunityProposalManagerContract(proposalManagerAddress);
 
       await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityNewProposal, prevBlockNumber).then(async (events) => {
