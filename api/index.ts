@@ -47,6 +47,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     res.send(200);
   });
 
+  service.get('/v1/status', async (req, res) => {
+    await respondByScheme(res, null);
+  });
+
   service.post('/v1/contours/by/inner-geohash', async (req, res) => {
     await respondByScheme(res, await geohashService.getContoursByInnerGeohash(req.body.geohash, req.body.contractAddress, req.body.level));
   });
