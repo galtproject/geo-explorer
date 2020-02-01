@@ -141,7 +141,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       this.getBlockTimestamp(e.blockNumber).then(blockTimestamp => {
         const blockDate = new Date();
         blockDate.setTime(parseInt(blockTimestamp) * 1000);
-        log('New Event', eventName, 'block date:', blockDate.toISOString().slice(0, 19).replace('T', ' '));
+        log('🛎 New Event', eventName, 'block number:',  e.blockNumber, 'block date:', blockDate.toISOString().slice(0, 19).replace('T', ' '));
       });
       if(e) {
         e.contractAddress = e.address;
