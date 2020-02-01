@@ -143,9 +143,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       this.subscribedToEventsByContract[contract._address] = {};
     }
 
-    this.subscribedToEventsByContract[contract._address][eventName] = true;
-
-    return contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
+    const eventReturn = contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       this.getBlockTimestamp(e.blockNumber).then(blockTimestamp => {
         const blockDate = new Date();
         blockDate.setTime(parseInt(blockTimestamp) * 1000);
@@ -159,10 +157,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         callback(error, e);
       }, 1000);
     });
+
+    const eventSignature = eventReturn.arguments[0].topics[0];
+
+    this.subscribedToEventsByContract[contract._address][eventSignature] = true;
+
+    return eventReturn;
   }
 
-  isSubscribedToEvent(contractAddress, eventName) {
-    return !!(this.subscribedToEventsByContract[contractAddress] || {})[eventName];
+  isSubscribedToEvent(contractAddress, eventSignature) {
+    return !!(this.subscribedToEventsByContract[contractAddress] || {})[eventSignature];
   }
 
   onReconnect(callback) {

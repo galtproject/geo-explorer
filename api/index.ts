@@ -53,7 +53,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
 
   service.post('/v1/check-subscribe', async (req, res) => {
     await respondByScheme(res, {
-      subscribed: chainService.isSubscribedToEvent(req.body.contractAddress, req.body.eventName)
+      subscribed: req.body.eventSignatures.some(signature => chainService.isSubscribedToEvent(req.body.contractAddress, signature))
     });
   });
 
