@@ -794,13 +794,13 @@ const log = require('./services/logService');
     // });
     // log('found spaceTokens', spaceTokens.list.map(st => st));
 
-    const approvedCommunities = await geoDataService.filterCommunitiesWithApprovedTokens({
-      tokenOwner: '0xf0430bbb78C3c359c22d4913484081A563B86170'
-    });
+    // const approvedCommunities = await geoDataService.filterCommunitiesWithApprovedTokens({
+    //   tokenOwner: '0xf0430bbb78C3c359c22d4913484081A563B86170'
+    // });
 
-    log('found approved', JSON.stringify(
-      approvedCommunities.list
-    , null, 2));
+    // log('found approved', JSON.stringify(
+    //   approvedCommunities.list
+    // , null, 2));
 
     // const communityTokenOwnersCount = await database.filterCommunityTokensCount({
     //   groupBy: 'owner',
