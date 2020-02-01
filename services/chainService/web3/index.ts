@@ -137,10 +137,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       log(`✖️ Event ${eventName} subscribing ignored, event not found`);
       return;
     }
-    log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
+    const contractAddress = contract._address.toLowerCase();
 
-    if(!this.subscribedToEventsByContract[contract._address]) {
-      this.subscribedToEventsByContract[contract._address] = {};
+    log(`✅️ Event ${eventName} subscribed, by contract ${contractAddress}`);
+
+    if(!this.subscribedToEventsByContract[contractAddress]) {
+      this.subscribedToEventsByContract[contractAddress] = {};
     }
 
     const eventReturn = contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
@@ -158,14 +160,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       }, 1000);
     });
 
-    const eventSignature = eventReturn.arguments[0].topics[0];
+    const eventSignature = eventReturn.arguments[0].topics[0].toLowerCase();
 
-    this.subscribedToEventsByContract[contract._address][eventSignature] = true;
+    this.subscribedToEventsByContract[contractAddress][eventSignature] = true;
 
     return eventReturn;
   }
 
   isSubscribedToEvent(contractAddress, eventSignature) {
+    contractAddress = contractAddress.toLowerCase();
+    eventSignature = eventSignature.toLowerCase();
     return !!(this.subscribedToEventsByContract[contractAddress] || {})[eventSignature];
   }
 
