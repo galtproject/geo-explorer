@@ -508,9 +508,15 @@ const log = require('./services/logService');
       if(subscribedToCommunity[address]) {
         return;
       }
+
       log('📢 Subscribed to Community:', address);
 
       subscribedToCommunity[address] = true;
+
+      const subscribedToProposalManager = {
+        // pmAddress => bool
+      };
+
       const contractRa = await chainService.getCommunityRaContract(address, isPpr);
 
       const registryAddress = await chainService.callContractMethod(contractRa, 'fundRegistry', []);
@@ -649,10 +655,6 @@ const log = require('./services/logService');
         await database.setValue('lastBlockNumber', currentBlockNumber.toString());
       });
     }
-
-    const subscribedToProposalManager = {
-      // pmAddress => bool
-    };
 
     async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
       if(!subscribedToProposalManager[proposalManagerAddress]) {
