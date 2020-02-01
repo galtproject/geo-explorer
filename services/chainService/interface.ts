@@ -40,6 +40,8 @@ export default interface IExplorerChainService {
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback): void;
 
+  isSubscribedToEvent(contractAddress, eventName): boolean;
+
   getCurrentBlock(): Promise<number>;
 
   onReconnect(callback): void;

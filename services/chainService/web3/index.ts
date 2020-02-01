@@ -83,6 +83,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   communityCache: any = {};
   tokenizableCache: any = {};
 
+  subscribedToEventsByContract: any = {};
+
   redeployed = false;
 
   constructor(_contractsConfig, _wsServer) {
@@ -137,6 +139,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     log(`✅️ Event ${eventName} subscribed, by contract ${contract._address}`);
 
+    if(!this.subscribedToEventsByContract[contract._address]) {
+      this.subscribedToEventsByContract[contract._address] = {};
+    }
+
+    this.subscribedToEventsByContract[contract._address][eventName] = true;
+
     return contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
       this.getBlockTimestamp(e.blockNumber).then(blockTimestamp => {
         const blockDate = new Date();
@@ -151,6 +159,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         callback(error, e);
       }, 1000);
     });
+  }
+
+  isSubscribedToEvent(contractAddress, eventName) {
+    return !!(this.subscribedToEventsByContract[contractAddress] || {})[eventName];
   }
 
   onReconnect(callback) {

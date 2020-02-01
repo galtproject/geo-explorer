@@ -51,6 +51,12 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, null);
   });
 
+  service.post('/v1/check-subscribe', async (req, res) => {
+    await respondByScheme(res, {
+      subscribed: chainService.isSubscribedToEvent(req.body.contractAddress, req.body.eventName)
+    });
+  });
+
   service.post('/v1/contours/by/inner-geohash', async (req, res) => {
     await respondByScheme(res, await geohashService.getContoursByInnerGeohash(req.body.geohash, req.body.contractAddress, req.body.level));
   });
@@ -158,7 +164,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
   async function respondByScheme(res, data) {
     res.send({
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
-      currentBlockNumber: await chainService.getCurrentBlock(),
+      // currentBlockNumber: await chainService.getCurrentBlock(),
       data
     }, 200);
   }
