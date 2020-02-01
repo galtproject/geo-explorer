@@ -463,6 +463,10 @@ const log = require('./services/logService');
       // communityAddress => bool
     };
 
+    const subscribedToProposalManager = {
+      // pmAddress => bool
+    };
+
     log('last communityMockFactory:');
     await chainService.getEventsFromBlock(chainService.communityMockFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
@@ -512,10 +516,6 @@ const log = require('./services/logService');
       log('📢 Subscribed to Community:', address);
 
       subscribedToCommunity[address] = true;
-
-      const subscribedToProposalManager = {
-        // pmAddress => bool
-      };
 
       const contractRa = await chainService.getCommunityRaContract(address, isPpr);
 
