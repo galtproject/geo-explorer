@@ -164,6 +164,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.subscribedToEventsByContract[contractAddress][eventSignature] = true;
 
+    console.log('subscribedToEventsByContract', contractAddress, eventSignature);
+
     return eventReturn;
   }
 

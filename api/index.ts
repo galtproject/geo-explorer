@@ -52,8 +52,11 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
   });
 
   service.post('/v1/check-subscribe', async (req, res) => {
+    if(!req.body.eventsMetaData || req.body.eventsMetaData.length > 100) {
+      throw "invalid_input";
+    }
     await respondByScheme(res, {
-      subscribed: req.body.eventSignatures.some(signature => chainService.isSubscribedToEvent(req.body.contractAddress, signature))
+      subscribed: req.body.eventsMetaData.some(i => chainService.isSubscribedToEvent(i.contractAddress, i.eventSignature))
     });
   });
 
