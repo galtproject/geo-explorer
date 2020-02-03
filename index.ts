@@ -192,6 +192,7 @@ const log = require('./services/logService');
     });
 
     async function subscribeToPrivatePropertyRegistry (address, old = false) {
+      address = address.toLowerCase();
       if(subscribedToPrivatePropertyRegistry[address]) {
         return;
       }
@@ -392,7 +393,7 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents[eventName], currentBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
-          if(eventName === 'PrivatePropertySetController') {
+          if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller) {
             unsubscribe();
             return subscribeToPrivatePropertyRegistry(address);
           }
@@ -485,6 +486,7 @@ const log = require('./services/logService');
     log('community done');
 
     async function subscribeToCommunity (address, isPpr) {
+      address = address.toLowerCase();
       if(subscribedToCommunity[address]) {
         return;
       }
@@ -623,6 +625,7 @@ const log = require('./services/logService');
     }
 
     async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
+      proposalManagerAddress = proposalManagerAddress.toLowerCase();
       if(!subscribedToProposalManager[proposalManagerAddress]) {
         return;
       }
