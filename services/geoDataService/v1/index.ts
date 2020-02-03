@@ -1,5 +1,5 @@
 /*
- * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * Copyright ©️ 2019 Galt•Project Society Construction and Terraforming Company
  * (Founded by [Nikolai Popeka](https://github.com/npopeka)
  *
  * Copyright ©️ 2019 Galt•Core Blockchain Company
@@ -36,6 +36,7 @@ const pIteration = require("p-iteration");
 
 const {GeesomeClient} = require('geesome-libs/src/GeesomeClient');
 const {isIpldHash} = require('geesome-libs/src/ipfsHelper');
+const log = require('../../logService');
 
 const {bytes32ToIpfsHash} = require('@galtproject/utils');
 
@@ -74,7 +75,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   };
 
   async saveSpaceTokenById(contractAddress, tokenId, additionalData = {}) {
-    console.log('getSpaceTokenData', tokenId);
+    log('getSpaceTokenData', tokenId);
 
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
@@ -85,7 +86,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     //     return;
     //   }
     // }
-      console.log('saveSpaceTokenById', tokenId, owner);
+    log('saveSpaceTokenById', tokenId, owner);
 
     let level;
     if (geoData.humanAddress) {
@@ -103,7 +104,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const lockerOwner = await this.chainService.getLockerOwner(owner);
-    console.log('getLockerOwner',lockerOwner);
+    log('getLockerOwner', lockerOwner);
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
@@ -145,7 +146,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       details = spaceData.data;
     }
 
-    if(!floorPlans) {
+    if (!floorPlans) {
       floorPlans = [];
     }
 
@@ -170,7 +171,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let imageHash;
 
-    if(photos[0]) {
+    if (photos[0]) {
       const link = await this.geesome.getContentLink(photos[0], 'large').catch(() => '');
       imageHash = _.last(link.split('/'))
     }
@@ -193,10 +194,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async addOrUpdateGeoData(geoDataToSave) {
-    if(geoDataToSave.owner) {
-      if(geoDataToSave.isPpr) {
+    if (geoDataToSave.owner) {
+      if (geoDataToSave.isPpr) {
         const ppr = await this.database.getPrivatePropertyRegistry(geoDataToSave.contractAddress);
-        if(ppr) {
+        if (ppr) {
           await this.database.addOrUpdatePprMember(ppr, {
             address: geoDataToSave.owner
           });
@@ -207,7 +208,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         return this.database.addOrUpdateGeoData(geoDataToSave);
       });
     } else {
-      if(geoDataToSave.isPpr) {
+      if (geoDataToSave.isPpr) {
         await this.deletePprMember(geoDataToSave.contractAddress, geoDataToSave.owner);
       }
       await this.database.deleteGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress);
@@ -217,7 +218,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async deletePprMember(registryAddress, memberAddress) {
     const pprMember = await this.database.getPprMember(registryAddress, memberAddress);
-    if(pprMember) {
+    if (pprMember) {
       await pprMember.destroy();
     }
   }
@@ -258,33 +259,33 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let description = '';
 
-    if(tokenData.details) {
+    if (tokenData.details) {
       attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
 
       description = tokenData.details.description;
-      if(tokenData.details.legalDescription) {
+      if (tokenData.details.legalDescription) {
         description += '\n\n' + tokenData.details.legalDescription;
       }
     }
 
     let name = '';
 
-    if(tokenData.humanAddress) {
+    if (tokenData.humanAddress) {
       name = tokenData.humanAddress.countryRegion || '';
 
-      if(name) {
+      if (name) {
         name += ', ';
       }
 
-      if(tokenData.humanAddress.cityStreet) {
+      if (tokenData.humanAddress.cityStreet) {
         name += tokenData.humanAddress.cityStreet;
       }
 
-      if(spaceGeoData.tokenType === 'room') {
-        if(tokenData.humanAddress.floor)
+      if (spaceGeoData.tokenType === 'room') {
+        if (tokenData.humanAddress.floor)
           name += ', Floor ' + tokenData.humanAddress.floor;
 
-        if(tokenData.humanAddress.litera)
+        if (tokenData.humanAddress.litera)
           name += ', ' + tokenData.humanAddress.litera;
       }
     } else {
@@ -352,9 +353,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       currencyName = await this.chainService.getContractSymbol(chainOrder.tokenContract);
     }
 
-    console.log(orderId, 'tokens types', dbSpaceTokens.map(s => [s.tokenType, s.area]));
+    log(orderId, 'tokens types', dbSpaceTokens.map(s => [s.tokenType, s.area]));
 
-    console.log('chainOrder.statusName', chainOrder.statusName);
+    log('chainOrder.statusName', chainOrder.statusName);
 
     const dbOrder = await this.database.addOrUpdateSaleOrder({
       orderId,
@@ -379,7 +380,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       updatedAtBlock: event.blockNumber
     });
 
-    console.log('order saved', dbOrder.orderId, event.contractAddress);
+    log('order saved', dbOrder.orderId, event.contractAddress);
 
     await dbOrder.setSpaceTokens(dbSpaceTokens);
   };
@@ -449,8 +450,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const spaceGeoDataAddress = this.chainService.spaceGeoData._address;
 
-    const application = await this.chainService.getNewPropertyApplication(applicationId);
-    const applicationDetails = await this.chainService.getNewPropertyApplicationDetails(applicationId);
+    const [application, applicationDetails] = await Promise.all([
+      this.chainService.getNewPropertyApplication(applicationId),
+      this.chainService.getNewPropertyApplicationDetails(applicationId)
+    ]);
 
     const oracles = [];
     const availableRoles = [];
@@ -513,7 +516,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         await dbApplication.addSpaceTokens([spaceToken]);
       }
     }
-    // console.log('spaceToken', spaceToken);
+    // log('spaceToken', spaceToken);
 
   };
 
@@ -538,19 +541,20 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const memberTo = event.returnValues._to;
 
     await pIteration.forEach([memberFrom, memberTo], async (memberAddress) => {
-      if(memberAddress === '0x0000000000000000000000000000000000000000') {
+      if (memberAddress === '0x0000000000000000000000000000000000000000') {
         return;
       }
       const memberBalance = await this.chainService.callContractMethod(tokenizableContract, 'balanceOf', [memberAddress], 'wei').catch(() => 0);
-      if(memberBalance) {
+      if (memberBalance) {
         return this.database.addOrUpdateTokenizableMember(contractAddress, {
           balance: memberBalance,
           address: memberAddress
         });
       } else {
         const dbMember = await this.database.getTokenizableMember(contractAddress, memberAddress);
-        if(dbMember) {
-          return dbMember.destroy().catch(() => {/* already destroyed */});
+        if (dbMember) {
+          return dbMember.destroy().catch(() => {/* already destroyed */
+          });
         }
       }
     });
@@ -578,47 +582,49 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updatePrivatePropertyRegistry(address, chainCreatedAt?) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
-    console.log('owner')
     const owner = await contract.methods.owner().call({});
 
-    if(owner === '0x0000000000000000000000000000000000000000') {
+    if (owner === '0x0000000000000000000000000000000000000000') {
       const ppr = await this.database.getPrivatePropertyRegistry(address);
-      if(ppr) {
+      if (ppr) {
         return ppr.destroy();
       }
       return;
     }
-    console.log('updatePrivatePropertyRegistry')
-    const name = await contract.methods.name().call({});
-    console.log('symbol')
-    const symbol = await contract.methods.symbol().call({});
-    console.log('controller')
-    const controller = await contract.methods.controller().call({});
 
-    console.log('controllerContract')
+    const [name, symbol, controller] = await Promise.all([
+      contract.methods.name().call({}),
+      contract.methods.symbol().call({}),
+      contract.methods.controller().call({})
+    ]);
+
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
-    const controllerOwner = await controllerContract.methods.owner().call({});
-    const defaultBurnTimeout = await controllerContract.methods.defaultBurnTimeoutDuration().call({});
+    const [controllerOwner, defaultBurnTimeout] = await Promise.all([
+      controllerContract.methods.owner().call({}),
+      controllerContract.methods.defaultBurnTimeoutDuration().call({})
+    ]);
 
-    console.log('get minter')
     let minter;
     //TODO: remove support for old registry
-    if(contract.methods.minter) {
-      console.log('contract.methods.minter')
+    if (contract.methods.minter) {
       minter = await contract.methods.minter().call({});
     } else {
-      console.log('controllerContract.methods.minter')
       minter = await controllerContract.methods.minter().call({});
     }
-    console.log('roles')
+
+    const [geoDataManager, feeManager, burner] = await Promise.all([
+      controllerContract.methods.geoDataManager().call({}),
+      controllerContract.methods.feeManager().call({}),
+      controllerContract.methods.burner().call({})
+    ]);
 
     const roles = {
       owner,
       controllerOwner,
       minter,
-      geoDataManager: await controllerContract.methods.geoDataManager().call({}),
-      feeManager: await controllerContract.methods.feeManager().call({}),
-      burner: await controllerContract.methods.burner().call({})
+      geoDataManager,
+      feeManager,
+      burner
     };
 
     await this.database.addOrPrivatePropertyRegistry({address});
@@ -626,8 +632,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const dbObject = await this.database.getPrivatePropertyRegistry(address);
 
     await pIteration.forEach(['owner', 'minter', 'geoDataManager', 'feeManager', 'burner'], async (roleName) => {
-      if(dbObject[roleName] != roles[roleName]) {
-        if(dbObject[roleName]) {
+      if (dbObject[roleName] != roles[roleName]) {
+        if (dbObject[roleName]) {
           await this.deletePprMember(address, dbObject[roleName]);
         }
         await this.database.addOrUpdatePprMember(dbObject, {
@@ -642,7 +648,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let description = dataLink;
     let dataJson = '';
-    if(isIpldHash(dataLink)) {
+    if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
@@ -652,7 +658,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       address, owner, totalSupply, name, symbol, dataLink, dataJson, description, defaultBurnTimeout, ...roles
     };
 
-    if(chainCreatedAt) {
+    if (chainCreatedAt) {
       pprData.chainCreatedAt = chainCreatedAt;
     }
     await this.database.addOrPrivatePropertyRegistry(pprData);
@@ -686,27 +692,27 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       contractAddress: event.contractAddress,
     };
 
-    if(event.returnValues.tokenId) {
+    if (event.returnValues.tokenId) {
       proposalData['tokenId'] = event.returnValues.tokenId;
       const spaceTokenGeoData = await this.getSpaceTokenById(proposalData['tokenId'], registryAddress);
-      if(!spaceTokenGeoData) {
+      if (!spaceTokenGeoData) {
         // token not exists
         return;
       }
       proposalData['spaceGeoDataId'] = spaceTokenGeoData.id;
     }
-    if(event.returnValues.creator) {
+    if (event.returnValues.creator) {
       proposalData['creator'] = event.returnValues.creator
     }
 
     const proposal = await this.chainService.callContractMethod(controllerContract, 'proposals', [proposalId]);
 
-    // console.log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
+    // log('handlePrivatePropertyRegistryProposalEvent', event.returnValues, proposal);
 
     const dataLink = proposal.dataLink;
     let description = dataLink;
     let dataJson = '';
-    if(isIpldHash(dataLink)) {
+    if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
@@ -736,40 +742,39 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       isApprovedByRegistryOwner: proposal.geoDataManagerApproved
     });
 
-    const pendingBurnProposalsForTokenOwnerCount = await this.database.filterPrivatePropertyProposalCount({
-      registryAddress,
-      tokenId: resultProposal.tokenId,
-      status: ['pending'],
-      isBurnProposal: true,
-      isApprovedByTokenOwner: false
-    });
+    const [pendingBurnProposalsForTokenOwnerCount, pendingEditProposalsForTokenOwnerCount, pendingBurnProposalsForRegistryOwnerCount, pendingEditProposalsForRegistryOwnerCount] = await Promise.all([
+      this.database.filterPrivatePropertyProposalCount({
+        registryAddress,
+        tokenId: resultProposal.tokenId,
+        status: ['pending'],
+        isBurnProposal: true,
+        isApprovedByTokenOwner: false
+      }),
+      this.database.filterPrivatePropertyProposalCount({
+        registryAddress,
+        tokenId: resultProposal.tokenId,
+        status: ['pending'],
+        isBurnProposal: false,
+        isApprovedByTokenOwner: false
+      }),
+      this.database.filterPrivatePropertyProposalCount({
+        registryAddress,
+        tokenId: resultProposal.tokenId,
+        status: ['pending'],
+        isBurnProposal: true,
+        isApprovedByRegistryOwner: false
+      }),
+      this.database.filterPrivatePropertyProposalCount({
+        registryAddress,
+        tokenId: resultProposal.tokenId,
+        status: ['pending'],
+        isBurnProposal: false,
+        isApprovedByRegistryOwner: false
+      })
+    ]);
 
-    const pendingEditProposalsForTokenOwnerCount = await this.database.filterPrivatePropertyProposalCount({
-      registryAddress,
-      tokenId: resultProposal.tokenId,
-      status: ['pending'],
-      isBurnProposal: false,
-      isApprovedByTokenOwner: false
-    });
-
-    const pendingBurnProposalsForRegistryOwnerCount = await this.database.filterPrivatePropertyProposalCount({
-      registryAddress,
-      tokenId: resultProposal.tokenId,
-      status: ['pending'],
-      isBurnProposal: true,
-      isApprovedByRegistryOwner: false
-    });
-
-    const pendingEditProposalsForRegistryOwnerCount = await this.database.filterPrivatePropertyProposalCount({
-      registryAddress,
-      tokenId: resultProposal.tokenId,
-      status: ['pending'],
-      isBurnProposal: false,
-      isApprovedByRegistryOwner: false
-    });
-
-    // console.log('isBurnProposal', burnMethod.signature === signature);
-    // console.log('pendingBurnProposalsForTokenOwnerCount', pendingBurnProposalsForTokenOwnerCount);
+    // log('isBurnProposal', burnMethod.signature === signature);
+    // log('pendingBurnProposalsForTokenOwnerCount', pendingBurnProposalsForTokenOwnerCount);
 
     await this.saveSpaceTokenById(registryAddress, resultProposal.tokenId, {
       proposalsToEditForTokenOwnerCount: pendingEditProposalsForTokenOwnerCount,
@@ -790,16 +795,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controllerAddress);
 
     let burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutDuration', [tokenId], 'number');
-    if(!burnTimeoutDuration) {
+    if (!burnTimeoutDuration) {
       burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'defaultBurnTimeoutDuration', [], 'number');
     }
 
-    // console.log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
+    // log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
 
     const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
 
     let burnOn = null;
-    if(burnTimeoutAt) {
+    if (burnTimeoutAt) {
       burnOn = new Date();
       burnOn.setTime(burnTimeoutAt * 1000);
     }
@@ -855,7 +860,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleNewCommunityEvent(event, isPpr) {
     const factoryContract = await this.chainService.getCommunityFactoryContract(event.contractAddress);
-    const { fundRegistry } = await this.chainService.callContractMethod(factoryContract, 'fundContracts', [event.returnValues.fundId]);
+    const {fundRegistry} = await this.chainService.callContractMethod(factoryContract, 'fundContracts', [event.returnValues.fundId]);
     const registryContract = await this.chainService.getCommunityFundRegistryContract(fundRegistry);
 
     const raAddress = await this.chainService.callContractMethod(registryContract, 'getRAAddress', []);
@@ -864,35 +869,37 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunity(raAddress, isPpr, createdAtBlock?) {
-    // console.log('updateCommunity', raAddress, isPpr);
+    // log('updateCommunity', raAddress, isPpr);
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isPpr);
     const registryAddress = await this.chainService.callContractMethod(raContract, 'fundRegistry', []);
 
     const registryContract = await this.chainService.getCommunityFundRegistryContract(registryAddress);
 
-    const storageAddress = await this.chainService.callContractMethod(registryContract, 'getStorageAddress', []);
+    const [storageAddress, multiSigAddress] = await Promise.all([
+      this.chainService.callContractMethod(registryContract, 'getStorageAddress', []),
+      this.chainService.callContractMethod(registryContract, 'getMultiSigAddress', [])
+    ]);
 
-    const contract = await this.chainService.getCommunityStorageContract(storageAddress, isPpr);
-    const community = await this.database.getCommunity(raAddress);
+    const [contract, community] = await Promise.all([
+      this.chainService.getCommunityStorageContract(storageAddress, isPpr),
+      this.database.getCommunity(raAddress)
+    ]);
 
-    const multiSigAddress = await this.chainService.callContractMethod(registryContract, 'getMultiSigAddress', []);
+    const [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
+      contract.methods.name().call({}),
+      contract.methods.dataLink().call({}),
+      this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number'),
+      (async () => community ? await this.database.getCommunityTokensCount(community) : 0)(),
+      this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei'),
+      (async () => (await contract.methods.config(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000')(),
+      this.database.filterCommunityMemberCount({communityAddress: raAddress})
+    ]);
 
-    const name = await contract.methods.name().call({});
-    const dataLink = await contract.methods.dataLink().call({});
-    const activeFundRulesCount =  await this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number');
-    const tokensCount = community ? await this.database.getCommunityTokensCount(community) : 0;
-
-    const spaceTokenOwnersCount = await this.database.filterCommunityMemberCount({
-      communityAddress: raAddress
-    });
-    console.log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount);
-    const reputationTotalSupply = await this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei');
-
-    const isPrivate = (await contract.methods.config(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000';
+    log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount);
 
     let description = dataLink;
     let dataJson = '';
-    if(isIpldHash(dataLink)) {
+    if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
@@ -914,24 +921,25 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       name,
       createdAtBlock
     });
-    if(!community) {
-      console.log('community created', raAddress, JSON.stringify(_community))
+    if (!community) {
+      log('community created', raAddress, JSON.stringify(_community))
     }
   }
 
   async updateCommunityMember(community: ICommunity, address) {
-    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
+    const [contract, raContract] = await Promise.all([
+      this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
+      this.chainService.getCommunityRaContract(community.address, community.isPpr)
+    ]);
 
-    const fullNameHash = await this.chainService.callContractMethod(contract, 'membersIdentification', [address], 'bytes32');
+    const [currentReputation, basicReputation, fullNameHash, tokensCount] = await Promise.all([
+      this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei'),
+      this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei'),
+      this.chainService.callContractMethod(contract, 'membersIdentification', [address], 'bytes32'),
+      (async () => (await this.database.getCommunityMemberTokens(community, address)).length)()
+    ]);
 
-    const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
-
-    const currentReputation = await this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei');
-    const basicReputation = await this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei');
-
-    const tokensCount = (await this.database.getCommunityMemberTokens(community, address)).length;
-
-    if(tokensCount > 0) {
+    if (tokensCount > 0) {
       await this.database.addOrUpdateCommunityMember(community, {
         address,
         currentReputation,
@@ -943,26 +951,29 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       });
     } else {
       const member = await this.database.getCommunityMember(community.id, address);
-      if(member) {
+      if (member) {
         member.destroy();
       }
     }
   }
 
   async handleCommunityMintEvent(communityAddress, event: IExplorerCommunityMintEvent, isPpr) {
-    const community = await this.database.getCommunity(communityAddress);
-    const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
+    const [community, propertyToken] = await Promise.all([
+      this.database.getCommunity(communityAddress),
+      this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address)
+    ]);
 
     const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
     let isMinted;
-    if(community.isPpr) {
+    if (community.isPpr) {
       isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.registry, event.returnValues.tokenId]);
     } else {
       isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.tokenId]);
     }
 
-    if(isMinted) {
-      await community.addSpaceTokens([propertyToken]).catch(() => {/* already in community */});
+    if (isMinted) {
+      await community.addSpaceTokens([propertyToken]).catch(() => {/* already in community */
+      });
     }
 
     await this.updateCommunityMember(community, propertyToken.owner);
@@ -971,19 +982,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleCommunityBurnEvent(communityAddress, event, isPpr) {
-    const community = await this.database.getCommunity(communityAddress);
-    const propertyToken = await this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address);
+    const [community, propertyToken] = await Promise.all([
+      this.database.getCommunity(communityAddress),
+      this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address)
+    ]);
 
     const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
 
     let isMinted;
-    if(community.isPpr) {
+    if (community.isPpr) {
       isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.registry, event.returnValues.tokenId]);
     } else {
       isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.tokenId]);
     }
 
-    if(!isMinted) {
+    if (!isMinted) {
       await community.removeSpaceTokens([propertyToken]);
     }
 
@@ -1019,9 +1032,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
-    const markerData = await contract.methods.proposalMarkers(marker).call({});
+    let [markerData, {support, minAcceptQuorum, timeout}, communityProposalsCount] = await Promise.all([
+      contract.methods.proposalMarkers(marker).call({}),
+      this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]),
+      this.database.filterCommunityProposalCount({communityAddress, marker})
+    ]);
 
-    let {support, minAcceptQuorum, timeout} = await this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]);
     support = this.chainService.weiToEther(support);
     minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
     timeout = parseInt(timeout.toString(10));
@@ -1037,7 +1053,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataLink = markerData.dataLink;
     let description = markerData.dataLink;
     let dataJson = '';
-    if(isIpldHash(dataLink)) {
+    if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
@@ -1057,7 +1073,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       // activeProposalsCount,
       // approvedProposalsCount,
       // rejectedProposalsCount,
-      totalProposalsCount: await this.database.filterCommunityProposalCount({communityAddress, marker})
+      totalProposalsCount: communityProposalsCount
     });
 
     await this.database.addOrUpdateCommunity({
@@ -1068,13 +1084,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async handleCommunityRemoveVotingEvent(communityAddress, event) {
     const community = await this.database.getCommunity(communityAddress);
-    if(!community) {
+    if (!community) {
       return;
     }
 
     const communityVoting = await this.database.getCommunityVoting(community.id, event.returnValues.marker);
 
-    if(!communityVoting) {
+    if (!communityVoting) {
       return;
     }
 
@@ -1090,29 +1106,34 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId, proposeTxId?) {
-    const community = await this.database.getCommunity(communityAddress);
+    const [community, proposal] = await Promise.all([
+      this.database.getCommunity(communityAddress),
+      this.database.getCommunityProposalByVotingAddress(pmAddress, proposalId)
+    ]);
 
-    let proposal = await this.database.getCommunityProposalByVotingAddress(pmAddress, proposalId);
-    if(!marker) {
-      if(!proposal) {
+    if (!marker) {
+      if (!proposal) {
         return console.error('Not found proposal', proposalId, 'in', pmAddress);
       }
       marker = proposal.marker;
     }
 
-    const voting = await this.database.getCommunityVoting(community.id, marker);
-
-    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(pmAddress);
+    const [voting, proposalManagerContract] = await Promise.all([
+      this.database.getCommunityVoting(community.id, marker),
+      this.chainService.getCommunityProposalManagerContract(pmAddress)
+    ]);
 
     let txData: any = {};
 
-    if(proposeTxId) {
+    if (proposeTxId) {
       txData.proposeTxId = proposeTxId;
     }
 
-    const proposalData = await proposalManagerContract.methods.proposals(proposalId).call({});
-    const proposalVotingData = await proposalManagerContract.methods.getProposalVoting(proposalId).call({});
-    const proposalVotingProgress = await proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({});
+    const [proposalData, proposalVotingData, proposalVotingProgress] = await Promise.all([
+      proposalManagerContract.methods.proposals(proposalId).call({}),
+      proposalManagerContract.methods.getProposalVoting(proposalId).call({}),
+      proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({})
+    ]);
 
     const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
@@ -1122,9 +1143,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       '2': 'executed'
     }[proposalData.status];
 
-    if(status === 'executed' && (!proposal || !proposal.executeTxId)) {
+    if (status === 'executed' && (!proposal || !proposal.executeTxId)) {
       const executeEvents = (await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock)).filter((e: any) => e.returnValues.success);
-      if(executeEvents.length) {
+      if (executeEvents.length) {
         txData.executeTxId = executeEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
         const closedAt = new Date();
@@ -1135,14 +1156,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
 
-    let ayeShare = await this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei');
-    let nayShare = await this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei');
+    let [ayeShare, nayShare, createdAtBlockTimestamp] = await Promise.all([
+      this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei'),
+      this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei'),
+      this.chainService.getBlockTimestamp(createdAtBlock)
+    ]);
 
-    if(status === 'active') {
+    if (status === 'active') {
       const timeoutDate = new Date();
       timeoutDate.setTime(timeoutAt * 1000);
-      if(new Date() >= timeoutDate) {
-        if(ayeShare > voting.minAcceptQuorum && ayeShare > voting.support) {
+      if (new Date() >= timeoutDate) {
+        if (ayeShare > voting.minAcceptQuorum && ayeShare > voting.support) {
           status = 'approved';
         } else {
           status = 'rejected';
@@ -1154,14 +1178,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataLink = proposalData.dataLink;
     let description = dataLink;
     let dataJson = '';
-    if(isIpldHash(dataLink)) {
+    if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       description = data.description;
       dataJson = JSON.stringify(data);
     }
 
     const createdAt = new Date();
-    createdAt.setTime((await this.chainService.getBlockTimestamp(createdAtBlock)) * 1000);
+    createdAt.setTime(createdAtBlockTimestamp * 1000);
 
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
@@ -1191,7 +1215,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       totalDeclined: this.chainService.weiToEther(proposalVotingProgress.totalNays),
       timeoutAt
     });
-    // console.log('newProposal', JSON.stringify(newProposal));
+    // log('newProposal', JSON.stringify(newProposal));
 
     await this.updateCommunityVoting(communityAddress, marker);
   }
@@ -1211,15 +1235,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let type = null;
     let dataJson = '';
-    if(isIpldHash(dataLink)) {
+    if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      // console.log('dataItem', dataItem);
+      // log('dataItem', dataItem);
       try {
-        if(data.text) {
+        if (data.text) {
           description = await this.geesome.getContentData(data.text).catch(() => '');
         }
         type = data.type;
-        console.log('description', description, 'type', type);
+        log('description', description, 'type', type);
         dataJson = JSON.stringify(data);
       } catch (e) {
         console.error(e);
@@ -1249,27 +1273,30 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
     let isApproved;
-    if(community.isPpr) {
+    if (community.isPpr) {
       isApproved = await this.chainService.callContractMethod(contract, 'isMintApproved', [registryAddress, tokenId]);
     } else {
       isApproved = await this.chainService.callContractMethod(contract, 'isMintApproved', [tokenId]);
     }
     const propertyToken = await this.database.getSpaceToken(tokenId, registryAddress || this.chainService.spaceGeoData._address);
 
-    if(isApproved) {
+    if (isApproved) {
       let expelledResult;
-      if(community.isPpr) {
+      if (community.isPpr) {
         expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [registryAddress, tokenId]);
       } else {
         expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [tokenId]);
       }
-      if(expelledResult.isExpelled) {
-        await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
+      if (expelledResult.isExpelled) {
+        await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */
+        });
       } else {
-        await community.addApprovedSpaceTokens([propertyToken]).catch(() => {/* already in community */});
+        await community.addApprovedSpaceTokens([propertyToken]).catch(() => {/* already in community */
+        });
       }
     } else {
-      await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
+      await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */
+      });
     }
   }
 

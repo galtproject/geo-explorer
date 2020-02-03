@@ -1,5 +1,5 @@
 /*
- * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * Copyright ©️ 2019 Galt•Project Society Construction and Terraforming Company
  * (Founded by [Nikolai Popeka](https://github.com/npopeka)
  *
  * Copyright ©️ 2019 Galt•Core Blockchain Company
@@ -39,6 +39,8 @@ export default interface IExplorerChainService {
   getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback): void;
+
+  isSubscribedToEvent(contractAddress, eventName): boolean;
 
   getCurrentBlock(): Promise<number>;
 

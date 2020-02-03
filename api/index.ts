@@ -1,5 +1,5 @@
 /*
- * Copyright ©️ 2019 GaltProject Society Construction and Terraforming Company
+ * Copyright ©️ 2019 Galt•Project Society Construction and Terraforming Company
  * (Founded by [Nikolai Popeka](https://github.com/npopeka)
  *
  * Copyright ©️ 2019 Galt•Core Blockchain Company
@@ -45,6 +45,19 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
   service.head("/*", function (req, res, next) {
     setHeaders(res);
     res.send(200);
+  });
+
+  service.get('/v1/status', async (req, res) => {
+    await respondByScheme(res, null);
+  });
+
+  service.post('/v1/check-subscribe', async (req, res) => {
+    if(!req.body.eventsMetaData || req.body.eventsMetaData.length > 100) {
+      throw "invalid_input";
+    }
+    await respondByScheme(res, {
+      subscribed: req.body.eventsMetaData.some(i => chainService.isSubscribedToEvent(i.contractAddress, i.eventSignature))
+    });
   });
 
   service.post('/v1/contours/by/inner-geohash', async (req, res) => {
@@ -154,7 +167,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
   async function respondByScheme(res, data) {
     res.send({
       lastChangeBlockNumber: parseInt(await database.getValue('lastBlockNumber')),
-      currentBlockNumber: await chainService.getCurrentBlock(),
+      // currentBlockNumber: await chainService.getCurrentBlock(),
       data
     }, 200);
   }
