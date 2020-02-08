@@ -568,6 +568,10 @@ const log = require('./services/logService');
         });
       });
 
+      proposalManagersAddresses = _.uniq(proposalManagersAddresses);
+      log('proposalManagersAddresses.length', proposalManagersAddresses.length);
+      await pIteration.forEachSeries(proposalManagersAddresses, pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
+
       chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityAddMarker, startBlockNumber, async (err, newEvent) => {
         subscribeToCommunityProposalManager(address, newEvent.returnValues.proposalManager.toLowerCase());
         await geoDataService.handleCommunityAddVotingEvent(address, newEvent);
@@ -578,10 +582,6 @@ const log = require('./services/logService');
         await geoDataService.handleCommunityRemoveVotingEvent(address, newEvent);
         await setLastBlockNumber(newEvent.blockNumber);
       });
-
-      proposalManagersAddresses = _.uniq(proposalManagersAddresses);
-      log('proposalManagersAddresses.length', proposalManagersAddresses.length);
-      await pIteration.forEachSeries(proposalManagersAddresses, pmAddress => subscribeToCommunityProposalManager(address, pmAddress));
 
       await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityAddRule, lastBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
@@ -630,12 +630,13 @@ const log = require('./services/logService');
 
     async function subscribeToCommunityProposalManager(communityAddress, proposalManagerAddress) {
       proposalManagerAddress = proposalManagerAddress.toLowerCase();
-      if(!subscribedToProposalManager[proposalManagerAddress]) {
+      if(subscribedToProposalManager[proposalManagerAddress]) {
         return;
       }
       subscribedToProposalManager[proposalManagerAddress] = true;
 
       const contractPm = await chainService.getCommunityProposalManagerContract(proposalManagerAddress);
+      console.log('contractPm', proposalManagerAddress);
 
       await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityNewProposal, lastBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {

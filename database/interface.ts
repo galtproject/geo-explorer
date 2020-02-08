@@ -750,7 +750,7 @@ export interface ICommunityRule {
   manager?;
   isActive?;
   type?;
-  proposalId?;
+  proposalDbId?;
 
   destroy?();
 }

@@ -723,7 +723,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     abiAddressArr.forEach(item => {
       const {abi, address} = item;
-      console.log('abi', abi);
       receipt.logs.filter(log => log.address.toLowerCase() === address.toLowerCase()).forEach((log) => {
         const eventObject = _.find(abi, (abiItem) => {
           if(!abiItem.signature) {
