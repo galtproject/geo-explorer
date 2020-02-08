@@ -1281,10 +1281,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(communityRule && communityRule.proposalDbId) {
       proposalDbId = communityRule.proposalDbId;
     } else {
-      const executeEvents = (await this.chainService.getEventsFromBlock(contract, 'AddFundRule', 0, {id: ruleId}));
-      if (executeEvents.length) {
+      let fundRuleEvents = await this.chainService.getEventsFromBlock(contract, 'AddFundRule', 0, {id: ruleId});
+
+      if(!fundRuleEvents.length) {
+        fundRuleEvents = await this.chainService.getEventsFromBlock(contract, 'DisableFundRule', 0, {id: ruleId});
+      }
+      if (fundRuleEvents.length) {
         const txReceipt = await this.chainService.getTransactionReceipt(
-          executeEvents[0]['transactionHash'],
+          fundRuleEvents[0]['transactionHash'],
           [{address: community.pmAddress, abi: this.chainService.contractsConfig['fundProposalManagerAbi']}]
         );
 
