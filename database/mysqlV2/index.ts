@@ -1705,6 +1705,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.getCommunityProposal(voting.id, proposal.proposalId);
   }
 
+  updateProposalByDbId(proposalDbId, updateData) {
+    return this.models.CommunityProposal.update(updateData, {
+      where: {id: proposalDbId}
+    });
+  }
+
   prepareCommunityProposalWhere(communityProposalQuery) {
     const allWheres: any = {};
 
@@ -1736,6 +1742,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['pmAddress'] = {[Op.like]: communityProposalQuery.pmAddress};
     }
 
+    if(!_.isUndefined(communityProposalQuery.isActual)) {
+      allWheres['isActual'] = communityProposalQuery.isActual;
+    }
+
     return allWheres;
   }
 
@@ -1743,7 +1753,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', Op.and]),
       include: {association: 'rule'}
     }
   }

@@ -188,6 +188,8 @@ export default interface IExplorerDatabase {
 
   filterCommunityProposalCount(filterQuery: CommunityProposalQuery): Promise<number>;
 
+  updateProposalByDbId(proposalDbId, updateData): Promise<void>;
+
   // =============================================================
   // Community Rules
   // =============================================================
@@ -732,6 +734,8 @@ export interface ICommunityProposal {
   createdAt?;
   closedAt?;
   closedAtBlock?;
+
+  isActual?;
 
   destroy?();
 }

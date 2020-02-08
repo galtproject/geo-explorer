@@ -1209,6 +1209,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     console.log('proposal', pmAddress, proposalId);
 
+    const isActual = proposal ? proposal.isActual : true;
+
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
@@ -1235,6 +1237,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
       totalAccepted: this.chainService.weiToEther(proposalVotingProgress.totalAyes),
       totalDeclined: this.chainService.weiToEther(proposalVotingProgress.totalNays),
+      isActual,
       timeoutAt
     });
     // log('newProposal', JSON.stringify(newProposal));
@@ -1298,9 +1301,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     console.log('proposalId', proposalDbId);
 
     await this.database.addOrUpdateCommunityRule(community, {
+      communityId: community.id,
       communityAddress,
       ruleId,
-      communityId: community.id,
       description,
       dataLink,
       dataJson,
@@ -1310,6 +1313,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       manager,
       proposalDbId
     });
+
+    if(!isActive) {
+      await this.database.updateProposalByDbId(proposalDbId, { isActual: false });
+    }
   }
 
   handleCommunityTokenApprovedEvent(communityAddress, event) {
