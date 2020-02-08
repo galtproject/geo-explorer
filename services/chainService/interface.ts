@@ -36,7 +36,7 @@ export default interface IExplorerChainService {
 
   callbackOnReconnect: any;
 
-  getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]>;
+  getEventsFromBlock(contract, eventName: string, blockNumber?: number, filter?: any): Promise<IExplorerChainContourEvent[]>;
 
   subscribeForNewEvents(contract, eventName: string, blockNumber: number, callback): void;
 
@@ -95,6 +95,8 @@ export default interface IExplorerChainService {
   getContractMethod(contractName, methodName): any;
 
   getBlockTimestamp(blockNumber):  Promise<number>;
+
+  getTransactionReceipt(txId, abiAddressArr): any;
 }
 
 export enum ChainServiceEvents {

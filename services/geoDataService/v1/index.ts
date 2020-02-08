@@ -932,22 +932,32 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.getCommunityRaContract(community.address, community.isPpr)
     ]);
 
-    const [currentReputation, basicReputation, fullNameHash, tokensCount] = await Promise.all([
+    const [currentReputation, basicReputation, fullNameHash, tokens] = await Promise.all([
       this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei'),
       this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei'),
       this.chainService.callContractMethod(contract, 'membersIdentification', [address], 'bytes32'),
-      (async () => (await this.database.getCommunityMemberTokens(community, address)).length)()
+      this.database.getCommunityMemberTokens(community, address)
     ]);
 
-    if (tokensCount > 0) {
+    if (tokens.length > 0) {
+      let photosJson = '[]';
+      try {
+        const tokenWithPhoto = tokens.filter(t => t.photosCount > 0)[0];
+        if(tokenWithPhoto) {
+          photosJson = JSON.stringify(JSON.parse(tokenWithPhoto.dataJson).photos);
+        }
+      } catch (e) {
+        // photos not found
+      }
       await this.database.addOrUpdateCommunityMember(community, {
         address,
         currentReputation,
         basicReputation,
-        tokensCount,
+        tokensCount: tokens.length,
         fullNameHash,
         communityAddress: community.address,
-        isPpr: community.isPpr
+        isPpr: community.isPpr,
+        photosJson
       });
     } else {
       const member = await this.database.getCommunityMember(community.id, address);
@@ -1144,7 +1154,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }[proposalData.status];
 
     if (status === 'executed' && (!proposal || !proposal.executeTxId)) {
-      const executeEvents = (await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock)).filter((e: any) => e.returnValues.success);
+      const executeEvents = (await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock, {success: true, proposalId}));
       if (executeEvents.length) {
         txData.executeTxId = executeEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
@@ -1250,6 +1260,26 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
+    let proposalId;
+
+    const communityRule = await this.database.getCommunityRule(community.id, ruleId);
+    if(communityRule && communityRule.proposalId) {
+      proposalId = communityRule.proposalId;
+    } else {
+      const txReceipt = await this.chainService.getTransactionReceipt(
+        '0x9fc76417374aa880d4449a1f7f31ec597f00b1f6f3dd2d66f4c9c6c445836d8b',
+        [{address: community.pmAddress, abi: this.chainService.contractsConfig['fundProposalManagerAbi']}]
+      );
+
+      const ExecuteProposalEvent = txReceipt.events.filter(e => e.name === 'Execute')[0];
+      if(ExecuteProposalEvent) {
+        const proposal = await this.database.getCommunityProposalByVotingAddress(community.pmAddress, ExecuteProposalEvent.values.proposalId);
+        proposalId = proposal.proposalId;
+      }
+    }
+
+    console.log('proposalId', proposalId);
+
     await this.database.addOrUpdateCommunityRule(community, {
       communityAddress,
       ruleId,
@@ -1260,7 +1290,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ipfsHash,
       isActive,
       type,
-      manager
+      manager,
+      proposalId
     });
   }
 

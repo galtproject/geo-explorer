@@ -670,6 +670,7 @@ export interface ICommunityMember {
   tokensCount?;
   fullNameHash?;
   isPpr?;
+  photosJson?;
 
   destroy?();
 }
@@ -749,6 +750,7 @@ export interface ICommunityRule {
   manager?;
   isActive?;
   type?;
+  proposalId?;
 
   destroy?();
 }

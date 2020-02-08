@@ -21,9 +21,6 @@ module.exports = async function (sequelize, models) {
     pmAddress: {
       type: Sequelize.STRING(100)
     },
-    proposalId: {
-      type: Sequelize.STRING(100)
-    },
     ruleId: {
       type: Sequelize.STRING(100)
     },
@@ -59,6 +56,9 @@ module.exports = async function (sequelize, models) {
 
   CommunityRule.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
   models.Community.hasMany(CommunityRule, {as: 'rules', foreignKey: 'communityId'});
+
+  CommunityRule.belongsTo(models.CommunityProposal, {as: 'proposal', foreignKey: 'proposalId'});
+  models.CommunityProposal.hasOne(CommunityRule, {as: 'rule', foreignKey: 'proposalId'});
 
   return CommunityRule.sync({});
 };
