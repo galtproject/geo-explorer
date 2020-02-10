@@ -1128,9 +1128,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       marker = proposal.marker;
     }
 
-    const [voting, proposalManagerContract] = await Promise.all([
+    const [voting, proposalManagerContract, storageContract] = await Promise.all([
       this.database.getCommunityVoting(community.id, marker),
-      this.chainService.getCommunityProposalManagerContract(pmAddress)
+      this.chainService.getCommunityProposalManagerContract(pmAddress),
+      this.chainService.getCommunityStorageContract(communityAddress)
     ]);
 
     let txData: any = {};
@@ -1166,7 +1167,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
         const txReceipt = await this.chainService.getTransactionReceipt(
           txData.executeTxId,
-          [{address: pmAddress, abi: proposalManagerContract._abi}]
+          [
+            {address: pmAddress, abi: proposalManagerContract._abi},
+            {address: community.storageAddress, abi: storageContract._abi}
+          ]
         );
 
         const AddFundRuleEvent = txReceipt.events.filter(e => e.name === 'AddFundRule')[0];
@@ -1178,9 +1182,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         const DisableFundRuleEvent = txReceipt.events.filter(e => e.name === 'DisableFundRule')[0];
         if(DisableFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
-          const addFundRuleProposal = dbRule.proposals.filter(p => {
-            return proposal && p.id != proposal.id;
-          })[0];
+          const addFundRuleProposal = dbRule.proposals.filter(p => proposal && p.id != proposal.id)[0];
           if(addFundRuleProposal) {
             await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
           }
