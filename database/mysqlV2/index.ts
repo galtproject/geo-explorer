@@ -1673,13 +1673,15 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getCommunityProposal(votingId, proposalId) {
     return this.models.CommunityProposal.findOne({
-      where: {votingId, proposalId}
+      where: {votingId, proposalId},
+      include: {association: 'rule'}
     });
   }
 
   async getCommunityProposalByVotingAddress(pmAddress, proposalId) {
     return this.models.CommunityProposal.findOne({
-      where: {pmAddress: {[Op.like]: pmAddress}, proposalId}
+      where: {pmAddress: {[Op.like]: pmAddress}, proposalId},
+      include: {association: 'rule'}
     });
   }
 
@@ -1701,6 +1703,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       });
     }
     return this.getCommunityProposal(voting.id, proposal.proposalId);
+  }
+
+  updateProposalByDbId(proposalDbId, updateData) {
+    return this.models.CommunityProposal.update(updateData, {
+      where: {id: proposalDbId}
+    });
   }
 
   prepareCommunityProposalWhere(communityProposalQuery) {
@@ -1734,6 +1742,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['pmAddress'] = {[Op.like]: communityProposalQuery.pmAddress};
     }
 
+    if(!_.isUndefined(communityProposalQuery.isActual)) {
+      allWheres['isActual'] = communityProposalQuery.isActual;
+    }
+
     return allWheres;
   }
 
@@ -1741,7 +1753,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', Op.and]),
+      include: {association: 'rule'}
     }
   }
 
@@ -1774,13 +1787,15 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getCommunityRule(communityId, ruleId) {
     return this.models.CommunityRule.findOne({
-      where: {communityId, ruleId}
+      where: {communityId, ruleId},
+      include: {association: 'proposal'}
     });
   }
 
   async getCommunityRuleByCommunityAddress(communityAddress, ruleId) {
     return this.models.CommunityRule.findOne({
-      where: {communityAddress: {[Op.like]: communityAddress}, ruleId}
+      where: {communityAddress: {[Op.like]: communityAddress}, ruleId},
+      include: {association: 'proposal'}
     });
   }
 
@@ -1823,7 +1838,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityRuleWhere(communityRuleQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and]),
+      include: {association: 'proposal'}
     }
   }
 

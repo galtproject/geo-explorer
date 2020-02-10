@@ -93,6 +93,10 @@ module.exports = async function (sequelize, models) {
     closedAt: {
       type: Sequelize.DATE
     },
+    isActual: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

@@ -33,6 +33,9 @@ module.exports = async function (sequelize, models) {
     isPpr: {
       type: Sequelize.BOOLEAN
     },
+    photosJson: {
+      type: Sequelize.TEXT
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

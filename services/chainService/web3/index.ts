@@ -103,7 +103,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // Contract Events
   // =============================================================
 
-  getEventsFromBlock(contract, eventName: string, blockNumber?: number): Promise<IExplorerChainContourEvent[]> {
+  getEventsFromBlock(contract, eventName: string, blockNumber?: number, filter?: any): Promise<IExplorerChainContourEvent[]> {
     if(!contract) {
       log(`✖️ Event ${eventName} getting events ignored, contract not found`);
       return new Promise((resolve) => resolve([]));
@@ -115,7 +115,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(_.isUndefined(blockNumber) || _.isNull(blockNumber)) {
       blockNumber = this.contractsConfig.blockNumber;
     }
-    return contract.getPastEvents(eventName, {fromBlock: blockNumber}).then(events => {
+    return contract.getPastEvents(eventName, {fromBlock: blockNumber, filter}).then(events => {
       log(`✅️ Event ${eventName} got ${events.length} items, by contract ${contract._address}`);
       return events.map(e => {
         // log('event', e);
@@ -714,5 +714,49 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
   async getBlockTimestamp(blockNumber) {
     return (await this.web3.eth.getBlock(blockNumber)).timestamp;
+  }
+
+  async getTransactionReceipt(txHash, abiAddressArr) {
+    const receipt = await this.web3.eth.getTransactionReceipt(txHash);
+
+    receipt.events = [];
+
+    abiAddressArr.forEach(item => {
+      const {abi, address} = item;
+      receipt.logs.filter(log => log.address.toLowerCase() === address.toLowerCase()).forEach((log) => {
+        const eventObject = _.find(abi, (abiItem) => {
+          if(!abiItem.signature) {
+            abiItem.signature = this.getMethodSignature(abi, abiItem.name);
+          }
+          return abiItem.type === 'event' && log.topics[0] === abiItem.signature;
+        });
+        if(eventObject) {
+          const values = this.web3.eth.abi.decodeLog(eventObject.inputs, log.data === '0x' ? null : log.data, log.topics.slice(1));
+          receipt.events.push({
+            ...eventObject,
+            address,
+            txHash,
+            values
+          })
+        }
+      });
+    });
+
+    return receipt;
+  }
+
+  getMethodSignature(abi, methodName) {
+    let signature = null;
+    abi.some(method => {
+      if (method.name === methodName) {
+        signature = method.signature;
+        if (!signature) {
+          signature = this.web3.eth.abi.encodeFunctionSignature(method);
+        }
+        return true;
+      }
+      return false;
+    });
+    return signature;
   }
 }

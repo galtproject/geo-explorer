@@ -188,6 +188,8 @@ export default interface IExplorerDatabase {
 
   filterCommunityProposalCount(filterQuery: CommunityProposalQuery): Promise<number>;
 
+  updateProposalByDbId(proposalDbId, updateData): Promise<void>;
+
   // =============================================================
   // Community Rules
   // =============================================================
@@ -670,6 +672,7 @@ export interface ICommunityMember {
   tokensCount?;
   fullNameHash?;
   isPpr?;
+  photosJson?;
 
   destroy?();
 }
@@ -732,6 +735,8 @@ export interface ICommunityProposal {
   closedAt?;
   closedAtBlock?;
 
+  isActual?;
+
   destroy?();
 }
 
@@ -749,6 +754,7 @@ export interface ICommunityRule {
   manager?;
   isActive?;
   type?;
+  proposalDbId?;
 
   destroy?();
 }
