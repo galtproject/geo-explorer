@@ -57,8 +57,5 @@ module.exports = async function (sequelize, models) {
   CommunityRule.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
   models.Community.hasMany(CommunityRule, {as: 'rules', foreignKey: 'communityId'});
 
-  CommunityRule.belongsTo(models.CommunityProposal, {as: 'proposal', foreignKey: 'proposalDbId'});
-  models.CommunityProposal.hasOne(CommunityRule, {as: 'rule', foreignKey: 'proposalDbId'});
-
   return CommunityRule.sync({});
 };

@@ -736,6 +736,7 @@ export interface ICommunityProposal {
   closedAtBlock?;
 
   isActual?;
+  ruleDbId?;
 
   destroy?();
 }
@@ -754,7 +755,8 @@ export interface ICommunityRule {
   manager?;
   isActive?;
   type?;
-  proposalDbId?;
+
+  proposals?: any[];
 
   destroy?();
 }

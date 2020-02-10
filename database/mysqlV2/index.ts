@@ -1788,7 +1788,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async getCommunityRule(communityId, ruleId) {
     return this.models.CommunityRule.findOne({
       where: {communityId, ruleId},
-      include: {association: 'proposal'}
+      include: {association: 'proposals'}
     });
   }
 
