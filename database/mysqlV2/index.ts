@@ -1550,6 +1550,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = {[Op.like]: communityMemberQuery[field]};
     });
 
+    ['addressIn'].forEach((field) => {
+      if(communityMemberQuery[field])
+        allWheres[field.replace('In', '')] = {[Op.in]: communityMemberQuery[field]};
+    });
+
     return allWheres;
   }
 
