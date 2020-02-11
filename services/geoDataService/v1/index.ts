@@ -1123,14 +1123,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if (!marker) {
       if (!proposal) {
+        // May appeared if AyeProposal event emited before the NewProposal
         return console.error('Not found proposal', proposalId, 'in', pmAddress);
       }
       marker = proposal.marker;
     }
 
-    const [voting, proposalManagerContract] = await Promise.all([
+    const [voting, proposalManagerContract, storageContract] = await Promise.all([
       this.database.getCommunityVoting(community.id, marker),
-      this.chainService.getCommunityProposalManagerContract(pmAddress)
+      this.chainService.getCommunityProposalManagerContract(pmAddress),
+      this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr)
     ]);
 
     let txData: any = {};
@@ -1154,9 +1156,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }[proposalData.status];
 
     let ruleDbId = proposal ? proposal.ruleDbId : null;
+    let isActual = proposal ? proposal.isActual : true;
 
     if (status === 'executed' && (!proposal || !proposal.executeTxId)) {
-      const executeEvents = (await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock, {success: true, proposalId}));
+      const executeEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock, {success: true, proposalId});
       if (executeEvents.length) {
         txData.executeTxId = executeEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
@@ -1175,12 +1178,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         if(AddFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
           ruleDbId = dbRule.id;
+          const disableEvents = await this.chainService.getEventsFromBlock(storageContract, 'DisableFundRule', createdAtBlock, {id: AddFundRuleEvent.values.id});
+          if(disableEvents.length) {
+            isActual = false;
+          }
         }
 
         const DisableFundRuleEvent = txReceipt.events.filter(e => e.name === 'DisableFundRule')[0];
         if(DisableFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, DisableFundRuleEvent.values.id);
-          const addFundRuleProposal = (dbRule.proposals || []).filter(p => proposal && p.id != proposal.id)[0];
+          const addFundRuleProposal = (dbRule.proposals || []).filter(p => !proposal || p.id != proposal.id)[0];
           if(addFundRuleProposal) {
             await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
           }
@@ -1222,9 +1229,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const createdAt = new Date();
     createdAt.setTime(createdAtBlockTimestamp * 1000);
 
-    console.log('proposal', pmAddress, proposalId);
-
-    const isActual = proposal ? proposal.isActual : true;
+    console.log('proposal', voting.name, pmAddress, proposalId, isActual);
 
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
