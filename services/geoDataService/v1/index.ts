@@ -1225,7 +1225,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           isAbstract: true,
           manager: pmAddress,
           dataLink: proposalParsedData.inputs.dataLink,
-          ipfsHash: proposalParsedData.inputs.ipfsHash
+          ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
         });
 
         ruleDbId = dbRule.id;
@@ -1294,6 +1294,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     ruleData.createdAt = undefined;
     ruleData.id = undefined;
+    ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,

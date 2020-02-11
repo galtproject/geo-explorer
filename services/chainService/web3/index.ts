@@ -19,6 +19,9 @@ const Web3Utils = require("web3-utils");
 const toBN = Web3Utils.toBN;
 const log = require('../../logService');
 
+const isIPFS = require('is-ipfs');
+const bs58 = require('bs58');
+
 const config = require('./config');
 if (!config.wsServer) {
   console.error('wsServer required in config.js');
@@ -700,10 +703,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return this.web3.utils.fromWei(value, 'ether');
   }
 
-  hexToString(value) {
-    return this.web3.utils.hexToUtf8(value);
-  }
-
   async getCurrentBlock() {
     return this.web3.eth.getBlockNumber();
   }
@@ -889,5 +888,42 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     return _.trim(value, '.');
+  }
+
+  hexToString(hex) {
+    if (!hex) {
+      return "";
+    }
+    try {
+      return Web3Utils.hexToUtf8(hex);
+    } catch (e) {
+      // most possible this is ipfs hash
+      if (hex.length == 66) {
+        if (typeof hex !== "string") {
+          throw new TypeError("bytes32 should be a string");
+        }
+
+        if (hex === "") {
+          throw new TypeError("bytes32 shouldn't be empty");
+        }
+
+        if (hex.length !== 66) {
+          throw new TypeError("bytes32 should have exactly 66 symbols (with 0x)");
+        }
+
+        if (!(hex.startsWith("0x") || hex.startsWith("0X"))) {
+          throw new TypeError("bytes32 hash should start with '0x'");
+        }
+
+        const hexString = "1220" + hex.substr(2);
+        const bytes = Buffer.from(hexString, 'hex');
+
+        const ipfsHash = bs58.encode(bytes);
+        if (isIPFS.multihash(ipfsHash)) {
+          return ipfsHash;
+        }
+      }
+      return null;
+    }
   }
 }
