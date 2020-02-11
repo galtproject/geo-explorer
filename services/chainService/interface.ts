@@ -99,6 +99,16 @@ export default interface IExplorerChainService {
   getBlockTimestamp(blockNumber):  Promise<number>;
 
   getTransactionReceipt(txId, abiAddressArr): any;
+
+  parseData(data, abi, decimals?): {
+    methodSignature: any,
+    methodAbi?: any,
+    methodName?: any,
+    sourceInputs?: any,
+    inputs?: any,
+    inputsFields?: any,
+    inputsDetails?: any
+  };
 }
 
 export enum ChainServiceEvents {

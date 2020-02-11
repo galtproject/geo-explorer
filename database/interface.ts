@@ -754,6 +754,7 @@ export interface ICommunityRule {
   ipfsHash?;
   manager?;
   isActive?;
+  isAbstract?;
   type?;
 
   proposals?: any[];

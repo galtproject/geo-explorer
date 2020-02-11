@@ -37,6 +37,10 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.BOOLEAN,
       defaultValue: false
     },
+    isAbstract: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
     dataLink: {
       type: Sequelize.STRING
     },

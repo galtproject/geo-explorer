@@ -1215,6 +1215,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         }
         txData.closedAt = timeoutDate;
       }
+
+      if(proposeTxId) {
+        const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+
+        const dbRule = await this.abstractUpdateCommunityRule(community, {
+          ruleId: null,
+          isActive: false,
+          isAbstract: true,
+          manager: pmAddress,
+          dataLink: proposalParsedData.inputs.dataLink,
+          ipfsHash: proposalParsedData.inputs.ipfsHash
+        });
+
+        ruleDbId = dbRule.id;
+      }
     }
 
     let dataLink = proposalData.dataLink;
@@ -1277,7 +1292,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const ruleData = await this.chainService.callContractMethod(contract, 'fundRules', [ruleId]);
 
-    const {dataLink, ipfsHash, active: isActive, manager, createdAt} = ruleData;
+    return this.abstractUpdateCommunityRule(community, {
+      ruleId,
+      isActive: ruleData.active,
+      ...ruleData
+    })
+  }
+
+  async abstractUpdateCommunityRule(community, ruleData) {
+    const {dataLink, createdAt} = ruleData;
     let description = dataLink;
     let type = null;
     let dataJson = '';
@@ -1297,16 +1320,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     return this.database.addOrUpdateCommunityRule(community, {
+      ...ruleData,
       communityId: community.id,
-      communityAddress,
-      ruleId,
+      communityAddress: community.address,
       description,
       dataLink,
       dataJson,
-      ipfsHash,
-      isActive,
-      type,
-      manager
+      type
     });
   }
 
