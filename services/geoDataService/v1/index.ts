@@ -1183,8 +1183,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
             isActual = false;
           }
 
-          const abstractProposals = (dbRule.proposals || []).filter(p => p.isAbstract);
-          await pIteration.forEach(abstractProposals, p => p.destroy());
+          const abstractProposal = await this.database.getCommunityRule(community.id, pmAddress + '-' + proposalId);
+          if(abstractProposal) {
+            await abstractProposal.destroy();
+          }
         }
       }
     }
@@ -1222,7 +1224,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
       if(proposeTxId) {
         const dbRule = await this.abstractUpdateCommunityRule(community, {
-          ruleId: pmAddress + '_' + proposalId,
+          ruleId: pmAddress + '-' + proposalId,
           isActive: false,
           isAbstract: true,
           manager: pmAddress,
