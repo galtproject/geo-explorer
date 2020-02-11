@@ -625,9 +625,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'], address);
+    const communityContract = new this.web3.eth.Contract(this.getCommunityStorageAbi(isPpr), address);
     this.communityCache[address] = communityContract;
     return communityContract;
+  }
+
+  getCommunityStorageAbi(isPpr = false) {
+    return isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'];
   }
 
   getCommunityRaContract(address, isPpr) {
