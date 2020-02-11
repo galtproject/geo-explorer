@@ -1182,18 +1182,22 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           if(disableEvents.length) {
             isActual = false;
           }
-        }
 
-        const DisableFundRuleEvent = txReceipt.events.filter(e => e.name === 'DisableFundRule')[0];
-        if(DisableFundRuleEvent) {
-          const dbRule = await this.updateCommunityRule(communityAddress, DisableFundRuleEvent.values.id);
-          const addFundRuleProposal = (dbRule.proposals || []).filter(p => !proposal || p.id != proposal.id)[0];
-          if(addFundRuleProposal) {
-            await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
-          }
-          ruleDbId = dbRule.id;
+          const abstractProposals = (dbRule.proposals || []).filter(p => p.isAbstract);
+          await pIteration.forEach(abstractProposals, p => p.destroy());
         }
       }
+    }
+
+    const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+
+    if(proposalParsedData.methodName === 'disableFundRule') {
+      const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
+      const addFundRuleProposal = (dbRule.proposals || []).filter(p => !proposal || p.id != proposal.id)[0];
+      if(addFundRuleProposal) {
+        await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
+      }
+      ruleDbId = dbRule.id;
     }
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
@@ -1217,8 +1221,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
 
       if(proposeTxId) {
-        const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
-
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId: pmAddress + '_' + proposalId,
           isActive: false,
