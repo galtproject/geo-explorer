@@ -1180,7 +1180,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         const DisableFundRuleEvent = txReceipt.events.filter(e => e.name === 'DisableFundRule')[0];
         if(DisableFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, DisableFundRuleEvent.values.id);
-          const addFundRuleProposal = dbRule.proposals.filter(p => proposal && p.id != proposal.id)[0];
+          const addFundRuleProposal = (dbRule.proposals || []).filter(p => proposal && p.id != proposal.id)[0];
           if(addFundRuleProposal) {
             await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
           }

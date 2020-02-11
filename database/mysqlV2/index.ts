@@ -1795,7 +1795,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async getCommunityRuleByCommunityAddress(communityAddress, ruleId) {
     return this.models.CommunityRule.findOne({
       where: {communityAddress: {[Op.like]: communityAddress}, ruleId},
-      include: {association: 'proposal'}
+      include: {association: 'proposals'}
     });
   }
 
