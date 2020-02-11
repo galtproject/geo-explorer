@@ -1220,7 +1220,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
 
         const dbRule = await this.abstractUpdateCommunityRule(community, {
-          ruleId: null,
+          ruleId: pmAddress + '_' + proposalId,
           isActive: false,
           isAbstract: true,
           manager: pmAddress,
