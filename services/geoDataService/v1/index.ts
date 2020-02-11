@@ -1293,6 +1293,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const ruleData = await this.chainService.callContractMethod(contract, 'fundRules', [ruleId]);
 
     ruleData.createdAt = undefined;
+    ruleData.id = undefined;
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
