@@ -190,6 +190,8 @@ export default interface IExplorerDatabase {
 
   updateProposalByDbId(proposalDbId, updateData): Promise<void>;
 
+  getAllTimeoutProposals(): Promise<ICommunityProposal[]>
+
   // =============================================================
   // Community Rules
   // =============================================================

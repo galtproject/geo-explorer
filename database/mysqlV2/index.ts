@@ -1786,6 +1786,17 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.CommunityProposal.count(findAllParam);
   }
 
+  getAllTimeoutProposals() {
+    return this.models.CommunityProposal.findAll({
+      where: {
+        status: 'active',
+        closedAt: {
+          [Op.lte]: new Date()
+        }
+      }
+    })
+  }
+
   // =============================================================
   // Community Rule
   // =============================================================

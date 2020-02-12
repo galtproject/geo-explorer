@@ -783,6 +783,13 @@ const log = require('./services/logService');
 
     await setLastBlockNumber(startBlockNumber);
 
+    setInterval(async () => {
+      const timeoutProposals = await database.getAllTimeoutProposals();
+      timeoutProposals.forEach(proposal => {
+        geoDataService.updateCommunityProposal(proposal.communityAddress, proposal.pmAddress, proposal.marker, proposal.proposalId);
+      })
+    }, 60 * 1000);
+
     //todo: handle DeleteSpaceTokenGeoData
   }
 
