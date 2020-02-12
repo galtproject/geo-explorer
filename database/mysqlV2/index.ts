@@ -1757,9 +1757,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   communityProposalQueryToFindAllParam(communityProposalQuery: CommunityProposalQuery) {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
+    const ruleInclude: any = {association: 'rule'};
+    if (communityProposalQuery.ruleSearch) {
+      ruleInclude.where = {
+        description: {
+          [Op.like]: '%' + communityProposalQuery.ruleSearch + '%'
+        }
+      };
+      ruleInclude.required = true;
+    }
     return {
       where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', Op.and]),
-      include: {association: 'rule'}
+      include: ruleInclude
     }
   }
 

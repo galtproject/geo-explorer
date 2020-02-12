@@ -816,6 +816,8 @@ export interface CommunityProposalQuery {
   creatorAddress?: string;
   pmAddress?: string;
   communityAddress?: string;
+
+  ruleSearch?: string;
 }
 
 
