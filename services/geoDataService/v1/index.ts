@@ -1193,11 +1193,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
 
-    if(status === 'executed' && proposalParsedData.methodName === 'disableFundRule') {
+    if(proposalParsedData.methodName === 'disableFundRule') {
       const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
-      const addFundRuleProposal = (dbRule.proposals || []).filter(p => p.markerName === 'storage.addFundRule')[0];
-      if(addFundRuleProposal) {
-        await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
+      if(status === 'executed') {
+        const addFundRuleProposal = (dbRule.proposals || []).filter(p => p.markerName === 'storage.addFundRule')[0];
+        if(addFundRuleProposal) {
+          await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
+        }
       }
       ruleDbId = dbRule.id;
     }
