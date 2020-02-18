@@ -48,7 +48,11 @@ const log = require('./services/logService');
 
   let startBlockNumber = await chainService.getCurrentBlock();
 
-  function setLastBlockNumber(blockNumber) {
+  async function setLastBlockNumber(blockNumber) {
+    const lastBlockNumber = parseInt(await database.getValue('lastBlockNumber'));
+    if(lastBlockNumber > parseInt(blockNumber)) {
+      return;
+    }
     return database.setValue('lastBlockNumber', blockNumber.toString())
   }
 
