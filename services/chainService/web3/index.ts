@@ -16,7 +16,11 @@ const axios = require('axios');
 
 const Web3 = require("web3");
 const Web3Utils = require("web3-utils");
+const toBN = Web3Utils.toBN;
 const log = require('../../logService');
+
+const isIPFS = require('is-ipfs');
+const bs58 = require('bs58');
 
 const config = require('./config');
 if (!config.wsServer) {
@@ -625,9 +629,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'], address);
+    const communityContract = new this.web3.eth.Contract(this.getCommunityStorageAbi(isPpr), address);
     this.communityCache[address] = communityContract;
     return communityContract;
+  }
+
+  getCommunityStorageAbi(isPpr = false) {
+    return isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'];
   }
 
   getCommunityRaContract(address, isPpr) {
@@ -695,10 +703,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return this.web3.utils.fromWei(value, 'ether');
   }
 
-  hexToString(value) {
-    return this.web3.utils.hexToUtf8(value);
-  }
-
   async getCurrentBlock() {
     return this.web3.eth.getBlockNumber();
   }
@@ -758,5 +762,168 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return false;
     });
     return signature;
+  }
+
+  parseData(data, abi, decimals?) {
+    const methodSignature = data.slice(0, 10);
+    if (methodSignature === '0x00000000') {
+      return null;
+    }
+
+    const methodAbi = _.find(abi, (abiItem) => {
+      let abiSignature = abiItem.signature;
+      if (abiItem.type === 'fallback') {
+        return false;
+      }
+      if (!abiSignature) {
+        try {
+          abiSignature = this.web3.eth.abi.encodeFunctionSignature(abiItem);
+        } catch (e) {
+          console.error('[EthData.parseData.encodeFunctionSignature]', abiItem, e);
+        }
+      }
+      return abiSignature && abiSignature === methodSignature;
+    });
+    if (!methodAbi) {
+      return {
+        methodSignature
+      };
+    }
+    const methodName = methodAbi.name;
+
+    let decoded = {};
+    if (data.slice(10)) {
+      decoded = this.web3.eth.abi.decodeParameters(methodAbi.inputs, '0x' + data.slice(10));
+    }
+
+    const sourceInputs = {};
+    const inputs = {};
+    const inputsStr = {};
+    const inputsFields = [];
+    const inputsDetails = {};
+
+    methodAbi.inputs.forEach((inputAbi) => {
+      let {name} = inputAbi;
+      let value = decoded[name];
+      sourceInputs[name] = value;
+      sourceInputs[_.trim(name, '-_')] = value;
+
+      let valueDecimals = decimals;
+      if (_.isUndefined(valueDecimals) || valueDecimals === null) {
+        if (_.includes(inputAbi.type, 'int256[]') && this.isNumberLargerThenDecimals(value[0], 15)) {
+          valueDecimals = 18;
+        } else if (_.includes(inputAbi.type, 'int256') && this.isNumberLargerThenDecimals(value, 15)) {
+          valueDecimals = 18;
+        } else {
+          valueDecimals = 0;
+        }
+      }
+      inputsDetails[name] = {
+        type: inputAbi.type,
+        decimals: valueDecimals
+      };
+
+
+      if (_.includes(inputAbi.type, 'int256[]')) {
+        value = value.map(valItem => {
+          return this.weiToDecimals(valItem, valueDecimals);
+        });
+      } else if (_.includes(inputAbi.type, 'int256')) {
+        value = this.weiToDecimals(value, valueDecimals);
+      }
+
+      inputs[name] = value;
+      inputs[_.trim(name, '-_')] = value;
+      inputsFields.push(name);
+    });
+
+    return {
+      methodSignature,
+      methodAbi,
+      methodName,
+      sourceInputs,
+      inputs,
+      inputsFields,
+      inputsDetails
+    };
+  }
+
+  isNumberLargerThenDecimals(number, decimals) {
+    return toBN(number.toString(10), 10).gt(toBN((10 ** decimals).toString(10), 10));
+  }
+
+  weiToDecimals(wei, decimals) {
+    const zero = toBN(0);
+    const negative1 = toBN(-1);
+
+    const negative = toBN(wei.toString(10), 10).lt(zero); // eslint-disable-line
+    const baseLength = (10 ** decimals).toString().length - 1 || 1;
+    const decimalsBN = toBN((10 ** decimals).toString(10), 10);
+
+    if (negative) {
+      wei = toBN(wei.toString(10), 10).mul(negative1);
+    }
+
+    let fraction = toBN(wei.toString(10), 10).mod(decimalsBN).toString(10); // eslint-disable-line
+    // fraction = trim(fraction, '0');
+
+    while (fraction.length < baseLength) {
+      fraction = '0' + fraction;
+    }
+
+    // if (!options.pad) {
+    fraction = fraction.match(/^([0-9]*[1-9]|0)(0*)/)[1];
+    // }
+
+    const whole = toBN(wei.toString(10), 10).div(decimalsBN).toString(10); // eslint-disable-line
+
+    // if (options.commify) {
+    //     whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // }
+
+    let value = '' + whole + (fraction == '0' ? '' : '.' + fraction); // eslint-disable-line
+
+    if (negative) {
+      value = '-' + value;
+    }
+
+    return _.trim(value, '.');
+  }
+
+  hexToString(hex) {
+    if (!hex) {
+      return "";
+    }
+    try {
+      return Web3Utils.hexToUtf8(hex);
+    } catch (e) {
+      // most possible this is ipfs hash
+      if (hex.length == 66) {
+        if (typeof hex !== "string") {
+          throw new TypeError("bytes32 should be a string");
+        }
+
+        if (hex === "") {
+          throw new TypeError("bytes32 shouldn't be empty");
+        }
+
+        if (hex.length !== 66) {
+          throw new TypeError("bytes32 should have exactly 66 symbols (with 0x)");
+        }
+
+        if (!(hex.startsWith("0x") || hex.startsWith("0X"))) {
+          throw new TypeError("bytes32 hash should start with '0x'");
+        }
+
+        const hexString = "1220" + hex.substr(2);
+        const bytes = Buffer.from(hexString, 'hex');
+
+        const ipfsHash = bs58.encode(bytes);
+        if (isIPFS.multihash(ipfsHash)) {
+          return ipfsHash;
+        }
+      }
+      return null;
+    }
   }
 }

@@ -1475,6 +1475,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       [communityTokensQuery.sortBy || 'createdAt', communityTokensQuery.sortDir || 'DESC']
     ];
 
+    if(communityTokensQuery.groupBy) {
+      findAllParam.group = [communityTokensQuery.groupBy];
+      findAllParam.attributes = [communityTokensQuery.groupBy];
+      return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
+    }
+
     return community.getSpaceTokens(findAllParam);
   }
 
@@ -1548,6 +1554,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     ['address', 'communityAddress'].forEach((field) => {
       if(communityMemberQuery[field])
         allWheres[field] = {[Op.like]: communityMemberQuery[field]};
+    });
+
+    ['addressIn'].forEach((field) => {
+      if(communityMemberQuery[field])
+        allWheres[field.replace('In', '')] = {[Op.in]: communityMemberQuery[field]};
     });
 
     return allWheres;
@@ -1752,9 +1763,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   communityProposalQueryToFindAllParam(communityProposalQuery: CommunityProposalQuery) {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
+    const ruleInclude: any = {association: 'rule'};
+    if (communityProposalQuery.ruleSearch) {
+      ruleInclude.where = {
+        description: {
+          [Op.like]: '%' + communityProposalQuery.ruleSearch + '%'
+        }
+      };
+      ruleInclude.required = true;
+    }
     return {
       where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', Op.and]),
-      include: {association: 'rule'}
+      include: ruleInclude
     }
   }
 
@@ -1781,6 +1801,17 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.CommunityProposal.count(findAllParam);
   }
 
+  getAllTimeoutProposals() {
+    return this.models.CommunityProposal.findAll({
+      where: {
+        status: 'active',
+        closedAt: {
+          [Op.lte]: new Date()
+        }
+      }
+    })
+  }
+
   // =============================================================
   // Community Rule
   // =============================================================
@@ -1788,14 +1819,14 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async getCommunityRule(communityId, ruleId) {
     return this.models.CommunityRule.findOne({
       where: {communityId, ruleId},
-      include: {association: 'proposal'}
+      include: {association: 'proposals'}
     });
   }
 
   async getCommunityRuleByCommunityAddress(communityAddress, ruleId) {
     return this.models.CommunityRule.findOne({
       where: {communityAddress: {[Op.like]: communityAddress}, ruleId},
-      include: {association: 'proposal'}
+      include: {association: 'proposals'}
     });
   }
 

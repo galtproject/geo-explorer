@@ -82,6 +82,8 @@ export default interface IExplorerChainService {
 
   getCommunityStorageContract(address, isPpr?): Promise<any>;
 
+  getCommunityStorageAbi(isPpr?): any;
+
   getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;
@@ -97,6 +99,16 @@ export default interface IExplorerChainService {
   getBlockTimestamp(blockNumber):  Promise<number>;
 
   getTransactionReceipt(txId, abiAddressArr): any;
+
+  parseData(data, abi, decimals?): {
+    methodSignature: any,
+    methodAbi?: any,
+    methodName?: any,
+    sourceInputs?: any,
+    inputs?: any,
+    inputsFields?: any,
+    inputsDetails?: any
+  };
 }
 
 export enum ChainServiceEvents {

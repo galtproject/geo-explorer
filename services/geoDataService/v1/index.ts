@@ -1123,14 +1123,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if (!marker) {
       if (!proposal) {
+        // May appeared if AyeProposal event emited before the NewProposal
         return console.error('Not found proposal', proposalId, 'in', pmAddress);
       }
       marker = proposal.marker;
     }
 
-    const [voting, proposalManagerContract] = await Promise.all([
+    const [voting, proposalManagerContract, storageContract] = await Promise.all([
       this.database.getCommunityVoting(community.id, marker),
-      this.chainService.getCommunityProposalManagerContract(pmAddress)
+      this.chainService.getCommunityProposalManagerContract(pmAddress),
+      this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr)
     ]);
 
     let txData: any = {};
@@ -1153,8 +1155,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       '2': 'executed'
     }[proposalData.status];
 
+    let ruleDbId = proposal ? proposal.ruleDbId : null;
+    let isActual = proposal ? proposal.isActual : true;
+
     if (status === 'executed' && (!proposal || !proposal.executeTxId)) {
-      const executeEvents = (await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock, {success: true, proposalId}));
+      const executeEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock, {success: true, proposalId});
       if (executeEvents.length) {
         txData.executeTxId = executeEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
@@ -1164,14 +1169,39 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
         const txReceipt = await this.chainService.getTransactionReceipt(
           txData.executeTxId,
-          [{address: pmAddress, abi: proposalManagerContract._abi}]
+          [
+            {address: community.storageAddress, abi: this.chainService.getCommunityStorageAbi(community.isPpr)}
+          ]
         );
 
         const AddFundRuleEvent = txReceipt.events.filter(e => e.name === 'AddFundRule')[0];
         if(AddFundRuleEvent) {
-          await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
+          const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
+          ruleDbId = dbRule.id;
+          const disableEvents = await this.chainService.getEventsFromBlock(storageContract, 'DisableFundRule', createdAtBlock, {id: AddFundRuleEvent.values.id});
+          if(disableEvents.length) {
+            isActual = false;
+          }
+
+          const abstractProposal = await this.database.getCommunityRule(community.id, pmAddress + '-' + proposalId);
+          if(abstractProposal) {
+            await abstractProposal.destroy();
+          }
         }
       }
+    }
+
+    const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+
+    if(proposalParsedData.methodName === 'disableFundRule') {
+      const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
+      if(status === 'executed') {
+        const addFundRuleProposal = (dbRule.proposals || []).filter(p => p.markerName === 'storage.addFundRule')[0];
+        if(addFundRuleProposal) {
+          await this.database.updateProposalByDbId(addFundRuleProposal.id, { isActual: false });
+        }
+      }
+      ruleDbId = dbRule.id;
     }
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
@@ -1193,6 +1223,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         }
         txData.closedAt = timeoutDate;
       }
+
+      if(!ruleDbId && proposeTxId && proposalParsedData.methodName === 'addFundRule') {
+        const dbRule = await this.abstractUpdateCommunityRule(community, {
+          ruleId: pmAddress + '-' + proposalId,
+          isActive: false,
+          isAbstract: true,
+          manager: pmAddress,
+          dataLink: proposalParsedData.inputs.dataLink,
+          ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
+        });
+
+        ruleDbId = dbRule.id;
+      }
+    }
+
+    if(isActual && status === 'rejected') {
+      isActual = false;
     }
 
     let dataLink = proposalData.dataLink;
@@ -1207,9 +1254,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const createdAt = new Date();
     createdAt.setTime(createdAtBlockTimestamp * 1000);
 
-    console.log('proposal', pmAddress, proposalId);
-
-    const isActual = proposal ? proposal.isActual : true;
+    console.log('proposal', voting.name, pmAddress, proposalId, isActual);
 
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
@@ -1238,7 +1283,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       totalAccepted: this.chainService.weiToEther(proposalVotingProgress.totalAyes),
       totalDeclined: this.chainService.weiToEther(proposalVotingProgress.totalNays),
       isActual,
-      timeoutAt
+      timeoutAt,
+      ruleDbId
     });
     // log('newProposal', JSON.stringify(newProposal));
 
@@ -1256,7 +1302,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const ruleData = await this.chainService.callContractMethod(contract, 'fundRules', [ruleId]);
 
-    const {dataLink, ipfsHash, active: isActive, manager, createdAt} = ruleData;
+    ruleData.createdAt = undefined;
+    ruleData.id = undefined;
+    ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
+
+    return this.abstractUpdateCommunityRule(community, {
+      ruleId,
+      isActive: ruleData.active,
+      ...ruleData
+    })
+  }
+
+  async abstractUpdateCommunityRule(community, ruleData) {
+    const {dataLink, createdAt} = ruleData;
     let description = dataLink;
     let type = null;
     let dataJson = '';
@@ -1264,7 +1322,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       // log('dataItem', dataItem);
       try {
-        if (data.text) {
+        if (data.description) {
+          description = await this.geesome.getContentData(data.description).catch(() => '');
+        }
+        if(!description && data.text) {
           description = await this.geesome.getContentData(data.text).catch(() => '');
         }
         type = data.type;
@@ -1275,52 +1336,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
-    let proposalDbId;
-
-    const communityRule = await this.database.getCommunityRule(community.id, ruleId);
-    if(communityRule && communityRule.proposalDbId) {
-      proposalDbId = communityRule.proposalDbId;
-    } else {
-      let fundRuleEvents = await this.chainService.getEventsFromBlock(contract, 'AddFundRule', 0, {id: ruleId});
-
-      if(!fundRuleEvents.length) {
-        fundRuleEvents = await this.chainService.getEventsFromBlock(contract, 'DisableFundRule', 0, {id: ruleId});
-      }
-      if (fundRuleEvents.length) {
-        const txReceipt = await this.chainService.getTransactionReceipt(
-          fundRuleEvents[0]['transactionHash'],
-          [{address: community.pmAddress, abi: this.chainService.contractsConfig['fundProposalManagerAbi']}]
-        );
-
-        const ExecuteProposalEvent = txReceipt.events.filter(e => e.name === 'Execute')[0];
-        if (ExecuteProposalEvent) {
-          const proposal = await this.database.getCommunityProposalByVotingAddress(community.pmAddress, ExecuteProposalEvent.values.proposalId);
-          if(proposal) {
-            proposalDbId = proposal.id;
-          }
-        }
-      }
-    }
-
-    console.log('proposalId', proposalDbId);
-
-    await this.database.addOrUpdateCommunityRule(community, {
+    return this.database.addOrUpdateCommunityRule(community, {
+      ...ruleData,
       communityId: community.id,
-      communityAddress,
-      ruleId,
+      communityAddress: community.address,
       description,
       dataLink,
       dataJson,
-      ipfsHash,
-      isActive,
-      type,
-      manager,
-      proposalDbId
+      type
     });
-
-    if(!isActive) {
-      await this.database.updateProposalByDbId(proposalDbId, { isActual: false });
-    }
   }
 
   handleCommunityTokenApprovedEvent(communityAddress, event) {

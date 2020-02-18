@@ -190,6 +190,8 @@ export default interface IExplorerDatabase {
 
   updateProposalByDbId(proposalDbId, updateData): Promise<void>;
 
+  getAllTimeoutProposals(): Promise<ICommunityProposal[]>
+
   // =============================================================
   // Community Rules
   // =============================================================
@@ -736,6 +738,7 @@ export interface ICommunityProposal {
   closedAtBlock?;
 
   isActual?;
+  ruleDbId?;
 
   destroy?();
 }
@@ -753,8 +756,10 @@ export interface ICommunityRule {
   ipfsHash?;
   manager?;
   isActive?;
+  isAbstract?;
   type?;
-  proposalDbId?;
+
+  proposals?: any[];
 
   destroy?();
 }
@@ -811,6 +816,8 @@ export interface CommunityProposalQuery {
   creatorAddress?: string;
   pmAddress?: string;
   communityAddress?: string;
+
+  ruleSearch?: string;
 }
 
 
