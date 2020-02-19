@@ -129,6 +129,9 @@ module.exports = async function (sequelize, models) {
     humanAddress: {
       type: Sequelize.STRING
     },
+    modelIpfsHash: {
+      type: Sequelize.STRING(100)
+    },
     dataJson: {
       type: Sequelize.TEXT
     },

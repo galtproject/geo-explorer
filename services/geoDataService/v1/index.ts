@@ -12,9 +12,8 @@ import IExplorerDatabase, {
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity, IPrivatePropertyRegistry,
   ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery,
-  PrivatePropertyRegistryQuery,
   SaleOffersQuery,
-  SaleOrdersQuery, TokenizableMemberQuery
+  TokenizableMemberQuery
 } from "../../../database/interface";
 import {
   default as IExplorerGeoDataService,
@@ -23,9 +22,8 @@ import {
   FilterSpaceTokensGeoQuery
 } from "../interface";
 import {
-  IExplorerChainContourEvent, IExplorerCommunityMintEvent,
+  IExplorerCommunityMintEvent,
   IExplorerGeoDataEvent, IExplorerNewApplicationEvent,
-  IExplorerResultContour,
   IExplorerSaleOrderEvent
 } from "../../interfaces";
 import IExplorerChainService from "../../chainService/interface";
@@ -140,7 +138,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
-    let {details, floorPlans, photos} = spaceData;
+    let {details, floorPlans, photos, models} = spaceData;
 
     if (!details) {
       details = spaceData.data;
@@ -170,16 +168,22 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     // }
 
     let imageHash;
-
-    if (photos[0]) {
+    if (photos && photos[0]) {
       const link = await this.geesome.getContentLink(photos[0], 'large').catch(() => '');
-      imageHash = _.last(link.split('/'))
+      imageHash = _.last(_.trim(link, '/').split('/'))
+    }
+
+    let modelIpfsHash;
+    if(models && models[0]) {
+      const link = await this.geesome.getContentLink(models[0]).catch(() => '');
+      modelIpfsHash = _.last(_.trim(link, '/').split('/'))
     }
 
     geoDataToSave = _.extend({
       type: details.type,
       subtype: details.subtype,
       imageHash,
+      modelIpfsHash,
       photosCount: photos.length,
       floorPlansCount: floorPlans.length,
       bathroomsCount: details.bathrooms,
