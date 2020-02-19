@@ -267,6 +267,7 @@ export interface ISpaceTokenGeoData {
   proposalsToBurnCount?;
 
   spaceTokensOrders?;
+  modelIpfsHash?;
 }
 
 export interface ISaleOrder {
