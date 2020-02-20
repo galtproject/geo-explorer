@@ -38,6 +38,8 @@ const log = require('./services/logService');
 
   let lastBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
+  console.log('lastBlockNumber', lastBlockNumber);
+
   await fetchAndSubscribe(chainService.contractsConfig.blockNumber > lastBlockNumber).catch(e => {
     console.error('init error', e);
   });

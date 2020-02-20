@@ -120,7 +120,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       blockNumber = this.contractsConfig.blockNumber;
     }
     return contract.getPastEvents(eventName, {fromBlock: blockNumber, filter}).then(events => {
-      log(`✅️ Event ${eventName} got ${events.length} items, by contract ${contract._address}`);
+      log(`✅️ Event ${eventName} got ${events.length} items, by contract ${contract._address} from block ${blockNumber}`);
       return events.map(e => {
         // log('event', e);
         e.contractAddress = e.address;
