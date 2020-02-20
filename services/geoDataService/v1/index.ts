@@ -1325,11 +1325,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
       // log('dataItem', dataItem);
       try {
+        log('rule data', data);
         if (data.description) {
           description = await this.geesome.getContentData(data.description).catch(() => '');
-        }
-        if(!description && data.text) {
-          description = await this.geesome.getContentData(data.text).catch(() => '');
+        } else if(data.text) {
+          if(isIpldHash(data.text)) {
+            description = await this.geesome.getContentData(data.text).catch(() => '');
+          } else {
+            description = data.text;
+          }
         }
         type = data.type;
         log('description', description, 'type', type);
