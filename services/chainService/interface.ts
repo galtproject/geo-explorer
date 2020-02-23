@@ -152,7 +152,7 @@ export enum ChainServiceEvents {
   PrivatePropertyDisableVerification = 'DisableVerification',
 
   PPDepositHolderDeposit = 'Deposit',
-  PPDepositHolderWithdraw = 'Withdraw',
+  PPDepositHolderWithdraw = 'Withdrawal',
 
   NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',

@@ -804,8 +804,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'defaultBurnTimeoutDuration', [], 'number');
     }
 
-    // log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
-
     const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
 
     let burnOn = null;
@@ -832,6 +830,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(verificationAddress);
 
     let activeFromTimestamp = await this.chainService.callContractMethod(verificationContract, 'activeFrom', [], 'number');
+    console.log('activeFromTimestamp', activeFromTimestamp);
     if(!activeFromTimestamp) {//verificationPledge
       return this.database.updateMassSpaceTokens(registryAddress, {
         burnWithoutPledgeOn: null
@@ -842,6 +841,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     activeFrom.setTime(activeFromTimestamp * 1000);
 
     let minimalDeposit = await this.chainService.callContractMethod(verificationContract, 'minimalDeposit', [], 'wei');
+    console.log('minimalDeposit', minimalDeposit);
 
     await this.database.updateMassSpaceTokens(registryAddress, {burnWithoutPledgeOn: null}, {
       verificationPledgeMin: minimalDeposit
