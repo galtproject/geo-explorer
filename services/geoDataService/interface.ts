@@ -92,6 +92,12 @@ export default interface IExplorerGeoDataService {
 
   updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId: any): Promise<any>;
 
+  handlePrivatePropertyPledgeBurnTimeoutEvent(registryAddress, event: any): Promise<any>;
+
+  updatePrivatePropertyPledgeTokenTimeout(registryAddress, verificationAddress?): Promise<any>;
+
+  handlePrivatePropertyPledgeChangeEvent(event: any): Promise<any>;
+
   handlePrivatePropertyLegalAgreementEvent(registryAddress, event): Promise<any>;
 
   filterPrivatePropertyLegalAgreements(query): Promise<IPrivatePropertyLegalAgreementsListResponse>;

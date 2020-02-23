@@ -20,5 +20,6 @@ module.exports = {
   'communityFactoryName': 'fundFactory',
   'communityMockFactoryName': 'mockFundFactory',
   'pprCommunityFactoryName': 'privateFundFactory',
-  'tokenizableFactoryName': 'tokenizableLockerFactory'
+  'tokenizableFactoryName': 'tokenizableLockerFactory',
+  'ppDepositHolderName': 'ppDepositHolder'
 };
