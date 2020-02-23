@@ -146,6 +146,8 @@ export enum ChainServiceEvents {
   PrivatePropertySetGeoDataManager = 'SetGeoDataManager',
   PrivatePropertySetFeeManager = 'SetFeeManager',
   PrivatePropertySetBurner = 'SetBurner',
+  PrivatePropertyEnableVerification = 'EnableVerification',
+  PrivatePropertyDisableVerification = 'DisableVerification',
 
   NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',
