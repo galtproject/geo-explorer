@@ -33,6 +33,12 @@ module.exports = async function (sequelize, models) {
     controller: {
       type: Sequelize.STRING(100)
     },
+    contourVerification: {
+      type: Sequelize.STRING(100)
+    },
+    contourVerificationOwner: {
+      type: Sequelize.STRING(100)
+    },
     geoDataManager: {
       type: Sequelize.STRING(100)
     },
@@ -40,9 +46,6 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.STRING(100)
     },
     burner: {
-      type: Sequelize.STRING(100)
-    },
-    verificationOwner: {
       type: Sequelize.STRING(100)
     },
     defaultBurnTimeout: {
