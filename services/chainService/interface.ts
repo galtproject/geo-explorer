@@ -80,6 +80,8 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryControllerContract(address, old?): Promise<any>;
 
+  getPropertyRegistryVerificationContract(address): Promise<any>;
+
   getCommunityStorageContract(address, isPpr?): Promise<any>;
 
   getCommunityStorageAbi(isPpr?): any;
@@ -144,6 +146,8 @@ export enum ChainServiceEvents {
   PrivatePropertySetGeoDataManager = 'SetGeoDataManager',
   PrivatePropertySetFeeManager = 'SetFeeManager',
   PrivatePropertySetBurner = 'SetBurner',
+  PrivatePropertyEnableVerification = 'EnableVerification',
+  PrivatePropertyDisableVerification = 'DisableVerification',
 
   NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',

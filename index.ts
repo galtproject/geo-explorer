@@ -235,6 +235,13 @@ const log = require('./services/logService');
 
       const controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
 
+      const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []);
+
+      let verificationContract;
+      if(contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
+        verificationContract = chainService.getPropertyRegistryVerificationContract(contourVerificationAddress);
+      }
+
       log('SetSpaceTokenContour');
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetSpaceTokenContour, fromBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
@@ -419,6 +426,19 @@ const log = require('./services/logService');
         });
 
         addSubscription(chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
+          await geoDataService.updatePrivatePropertyRegistry(address);
+          await setLastBlockNumber(newEvent.blockNumber);
+        }));
+      });
+
+      await pIteration.forEachSeries(['PrivatePropertyTransferOwnership', 'PrivatePropertyEnableVerification', 'PrivatePropertyDisableVerification'], async eventName => {
+        await chainService.getEventsFromBlock(verificationContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            return geoDataService.updatePrivatePropertyRegistry(address);
+          });
+        });
+
+        addSubscription(chainService.subscribeForNewEvents(verificationContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
           await setLastBlockNumber(newEvent.blockNumber);
         }));

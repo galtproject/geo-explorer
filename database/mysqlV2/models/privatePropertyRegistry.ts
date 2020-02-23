@@ -33,6 +33,12 @@ module.exports = async function (sequelize, models) {
     controller: {
       type: Sequelize.STRING(100)
     },
+    contourVerification: {
+      type: Sequelize.STRING(100)
+    },
+    contourVerificationOwner: {
+      type: Sequelize.STRING(100)
+    },
     geoDataManager: {
       type: Sequelize.STRING(100)
     },

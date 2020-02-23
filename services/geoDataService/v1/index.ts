@@ -602,23 +602,24 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ]);
 
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
-    const [controllerOwner, defaultBurnTimeout] = await Promise.all([
+    const [controllerOwner, contourVerification, defaultBurnTimeout] = await Promise.all([
       controllerContract.methods.owner().call({}),
+      controllerContract.methods.contourVerificationManager().call({}),
       controllerContract.methods.defaultBurnTimeoutDuration().call({})
     ]);
 
-    let minter;
-    //TODO: remove support for old registry
-    if (contract.methods.minter) {
-      minter = await contract.methods.minter().call({});
-    } else {
-      minter = await controllerContract.methods.minter().call({});
+    let verificationContract;
+    if(contourVerification !== '0x0000000000000000000000000000000000000000') {
+      verificationContract = await this.chainService.getPropertyRegistryVerificationContract(contourVerification);
     }
 
-    const [geoDataManager, feeManager, burner] = await Promise.all([
+    let minter = await controllerContract.methods.minter().call({});
+
+    const [geoDataManager, feeManager, burner, contourVerificationOwner] = await Promise.all([
       controllerContract.methods.geoDataManager().call({}),
       controllerContract.methods.feeManager().call({}),
-      controllerContract.methods.burner().call({})
+      controllerContract.methods.burner().call({}),
+      verificationContract ? verificationContract.methods.owner().call({}) : null
     ]);
 
     const roles = {
@@ -627,14 +628,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       minter,
       geoDataManager,
       feeManager,
-      burner
+      burner,
+      contourVerificationOwner
     };
 
     await this.database.addOrPrivatePropertyRegistry({address});
 
     const dbObject = await this.database.getPrivatePropertyRegistry(address);
 
-    await pIteration.forEach(['owner', 'minter', 'geoDataManager', 'feeManager', 'burner'], async (roleName) => {
+    await pIteration.forEach(['owner', 'minter', 'geoDataManager', 'feeManager', 'burner', 'contourVerificationOwner'], async (roleName) => {
       if (dbObject[roleName] != roles[roleName]) {
         if (dbObject[roleName]) {
           await this.deletePprMember(address, dbObject[roleName]);
@@ -658,7 +660,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const pprData: IPrivatePropertyRegistry = {
-      address, owner, totalSupply, name, symbol, dataLink, dataJson, description, defaultBurnTimeout, ...roles
+      address, controller, contourVerification, owner, totalSupply, name, symbol, dataLink, dataJson, description, defaultBurnTimeout, ...roles
     };
 
     if (chainCreatedAt) {
