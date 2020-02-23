@@ -80,6 +80,8 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryControllerContract(address, old?): Promise<any>;
 
+  getPropertyRegistryVerificationContract(address): Promise<any>;
+
   getCommunityStorageContract(address, isPpr?): Promise<any>;
 
   getCommunityStorageAbi(isPpr?): any;

@@ -393,6 +393,17 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return privatePropertyControllerContract;
   }
 
+  getPropertyRegistryVerificationContract(address) {
+    if(this.pprCache[address]) {
+      return this.pprCache[address];
+    }
+    let abi = this.contractsConfig['ppContourVerificationAbi'];
+
+    const privatePropertyVerificationContract = new this.web3.eth.Contract(abi, address);
+    this.pprCache[address] = privatePropertyVerificationContract;
+    return privatePropertyVerificationContract;
+  }
+
   public async getLockerOwner(address) {
     try {
       const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);

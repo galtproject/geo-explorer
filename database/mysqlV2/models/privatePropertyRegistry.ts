@@ -42,6 +42,9 @@ module.exports = async function (sequelize, models) {
     burner: {
       type: Sequelize.STRING(100)
     },
+    verificationOwner: {
+      type: Sequelize.STRING(100)
+    },
     defaultBurnTimeout: {
       type: Sequelize.INTEGER
     },

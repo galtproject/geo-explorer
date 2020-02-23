@@ -534,6 +534,7 @@ export interface IPrivatePropertyRegistry {
   geoDataManager?;
   feeManager?;
   burner?;
+  verificationOwner?;
   totalSupply?;
   dataLink?;
   dataJson?;
