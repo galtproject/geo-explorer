@@ -118,7 +118,8 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.DATE
     },
     verificationPledge: {
-      type: Sequelize.FLOAT
+      type: Sequelize.FLOAT,
+      defaultValue: 0
     },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)
