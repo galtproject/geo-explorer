@@ -608,7 +608,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       controllerContract.methods.defaultBurnTimeoutDuration().call({})
     ]);
 
-    const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(verificationAddress);
+    let verificationContract;
+    if(verificationAddress !== '0x0000000000000000000000000000000000000000') {
+      verificationContract = await this.chainService.getPropertyRegistryVerificationContract(verificationAddress);
+    }
 
     let minter = await controllerContract.methods.minter().call({});
 
@@ -616,7 +619,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       controllerContract.methods.geoDataManager().call({}),
       controllerContract.methods.feeManager().call({}),
       controllerContract.methods.burner().call({}),
-      verificationContract.methods.owner().call({})
+      verificationContract ? verificationContract.methods.owner().call({}) : null
     ]);
 
     const roles = {
