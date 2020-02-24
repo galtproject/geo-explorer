@@ -418,7 +418,7 @@ const log = require('./services/logService');
         }));
       });
 
-      await pIteration.forEachSeries(['PrivatePropertySetGeoDataManager', 'PrivatePropertySetFeeManager', 'PrivatePropertyTransferOwnership', 'PrivatePropertySetBurner', 'PrivatePropertySetMinter'], async eventName => {
+      await pIteration.forEachSeries(['PrivatePropertySetGeoDataManager', 'PrivatePropertySetFeeManager', 'PrivatePropertyTransferOwnership', 'PrivatePropertySetBurner', 'PrivatePropertySetMinter', 'PrivatePropertySetVerification'], async eventName => {
         await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
           await pIteration.forEach(events, async (e) => {
             return geoDataService.updatePrivatePropertyRegistry(address);
@@ -427,6 +427,10 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
+          if(eventName === 'PrivatePropertySetVerification' && contourVerificationAddress.toLowerCase() !== newEvent.returnValues.contourVerificationManager.toLowerCase()) {
+            unsubscribe();
+            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
+          }
           await setLastBlockNumber(newEvent.blockNumber);
         }));
       });

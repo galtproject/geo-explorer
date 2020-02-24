@@ -150,6 +150,7 @@ export enum ChainServiceEvents {
   PrivatePropertySetBurner = 'SetBurner',
   PrivatePropertyEnableVerification = 'EnableVerification',
   PrivatePropertyDisableVerification = 'DisableVerification',
+  PrivatePropertySetVerification = 'SetContourVerificationManager',
 
   PPDepositHolderDeposit = 'Deposit',
   PPDepositHolderWithdraw = 'Withdrawal',
