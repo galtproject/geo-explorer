@@ -253,6 +253,8 @@ const log = require('./services/logService');
             returnValues: e.returnValues
           });
           log('handleChangeContourEvent');
+          let tokenId: string = e.returnValues['id'] || e.returnValues['_tokenId'] || e.returnValues['tokenId'] || e.returnValues['_spaceTokenId'] || e.returnValues['spaceTokenId'] || e.returnValues['privatePropertyId'];
+          await geoDataService.updatePrivatePropertyPledge(address, tokenId);
           return geohashService.handleChangeContourEvent(e);
         });
       });

@@ -98,6 +98,8 @@ export default interface IExplorerGeoDataService {
 
   handlePrivatePropertyPledgeChangeEvent(event: any): Promise<any>;
 
+  updatePrivatePropertyPledge(registryAddress, tokenId): Promise<any>;
+
   handlePrivatePropertyLegalAgreementEvent(registryAddress, event): Promise<any>;
 
   filterPrivatePropertyLegalAgreements(query): Promise<IPrivatePropertyLegalAgreementsListResponse>;
