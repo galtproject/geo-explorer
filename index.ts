@@ -253,8 +253,6 @@ const log = require('./services/logService');
             returnValues: e.returnValues
           });
           log('handleChangeContourEvent');
-          let tokenId: string = e.returnValues['id'] || e.returnValues['_tokenId'] || e.returnValues['tokenId'] || e.returnValues['_spaceTokenId'] || e.returnValues['spaceTokenId'] || e.returnValues['privatePropertyId'];
-          await geoDataService.updatePrivatePropertyPledge(address, tokenId);
           return geohashService.handleChangeContourEvent(e);
         });
       });
@@ -289,6 +287,8 @@ const log = require('./services/logService');
           contractAddress: controllerAddress,
           returnValues: newEvent.returnValues
         });
+        let tokenId: string = newEvent.returnValues['id'] || newEvent.returnValues['_tokenId'] || newEvent.returnValues['tokenId'] || newEvent.returnValues['_spaceTokenId'] || newEvent.returnValues['spaceTokenId'] || newEvent.returnValues['privatePropertyId'];
+        await geoDataService.updatePrivatePropertyPledge(address, tokenId);
         await setLastBlockNumber(newEvent.blockNumber);
       }));
 
