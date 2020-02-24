@@ -465,7 +465,8 @@ const log = require('./services/logService');
     });
 
     chainService.subscribeForNewEvents(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderDeposit, startBlockNumber, async (err, newEvent) => {
-      return geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent)
+      await geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
     });
 
     await chainService.getEventsFromBlock(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderWithdraw, lastBlockNumber).then(async (events) => {
@@ -475,7 +476,8 @@ const log = require('./services/logService');
     });
 
     chainService.subscribeForNewEvents(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderWithdraw, startBlockNumber, async (err, newEvent) => {
-      return geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent)
+      await geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
     });
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, lastBlockNumber).then(async (events) => {
@@ -491,7 +493,8 @@ const log = require('./services/logService');
     });
 
     chainService.subscribeForNewEvents(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, startBlockNumber, async (err, newEvent) => {
-      return geoDataService.handleSaleOrderEvent(newEvent)
+      await geoDataService.handleSaleOrderEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
     });
 
     ['SaleOfferAskChanged', 'SaleOfferBidChanged', 'SaleOfferStatusChanged'].map((eventName) => {
