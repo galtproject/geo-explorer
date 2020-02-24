@@ -410,7 +410,7 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
-          if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller) {
+          if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller.toLowerCase()) {
             unsubscribe();
             return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
           }
