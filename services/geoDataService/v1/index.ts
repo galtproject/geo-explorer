@@ -853,7 +853,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   handlePrivatePropertyPledgeChangeEvent(e) {
-    return this.updatePrivatePropertyPledge(e.returnValues.tokenContract, e.returnValues.tokenContract.tokenId);
+    return this.updatePrivatePropertyPledge(e.returnValues.tokenContract, e.returnValues.tokenId);
   }
 
   async updatePrivatePropertyPledge(registryAddress, tokenId) {
