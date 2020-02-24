@@ -770,6 +770,20 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
 
+  async updateMassSpaceTokens(contractAddress, updateData, additionalFilters = {}) {
+    if(additionalFilters['verificationPledgeMin']) {
+      additionalFilters['verificationPledge'] = {[Op.gte]: additionalFilters['verificationPledgeMin']};
+      delete additionalFilters['verificationPledgeMin'];
+    }
+    if(additionalFilters['verificationPledgeMax']) {
+      additionalFilters['verificationPledge'] = {[Op.lt]: additionalFilters['verificationPledgeMax']};
+      delete additionalFilters['verificationPledgeMax'];
+    }
+    return this.models.SpaceTokenGeoData.update(updateData, {
+      where: { contractAddress: {[Op.like]: contractAddress}, ...additionalFilters }
+    });
+  }
+
   // =============================================================
   // SaleOffers
   // =============================================================

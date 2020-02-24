@@ -79,6 +79,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   communityMockFactory: any;
   tokenizableFactory: any;
 
+  ppDepositHolder: any;
+
   contractsConfig: any;
 
   callbackOnReconnect: any;
@@ -222,7 +224,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.communityCache = {};
     this.tokenizableCache = {};
 
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory', 'tokenizableFactory'].forEach(contractName => {
+    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory', 'tokenizableFactory', 'ppDepositHolder'].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];

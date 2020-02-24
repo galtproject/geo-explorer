@@ -72,6 +72,8 @@ export default interface IExplorerDatabase {
 
   filterSpaceTokensCount(filterQuery: SpaceTokensQuery): Promise<number>;
 
+  updateMassSpaceTokens(contractAddress, updateData, additionalFilters?): Promise<any>;
+
   // =============================================================
   // Tokenizable Members
   // =============================================================
@@ -265,6 +267,9 @@ export interface ISpaceTokenGeoData {
   isPpr;
   proposalsToEditCount?;
   proposalsToBurnCount?;
+  burnWithoutPledgeOn?;
+  verificationPledge?;
+  burnOn?;
 
   spaceTokensOrders?;
   modelIpfsHash?;

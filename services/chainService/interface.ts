@@ -26,6 +26,8 @@ export default interface IExplorerChainService {
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
 
+  ppDepositHolder;
+
   communityFactory: any;
   communityMockFactory: any;
 
@@ -148,6 +150,9 @@ export enum ChainServiceEvents {
   PrivatePropertySetBurner = 'SetBurner',
   PrivatePropertyEnableVerification = 'EnableVerification',
   PrivatePropertyDisableVerification = 'DisableVerification',
+
+  PPDepositHolderDeposit = 'Deposit',
+  PPDepositHolderWithdraw = 'Withdrawal',
 
   NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',

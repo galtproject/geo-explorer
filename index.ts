@@ -431,7 +431,7 @@ const log = require('./services/logService');
         }));
       });
 
-      await pIteration.forEachSeries(['PrivatePropertyTransferOwnership', 'PrivatePropertyEnableVerification', 'PrivatePropertyDisableVerification'], async eventName => {
+      await pIteration.forEachSeries(['PrivatePropertyTransferOwnership'], async eventName => {
         await chainService.getEventsFromBlock(verificationContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
           await pIteration.forEach(events, async (e) => {
             return geoDataService.updatePrivatePropertyRegistry(address);
@@ -443,7 +443,42 @@ const log = require('./services/logService');
           await setLastBlockNumber(newEvent.blockNumber);
         }));
       });
+
+      await pIteration.forEachSeries(['PrivatePropertyEnableVerification', 'PrivatePropertyDisableVerification'], async eventName => {
+        await chainService.getEventsFromBlock(verificationContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            return geoDataService.handlePrivatePropertyPledgeBurnTimeoutEvent(address, e);
+          });
+        });
+
+        addSubscription(chainService.subscribeForNewEvents(verificationContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
+          await geoDataService.handlePrivatePropertyPledgeBurnTimeoutEvent(address, newEvent);
+          await setLastBlockNumber(newEvent.blockNumber);
+        }));
+      });
     }
+
+    await chainService.getEventsFromBlock(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderDeposit, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handlePrivatePropertyPledgeChangeEvent(e)
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderDeposit, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
+
+    await chainService.getEventsFromBlock(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderWithdraw, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handlePrivatePropertyPledgeChangeEvent(e)
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderWithdraw, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, lastBlockNumber).then(async (events) => {
       await pIteration.forEach(events, (e) => {
@@ -458,7 +493,8 @@ const log = require('./services/logService');
     });
 
     chainService.subscribeForNewEvents(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, startBlockNumber, async (err, newEvent) => {
-      return geoDataService.handleSaleOrderEvent(newEvent)
+      await geoDataService.handleSaleOrderEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
     });
 
     ['SaleOfferAskChanged', 'SaleOfferBidChanged', 'SaleOfferStatusChanged'].map((eventName) => {

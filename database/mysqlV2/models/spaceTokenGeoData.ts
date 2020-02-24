@@ -114,6 +114,13 @@ module.exports = async function (sequelize, models) {
     burnOn: {
       type: Sequelize.DATE
     },
+    burnWithoutPledgeOn: {
+      type: Sequelize.DATE
+    },
+    verificationPledge: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)
     },

@@ -804,8 +804,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       burnTimeoutDuration = await this.chainService.callContractMethod(controllerContract, 'defaultBurnTimeoutDuration', [], 'number');
     }
 
-    // log('burnTimeoutDuration', burnTimeoutDuration, registryAddress, tokenId);
-
     const burnTimeoutAt = await this.chainService.callContractMethod(controllerContract, 'burnTimeoutAt', [tokenId]);
 
     let burnOn = null;
@@ -818,6 +816,51 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       burnTimeout: burnTimeoutDuration,
       burnOn
     } as any);
+  }
+
+  async handlePrivatePropertyPledgeBurnTimeoutEvent(registryAddress, event) {
+    return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress, event.contractAddress);
+  }
+
+  async updatePrivatePropertyPledgeTokenTimeout(registryAddress, verificationAddress?) {
+    if(!verificationAddress) {
+      const ppr = await this.database.getPrivatePropertyRegistry(registryAddress);
+      verificationAddress = ppr.contourVerification;
+    }
+    const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(verificationAddress);
+
+    let activeFromTimestamp = await this.chainService.callContractMethod(verificationContract, 'activeFrom', [], 'number');
+    console.log('activeFromTimestamp', activeFromTimestamp);
+    if(!activeFromTimestamp) {//verificationPledge
+      return this.database.updateMassSpaceTokens(registryAddress, {
+        burnWithoutPledgeOn: null
+      })
+    }
+
+    const activeFrom = new Date();
+    activeFrom.setTime(activeFromTimestamp * 1000);
+
+    let minimalDeposit = await this.chainService.callContractMethod(verificationContract, 'minimalDeposit', [], 'wei');
+    console.log('minimalDeposit', minimalDeposit);
+
+    await this.database.updateMassSpaceTokens(registryAddress, {burnWithoutPledgeOn: null}, {
+      verificationPledgeMin: minimalDeposit
+    });
+
+    await this.database.updateMassSpaceTokens(registryAddress, {burnWithoutPledgeOn: activeFrom}, {
+      verificationPledgeMax: minimalDeposit
+    });
+  }
+
+  handlePrivatePropertyPledgeChangeEvent(e) {
+    return this.updatePrivatePropertyPledge(e.returnValues.tokenContract, e.returnValues.tokenId);
+  }
+
+  async updatePrivatePropertyPledge(registryAddress, tokenId) {
+    const verificationPledge = await this.chainService.callContractMethod(this.chainService.ppDepositHolder, 'balanceOf', [registryAddress, tokenId], 'wei');
+
+    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge } as any);
+    return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
   }
 
   async filterPrivatePropertyTokeProposals(filterQuery: PrivatePropertyProposalQuery) {
