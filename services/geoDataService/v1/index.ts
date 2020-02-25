@@ -827,6 +827,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const ppr = await this.database.getPrivatePropertyRegistry(registryAddress);
       verificationAddress = ppr.contourVerification;
     }
+    if(!verificationAddress || verificationAddress === '0x0000000000000000000000000000000000000000') {
+      return;
+    }
     const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(verificationAddress);
 
     let activeFromTimestamp = await this.chainService.callContractMethod(verificationContract, 'activeFrom', [], 'number');
