@@ -400,6 +400,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
     let abi = this.contractsConfig['ppContourVerificationAbi'];
+    if(!abi) {
+      return null;
+    }
 
     const privatePropertyVerificationContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyVerificationContract;
