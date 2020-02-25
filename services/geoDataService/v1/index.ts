@@ -865,7 +865,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
 
-    const verificationDisabled = (await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')], 'wei')) !== '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const CLAIM_UNIQUENESS = await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')], 'wei');
+    console.log('CLAIM_UNIQUENESS', CLAIM_UNIQUENESS);
+    const verificationDisabled = CLAIM_UNIQUENESS !== '0x0000000000000000000000000000000000000000000000000000000000000000';
 
     await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled } as any);
     return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
