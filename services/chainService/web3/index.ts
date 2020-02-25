@@ -909,6 +909,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return _.trim(value, '.');
   }
 
+  stringToHex(string) {
+    return Web3Utils.utf8ToHex(string)
+  }
+
   hexToString(hex) {
     if (!hex) {
       return "";

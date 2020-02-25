@@ -292,6 +292,17 @@ const log = require('./services/logService');
         await setLastBlockNumber(newEvent.blockNumber);
       }));
 
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.PrivatePropertySetExtraData, fromBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.updatePrivatePropertyPledge(address, e.returnValues['propertyId']);
+        });
+      });
+
+      addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents.PrivatePropertySetExtraData, subscribeFromBlockNumber, async (err, newEvent) => {
+        await geoDataService.updatePrivatePropertyPledge(address, newEvent.returnValues['propertyId']);
+        await setLastBlockNumber(newEvent.blockNumber);
+      }));
+
       addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetPrivatePropertyDetails, subscribeFromBlockNumber, async (err, newEvent) => {
         await geoDataService.handleChangeSpaceTokenDataEvent(address, newEvent);
         await setLastBlockNumber(newEvent.blockNumber);

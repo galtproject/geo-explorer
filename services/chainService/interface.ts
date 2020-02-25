@@ -96,6 +96,8 @@ export default interface IExplorerChainService {
 
   hexToString(value): string;
 
+  stringToHex(value): string;
+
   weiToEther(value): string;
 
   getContractMethod(contractName, methodName): any;
@@ -151,6 +153,7 @@ export enum ChainServiceEvents {
   PrivatePropertyEnableVerification = 'EnableVerification',
   PrivatePropertyDisableVerification = 'DisableVerification',
   PrivatePropertySetVerification = 'SetContourVerificationManager',
+  PrivatePropertySetExtraData = 'SetPropertyExtraData',
 
   PPDepositHolderDeposit = 'Deposit',
   PPDepositHolderWithdraw = 'Withdrawal',

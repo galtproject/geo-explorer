@@ -851,7 +851,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     await this.database.updateMassSpaceTokens(registryAddress, {burnWithoutPledgeOn: activeFrom}, {
-      verificationPledgeMax: minimalDeposit
+      verificationPledgeMax: minimalDeposit,
+      verificationDisabled: false
     });
   }
 
@@ -862,7 +863,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updatePrivatePropertyPledge(registryAddress, tokenId) {
     const verificationPledge = await this.chainService.callContractMethod(this.chainService.ppDepositHolder, 'balanceOf', [registryAddress, tokenId], 'wei');
 
-    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge } as any);
+    const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
+
+    const verificationDisabled = (await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')], 'wei')) !== '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled } as any);
     return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
   }
 
