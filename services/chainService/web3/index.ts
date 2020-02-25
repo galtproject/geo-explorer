@@ -451,10 +451,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
-          heightsContour.push(height / 100);
+          heightsContour.push(height);
         } else {
           const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-          heightsContour.push(height / 100);
+          heightsContour.push(height);
           const geohash = galtUtils.numberToGeohash(geohash5);
           geohashContour.push(geohash);
           contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
