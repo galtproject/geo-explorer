@@ -689,7 +689,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // =============================================================
 
   public async callContractMethod(contract, method, args, type) {
-    if(!contract.methods[method]) {
+    if(!contract || !contract.methods[method]) {
       return null;
     }
     let value = await contract.methods[method].apply(contract, args).call({});
