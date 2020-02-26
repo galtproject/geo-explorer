@@ -604,7 +604,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
     const [controllerOwner, contourVerification, defaultBurnTimeout] = await Promise.all([
       controllerContract.methods.owner().call({}),
-      controllerContract.methods.contourVerificationManager().call({}),
+      controllerContract.methods.contourVerificationManager ? controllerContract.methods.contourVerificationManager().call({}) : '0x0000000000000000000000000000000000000000',
       controllerContract.methods.defaultBurnTimeoutDuration().call({})
     ]);
 
@@ -827,6 +827,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const ppr = await this.database.getPrivatePropertyRegistry(registryAddress);
       verificationAddress = ppr.contourVerification;
     }
+    if(!verificationAddress || verificationAddress === '0x0000000000000000000000000000000000000000') {
+      return;
+    }
     const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(verificationAddress);
 
     let activeFromTimestamp = await this.chainService.callContractMethod(verificationContract, 'activeFrom', [], 'number');
@@ -848,7 +851,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     await this.database.updateMassSpaceTokens(registryAddress, {burnWithoutPledgeOn: activeFrom}, {
-      verificationPledgeMax: minimalDeposit
+      verificationPledgeMax: minimalDeposit,
+      verificationDisabled: false
     });
   }
 
@@ -859,7 +863,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updatePrivatePropertyPledge(registryAddress, tokenId) {
     const verificationPledge = await this.chainService.callContractMethod(this.chainService.ppDepositHolder, 'balanceOf', [registryAddress, tokenId], 'wei');
 
-    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge } as any);
+    const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
+
+    const CLAIM_UNIQUENESS = await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')]);
+    console.log('CLAIM_UNIQUENESS', CLAIM_UNIQUENESS);
+    const verificationDisabled = CLAIM_UNIQUENESS === '0x0000000000000000000000000000000000000000000000000000000000000001' || CLAIM_UNIQUENESS === '1' || CLAIM_UNIQUENESS === 1;
+
+    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled } as any);
     return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
   }
 

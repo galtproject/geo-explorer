@@ -400,6 +400,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
     let abi = this.contractsConfig['ppContourVerificationAbi'];
+    if(!abi) {
+      return null;
+    }
 
     const privatePropertyVerificationContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyVerificationContract;
@@ -448,10 +451,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
-          heightsContour.push(height / 100);
+          heightsContour.push(height);
         } else {
           const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-          heightsContour.push(height / 100);
+          heightsContour.push(height);
           const geohash = galtUtils.numberToGeohash(geohash5);
           geohashContour.push(geohash);
           contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
@@ -501,10 +504,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
-          heightsContour.push(height / 100);
+          heightsContour.push(height);
         } else {
           const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-          heightsContour.push(height / 100);
+          heightsContour.push(height);
           const geohash = galtUtils.numberToGeohash(geohash5);
           geohashContour.push(geohash);
           contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
@@ -517,7 +520,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         contractContour,
         heightsContour,
         ledgerIdentifier,
-        highestPoint: this.weiToEther(result.highestPoint),
+        highestPoint: parseInt(result.highestPoint.toString(10)) / 100,
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
         spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[tokenType]
@@ -686,6 +689,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // =============================================================
 
   public async callContractMethod(contract, method, args, type) {
+    if(!contract.methods[method]) {
+      return null;
+    }
     let value = await contract.methods[method].apply(contract, args).call({});
     if(type === 'wei') {
       value = this.weiToEther(value);
@@ -901,6 +907,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     return _.trim(value, '.');
+  }
+
+  stringToHex(string) {
+    return Web3Utils.utf8ToHex(string)
   }
 
   hexToString(hex) {

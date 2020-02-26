@@ -121,6 +121,10 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
+    verificationDisabled: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
     ledgerIdentifier: {
       type: Sequelize.STRING(100)
     },

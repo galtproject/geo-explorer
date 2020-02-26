@@ -287,6 +287,19 @@ const log = require('./services/logService');
           contractAddress: controllerAddress,
           returnValues: newEvent.returnValues
         });
+        let tokenId: string = newEvent.returnValues['id'] || newEvent.returnValues['_tokenId'] || newEvent.returnValues['tokenId'] || newEvent.returnValues['_spaceTokenId'] || newEvent.returnValues['spaceTokenId'] || newEvent.returnValues['privatePropertyId'];
+        await geoDataService.updatePrivatePropertyPledge(address, tokenId);
+        await setLastBlockNumber(newEvent.blockNumber);
+      }));
+
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.PrivatePropertySetExtraData, fromBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          return geoDataService.updatePrivatePropertyPledge(address, e.returnValues['propertyId']);
+        });
+      });
+
+      addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents.PrivatePropertySetExtraData, subscribeFromBlockNumber, async (err, newEvent) => {
+        await geoDataService.updatePrivatePropertyPledge(address, newEvent.returnValues['propertyId']);
         await setLastBlockNumber(newEvent.blockNumber);
       }));
 
@@ -410,7 +423,7 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
-          if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller) {
+          if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller.toLowerCase()) {
             unsubscribe();
             return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
           }
@@ -418,7 +431,7 @@ const log = require('./services/logService');
         }));
       });
 
-      await pIteration.forEachSeries(['PrivatePropertySetGeoDataManager', 'PrivatePropertySetFeeManager', 'PrivatePropertyTransferOwnership', 'PrivatePropertySetBurner', 'PrivatePropertySetMinter'], async eventName => {
+      await pIteration.forEachSeries(['PrivatePropertySetGeoDataManager', 'PrivatePropertySetFeeManager', 'PrivatePropertyTransferOwnership', 'PrivatePropertySetBurner', 'PrivatePropertySetMinter', 'PrivatePropertySetVerification'], async eventName => {
         await chainService.getEventsFromBlock(controllerContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
           await pIteration.forEach(events, async (e) => {
             return geoDataService.updatePrivatePropertyRegistry(address);
@@ -427,6 +440,10 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
+          if(eventName === 'PrivatePropertySetVerification' && contourVerificationAddress.toLowerCase() !== newEvent.returnValues.contourVerificationManager.toLowerCase()) {
+            unsubscribe();
+            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
+          }
           await setLastBlockNumber(newEvent.blockNumber);
         }));
       });
