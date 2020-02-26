@@ -861,6 +861,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updatePrivatePropertyPledge(registryAddress, tokenId) {
+    if(!this.chainService.ppDepositHolder) {
+      return;
+    }
     const verificationPledge = await this.chainService.callContractMethod(this.chainService.ppDepositHolder, 'balanceOf', [registryAddress, tokenId], 'wei');
 
     const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
