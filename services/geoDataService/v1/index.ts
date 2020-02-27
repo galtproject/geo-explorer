@@ -879,7 +879,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const newTokenTimeout = await this.chainService.callContractMethod(verificationContract, 'newTokenTimeout', [], 'number');
       creationTimeoutEndOn = new Date();
       creationTimeoutEndOn.setTime((creationTimestamp + newTokenTimeout) * 1000);
-      return;
     }
 
     await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled, creationTimeoutEndOn } as any);
