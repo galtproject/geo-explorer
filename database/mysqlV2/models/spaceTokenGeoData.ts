@@ -117,6 +117,9 @@ module.exports = async function (sequelize, models) {
     burnWithoutPledgeOn: {
       type: Sequelize.DATE
     },
+    creationTimeoutEndOn: {
+      type: Sequelize.DATE
+    },
     verificationPledge: {
       type: Sequelize.FLOAT,
       defaultValue: 0

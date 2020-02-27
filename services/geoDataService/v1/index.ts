@@ -864,15 +864,25 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(!this.chainService.ppDepositHolder) {
       return;
     }
+    const ppr = await this.database.getPrivatePropertyRegistry(registryAddress);
     const verificationPledge = await this.chainService.callContractMethod(this.chainService.ppDepositHolder, 'balanceOf', [registryAddress, tokenId], 'wei');
 
     const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
 
     const CLAIM_UNIQUENESS = await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')]);
-    console.log('CLAIM_UNIQUENESS', CLAIM_UNIQUENESS);
     const verificationDisabled = CLAIM_UNIQUENESS === '0x0000000000000000000000000000000000000000000000000000000000000001' || CLAIM_UNIQUENESS === '1' || CLAIM_UNIQUENESS === 1;
 
-    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled } as any);
+    let creationTimeoutEndOn;
+    if(ppr.contourVerification && ppr.contourVerification !== '0x0000000000000000000000000000000000000000') {
+      const creationTimestamp = await this.chainService.callContractMethod(contract, 'propertyCreatedAt', [tokenId], 'number');
+      const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(ppr.contourVerification);
+      const newTokenTimeout = await this.chainService.callContractMethod(verificationContract, 'newTokenTimeout', [], 'number');
+      creationTimeoutEndOn = new Date();
+      creationTimeoutEndOn.setTime((creationTimestamp + newTokenTimeout) * 1000);
+      return;
+    }
+
+    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled, creationTimeoutEndOn } as any);
     return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
   }
 
