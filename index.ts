@@ -501,12 +501,12 @@ const log = require('./services/logService');
       await pIteration.forEachSeries(['PPMediatorSetOtherSide'], async eventName => {
         await chainService.getEventsFromBlock(mediatorContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
           await pIteration.forEach(events, async (e) => {
-            return geoDataService.handleMediatorSet(address, e, mediatorType);
+            return geoDataService.handleMediatorOtherSideSet(address, e, mediatorType);
           });
         });
 
         addSubscription(chainService.subscribeForNewEvents(mediatorContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
-          await geoDataService.handleMediatorSet(address, newEvent, mediatorType);
+          await geoDataService.handleMediatorOtherSideSet(address, newEvent, mediatorType);
           await setLastBlockNumber(newEvent.blockNumber);
         }));
       });

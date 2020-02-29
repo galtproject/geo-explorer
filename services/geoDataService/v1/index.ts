@@ -943,9 +943,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.updatePrivateRegistryMediatorAddress(tokenId, mediator, mediatorType);
   }
 
-  async handleMediatorSet(registryAddress, event, mediatorType) {
-    const {mediatorContract} = event.returnValues;
-    return this.updatePrivateRegistryMediatorAddress(registryAddress, mediatorContract, mediatorType);
+  async handleMediatorOtherSideSet(registryAddress, event, mediatorType) {
+    const ppr = await this.getPrivatePropertyRegistry(registryAddress);
+    return this.updatePrivateRegistryMediatorAddress(registryAddress, mediatorType === 'foreign' ? ppr.foreignMediator : ppr.homeMediator, mediatorType);
   }
 
   async updatePrivateRegistryMediatorAddress(registryAddress, mediatorAddress, mediatorType) {
