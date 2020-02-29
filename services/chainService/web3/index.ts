@@ -686,6 +686,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
   }
 
+  getNetworkId(): Promise<any> {
+    return this.web3.eth.net.getId();
+  }
+
   async getTransactionReceipt(txHash, abiAddressArr) {
     const receipt = await this.web3.eth.getTransactionReceipt(txHash);
 

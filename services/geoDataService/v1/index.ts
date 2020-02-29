@@ -961,12 +961,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(mediatorType === 'home') {
       additionalData['isBridgetHome'] = true;
       additionalData['homeMediator'] = mediatorAddress;
+      additionalData['homeMediatorNetwork'] = await this.chainService.getNetworkId();
 
       additionalData['foreignMediator'] = mediatorContractOnOtherSide;
       additionalData['foreignMediatorNetwork'] = network;
     } else {
       additionalData['isBridgetForeign'] = true;
       additionalData['foreignMediator'] = mediatorAddress;
+      additionalData['foreignMediatorNetwork'] = await this.chainService.getNetworkId();
 
       additionalData['homeMediator'] = mediatorContractOnOtherSide;
       additionalData['homeMediatorNetwork'] = network;

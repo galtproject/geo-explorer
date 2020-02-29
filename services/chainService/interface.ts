@@ -108,7 +108,9 @@ export default interface IExplorerChainService {
 
   getContractMethod(contractName, methodName): any;
 
-  getBlockTimestamp(blockNumber):  Promise<number>;
+  getBlockTimestamp(blockNumber): Promise<number>;
+
+  getNetworkId(): Promise<number>;
 
   getTransactionReceipt(txId, abiAddressArr): any;
 
