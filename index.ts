@@ -233,15 +233,19 @@ const log = require('./services/logService');
         return;
       }
 
-      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []);
+      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []).catch(() => null);
 
-      const controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
-
-      const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []);
-
+      let controllerContract;
+      let contourVerificationAddress = '';
       let verificationContract;
-      if(contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
-        verificationContract = chainService.getPropertyRegistryVerificationContract(contourVerificationAddress);
+
+      if (controllerAddress) {
+        controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
+
+        const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []);
+        if(contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
+          verificationContract = chainService.getPropertyRegistryVerificationContract(contourVerificationAddress);
+        }
       }
 
       log('SetSpaceTokenContour');

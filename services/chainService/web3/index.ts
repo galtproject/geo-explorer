@@ -299,96 +299,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
 
-    let abi;
-    if(old) {
-      //TODO: remove support for old registry
-      abi = _.clone(this.contractsConfig['ppTokenAbi']);
-      abi.forEach(abiItem => {
-        if(abiItem['name'] === 'getDetails') {
-          abiItem['outputs'] = [
-            {
-              "internalType": "enum IPPToken.TokenType",
-              "name": "tokenType",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "contour",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "int256",
-              "name": "highestPoint",
-              "type": "int256"
-            },
-            {
-              "internalType": "enum IPPToken.AreaSource",
-              "name": "areaSource",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint256",
-              "name": "area",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "ledgerIdentifier",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "string",
-              "name": "humanAddress",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "dataLink",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "setupStage",
-              "type": "uint256"
-            }
-          ];
-        }
-      });
-
-      abi.push({
-        "constant": true,
-        "inputs": [],
-        "name": "minter",
-        "outputs": [
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      });
-
-      abi.push({
-        "constant": true,
-        "inputs": [],
-        "name": "tokenDataLink",
-        "outputs": [
-          {
-            "internalType": "string",
-            "name": "",
-            "type": "string"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      });
-    } else {
-      abi = this.contractsConfig['ppTokenAbi'];
-    }
+    let abi = this.contractsConfig['ppTokenAbi'] || this.contractsConfig['ppBridgedTokenAbi'];
 
     const privatePropertyContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyContract;
@@ -399,13 +310,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.pprCache[address]) {
       return this.pprCache[address];
     }
-    let abi;
-    if(old) {
-      abi = _.clone(this.contractsConfig['ppTokenControllerAbi']);
-      abi = abi.filter(abiItem => abiItem['name'] != 'SetMinter')
-    } else {
-      abi = this.contractsConfig['ppTokenControllerAbi'];
-    }
+    let abi = this.contractsConfig['ppTokenControllerAbi'];
 
     const privatePropertyControllerContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyControllerContract;
