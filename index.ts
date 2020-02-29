@@ -201,6 +201,8 @@ const log = require('./services/logService');
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
+    const pprUnsubscribeByAddress = {};
+
     async function subscribeToPrivatePropertyRegistry (address, old = false, fromBlockNumber = null) {
       address = address.toLowerCase();
       if(subscribedToPrivatePropertyRegistry[address]) {
@@ -225,6 +227,9 @@ const log = require('./services/logService');
         });
         subscribedToPrivatePropertyRegistry[address] = false;
       }
+
+      pprUnsubscribeByAddress[address] = unsubscribe;
+
       const contract = chainService.getPropertyRegistryContract(address, old);
 
       const ppr = await geoDataService.getPrivatePropertyRegistry(address);
@@ -537,6 +542,8 @@ const log = require('./services/logService');
 
     chainService.subscribeForNewEvents(chainService.ppHomeMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
       await geoDataService.handleMediatorCreation(newEvent, 'home');
+      pprUnsubscribeByAddress[newEvent.returnValues.tokenId.toLowerCase()]();
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.tokenId, false, newEvent.blockNumber);
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
