@@ -49,6 +49,7 @@ const log = require('./services/logService');
   }, 30 * 1000);
 
   let startBlockNumber = await chainService.getCurrentBlock();
+  console.log('startBlockNumber', startBlockNumber);
 
   async function setLastBlockNumber(blockNumber) {
     const lastBlockNumber = parseInt(await database.getValue('lastBlockNumber'));
@@ -65,6 +66,7 @@ const log = require('./services/logService');
     lastBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
     startBlockNumber = await chainService.getCurrentBlock();
+    console.log('fetchAndSubscribe startBlockNumber', startBlockNumber);
 
     await chainService.getEventsFromBlock(chainService.spaceGeoData, ChainServiceEvents.SetSpaceTokenContour, lastBlockNumber).then(async (events) => {
       await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
