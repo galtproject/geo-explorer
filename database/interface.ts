@@ -548,6 +548,13 @@ export interface IPrivatePropertyRegistry {
   chainCreatedAt?;
   defaultBurnTimeout?;
 
+  isBridgetForeign?;
+  isBridgetHome?;
+  homeMediator?;
+  homeMediatorNetwork?;
+  foreignMediator?;
+  foreignMediatorNetwork?;
+
   createdAtBlock?;
   updatedAtBlock?;
 

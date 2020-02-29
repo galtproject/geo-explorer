@@ -167,6 +167,7 @@ export enum ChainServiceEvents {
   PPDepositHolderWithdraw = 'Withdrawal',
 
   PPMediatorNew = 'NewPPMediator',
+  PPMediatorSetOtherSide = 'SetMediatorContractOnOtherSide',
 
   NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',

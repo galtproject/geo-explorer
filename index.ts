@@ -227,6 +227,8 @@ const log = require('./services/logService');
       }
       const contract = chainService.getPropertyRegistryContract(address, old);
 
+      const ppr = await geoDataService.getPrivatePropertyRegistry(address);
+
       const owner = await chainService.callContractMethod(contract, 'owner', []);
 
       if(owner === '0x0000000000000000000000000000000000000000') {
@@ -476,6 +478,30 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(verificationContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.handlePrivatePropertyPledgeBurnTimeoutEvent(address, newEvent);
+          await setLastBlockNumber(newEvent.blockNumber);
+        }));
+      });
+
+      let mediatorContract;
+      let mediatorType;
+      if(ppr && ppr.isBridgetForeign && ppr.foreignMediator && ppr.foreignMediator !== '0x0000000000000000000000000000000000000000') {
+        mediatorType = 'foreign';
+        mediatorContract = chainService.getMediatorContract(ppr.foreignMediator, mediatorType);
+      }
+      if(ppr && ppr.isBridgetHome && ppr.homeMediator && ppr.homeMediator !== '0x0000000000000000000000000000000000000000') {
+        mediatorType = 'home';
+        mediatorContract = chainService.getMediatorContract(ppr.homeMediator, mediatorType);
+      }
+
+      await pIteration.forEachSeries(['PPMediatorSetOtherSide'], async eventName => {
+        await chainService.getEventsFromBlock(mediatorContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            return geoDataService.handleMediatorSet(address, e, mediatorType);
+          });
+        });
+
+        addSubscription(chainService.subscribeForNewEvents(mediatorContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
+          await geoDataService.handleMediatorSet(address, newEvent, mediatorType);
           await setLastBlockNumber(newEvent.blockNumber);
         }));
       });

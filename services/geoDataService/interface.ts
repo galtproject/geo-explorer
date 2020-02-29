@@ -132,6 +132,8 @@ export default interface IExplorerGeoDataService {
 
   handleMediatorCreation(event: any, mediatorType: string): Promise<any>;
 
+  handleMediatorSet(registryAddress, event: any, mediatorType: string): Promise<any>;
+
   // ====================================================
   // Community
   // ====================================================

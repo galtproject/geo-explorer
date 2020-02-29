@@ -331,6 +331,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return privatePropertyVerificationContract;
   }
 
+
   public async getLockerOwner(address) {
     try {
       const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);

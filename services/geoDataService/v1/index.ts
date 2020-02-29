@@ -939,26 +939,35 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleMediatorCreation(event, mediatorType) {
-    const {mediator, _mediatorContractOnOtherSide, tokenId} = event.returnValues;
+    const {mediator, tokenId} = event.returnValues;
+    return this.updatePrivateRegistryMediatorAddress(tokenId, mediator, mediatorType);
+  }
 
-    const mediatorContract = await this.chainService.getMediatorContract(mediator, mediatorType);
+  async handleMediatorSet(registryAddress, event, mediatorType) {
+    const {mediatorContract} = event.returnValues;
+    return this.updatePrivateRegistryMediatorAddress(registryAddress, mediatorContract, mediatorType);
+  }
+
+  async updatePrivateRegistryMediatorAddress(registryAddress, mediatorAddress, mediatorType) {
+    const mediatorContract = await this.chainService.getMediatorContract(mediatorAddress, mediatorType);
     const network = await this.chainService.callContractMethod(mediatorContract, 'oppositeChainId', []);
+    const mediatorContractOnOtherSide = await this.chainService.callContractMethod(mediatorContract, 'mediatorContractOnOtherSide', []);
 
     let additionalData = {};
     if(mediatorType === 'home') {
       additionalData['isBridgetHome'] = true;
-      additionalData['homeMediator'] = mediator;
+      additionalData['homeMediator'] = mediatorAddress;
 
-      additionalData['foreignMediator'] = _mediatorContractOnOtherSide;
+      additionalData['foreignMediator'] = mediatorContractOnOtherSide;
       additionalData['foreignMediatorNetwork'] = network;
     } else {
       additionalData['isBridgetForeign'] = true;
-      additionalData['foreignMediator'] = mediator;
+      additionalData['foreignMediator'] = mediatorAddress;
 
-      additionalData['homeMediator'] = _mediatorContractOnOtherSide;
+      additionalData['homeMediator'] = mediatorContractOnOtherSide;
       additionalData['homeMediatorNetwork'] = network;
     }
-    return this.updatePrivatePropertyRegistry(tokenId, additionalData);
+    return this.updatePrivatePropertyRegistry(registryAddress, additionalData);
   }
 
   // =============================================================
