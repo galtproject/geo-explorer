@@ -112,6 +112,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.getPrivatePropertyRegistry(req.params.address));
   });
 
+  service.post('/v1/ppr/get-by-mediator/:mediatorType/:mediatorAddress', async (req, res) => {
+    await respondByScheme(res, await geoDataService.getPrivatePropertyRegistryByMediator(req.params.mediatorType, req.params.mediatorAddress));
+  });
+
   service.post('/v1/ppr-token-proposals/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterPrivatePropertyTokeProposals(req.body));
   });

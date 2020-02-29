@@ -1059,6 +1059,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     });
   }
 
+  async getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress) {
+    return this.models.PrivatePropertyRegistry.findOne({
+      where: mediatorType === 'foreign' ? {foreignMediator: {[Op.like]: mediatorAddress}} :  {homeMediator: {[Op.like]: mediatorAddress}},
+      // include: [{
+      //   model: this.models.SpaceTokenGeoData,
+      //   as: 'spaceTokens',
+      // }]
+    });
+  }
+
   async addOrPrivatePropertyRegistry(registry: IPrivatePropertyRegistry) {
     let dbObject = await this.getPrivatePropertyRegistry(registry.address);
 

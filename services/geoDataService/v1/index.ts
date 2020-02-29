@@ -687,6 +687,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.database.getPrivatePropertyRegistry(address);
   }
 
+  getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress) {
+    return this.database.getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress);
+  }
+
   async filterPrivatePropertyRegistries(filterQuery: FilterPrivatePropertyRegistryGeoQuery) {
     if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
       filterQuery.addresses = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());

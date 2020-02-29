@@ -104,6 +104,8 @@ export default interface IExplorerGeoDataService {
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
 
+  getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress): Promise<IPrivatePropertyRegistry>;
+
   handlePrivatePropertyRegistryProposalEvent(registryAddress, event: any): Promise<IPrivatePropertyProposal>;
 
   filterPrivatePropertyTokeProposals(pprQuery: PrivatePropertyProposalQuery): Promise<IPrivatePropertyProposalListResponse>;
