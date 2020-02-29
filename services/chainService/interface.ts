@@ -27,6 +27,8 @@ export default interface IExplorerChainService {
   privatePropertyMarket: any;
 
   ppDepositHolder;
+  ppHomeMediatorFactory;
+  ppForeignMediatorFactory;
 
   communityFactory: any;
   communityMockFactory: any;
@@ -94,6 +96,10 @@ export default interface IExplorerChainService {
 
   getCommunityFundRegistryContract(address): Promise<any>;
 
+  getMediatorFactoryAbi(): any;
+
+  getMediatorContract(address, mediatorType): Promise<any>;
+
   hexToString(value): string;
 
   stringToHex(value): string;
@@ -105,6 +111,8 @@ export default interface IExplorerChainService {
   getBlockTimestamp(blockNumber):  Promise<number>;
 
   getTransactionReceipt(txId, abiAddressArr): any;
+
+  getTransactionArgs(txId, abi): any;
 
   parseData(data, abi, decimals?): {
     methodSignature: any,
@@ -157,6 +165,8 @@ export enum ChainServiceEvents {
 
   PPDepositHolderDeposit = 'Deposit',
   PPDepositHolderWithdraw = 'Withdrawal',
+
+  PPMediatorNew = 'NewPPMediator',
 
   NewCommunity = 'CreateFundDone',
   CommunityMint = 'TokenMint',

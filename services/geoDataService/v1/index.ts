@@ -579,10 +579,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const timestamp = await this.chainService.getBlockTimestamp(event.blockNumber);
     const chainCreatedAt = new Date();
     chainCreatedAt.setTime(timestamp * 1000);
-    return this.updatePrivatePropertyRegistry(address, chainCreatedAt);
+    return this.updatePrivatePropertyRegistry(address, {chainCreatedAt});
   }
 
-  async updatePrivatePropertyRegistry(address, chainCreatedAt?) {
+  async updatePrivatePropertyRegistry(address, additionalData = {}) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
     const owner = await contract.methods.owner().call({});
@@ -663,10 +663,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       address, controller, contourVerification, owner, totalSupply, name, symbol, dataLink, dataJson, description, defaultBurnTimeout, ...roles
     };
 
-    if (chainCreatedAt) {
-      pprData.chainCreatedAt = chainCreatedAt;
-    }
-    await this.database.addOrPrivatePropertyRegistry(pprData);
+    await this.database.addOrPrivatePropertyRegistry({
+      ...pprData,
+      ...additionalData
+    });
   }
 
   async getPrivatePropertyRegistry(address) {
@@ -922,6 +922,29 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       list: await this.database.filterPprMember(filterQuery),
       total: await this.database.filterPprMemberCount(filterQuery)
     };
+  }
+
+  async handleMediatorCreation(event, mediatorType) {
+    const {mediator, _mediatorContractOnOtherSide, tokenId} = event.returnValues;
+
+    const mediatorContract = await this.chainService.getMediatorContract(mediator, mediatorType);
+    const network = await this.chainService.callContractMethod(mediatorContract, 'oppositeChainId', []);
+
+    let additionalData = {};
+    if(mediatorType === 'home') {
+      additionalData['isBridgetHome'] = true;
+      additionalData['homeMediator'] = mediator;
+
+      additionalData['foreignMediator'] = _mediatorContractOnOtherSide;
+      additionalData['foreignMediatorNetwork'] = network;
+    } else {
+      additionalData['isBridgetForeign'] = true;
+      additionalData['foreignMediator'] = mediator;
+
+      additionalData['homeMediator'] = _mediatorContractOnOtherSide;
+      additionalData['homeMediatorNetwork'] = network;
+    }
+    return this.updatePrivatePropertyRegistry(tokenId, additionalData);
   }
 
   // =============================================================

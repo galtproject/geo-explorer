@@ -497,6 +497,28 @@ const log = require('./services/logService');
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
+    await chainService.getEventsFromBlock(chainService.ppHomeMediatorFactory, ChainServiceEvents.PPMediatorNew, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handleMediatorCreation(e, 'home')
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppHomeMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handleMediatorCreation(newEvent, 'home');
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
+
+    await chainService.getEventsFromBlock(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handleMediatorCreation(e, 'foreign')
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handleMediatorCreation(newEvent, 'foreign');
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
+
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, lastBlockNumber).then(async (events) => {
       await pIteration.forEach(events, (e) => {
         return geoDataService.handleSaleOrderEvent(e)

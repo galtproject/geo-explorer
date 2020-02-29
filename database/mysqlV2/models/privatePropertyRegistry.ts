@@ -72,6 +72,27 @@ module.exports = async function (sequelize, models) {
     chainCreatedAt: {
       type: Sequelize.DATE
     },
+
+    isBridgetForeign: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+    isBridgetHome: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+    homeMediator: {
+      type: Sequelize.STRING(100)
+    },
+    homeMediatorNetwork: {
+      type: Sequelize.STRING(100)
+    },
+    foreignMediator: {
+      type: Sequelize.STRING(100)
+    },
+    foreignMediatorNetwork: {
+      type: Sequelize.STRING(100)
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

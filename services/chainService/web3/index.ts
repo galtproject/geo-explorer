@@ -80,6 +80,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   tokenizableFactory: any;
 
   ppDepositHolder: any;
+  ppHomeMediatorFactory: any;
+  ppForeignMediatorFactory: any;
 
   contractsConfig: any;
 
@@ -224,7 +226,22 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.communityCache = {};
     this.tokenizableCache = {};
 
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory', 'tokenizableFactory', 'ppDepositHolder'].forEach(contractName => {
+    [
+      'spaceGeoData',
+      'propertyMarket',
+      'spaceToken',
+      'newPropertyManager',
+      'privatePropertyGlobalRegistry',
+      'privatePropertyMarket',
+      'communityFactory',
+      'communityMockFactory',
+      'pprCommunityFactory',
+      'tokenizableFactory',
+      'ppDepositHolder',
+      'ppForeignMediatorFactory',
+      'ppHomeMediatorFactory',
+      'ppForeignMediatorFactory'
+    ].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
@@ -636,6 +653,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  getMediatorContract(address, type) {
+    if(this.pprCache[address]) {
+      return this.pprCache[address];
+    }
+
+    const mediatorContract = new this.web3.eth.Contract(this.contractsConfig[type === 'foreign' ? 'ppForeignMediatorAbi' : 'ppHomeMediatorAbi'], address);
+    this.pprCache[address] = mediatorContract;
+    return mediatorContract;
+  }
+
   // =============================================================
   // Community
   // =============================================================
@@ -687,6 +714,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // =============================================================
   // Common
   // =============================================================
+
+  getMediatorFactoryAbi() {
+    return this.contractsConfig['ppHomeMediatorFactoryAbi'] || this.contractsConfig['ppForeignMediatorFactoryAbi'];
+  }
 
   public async callContractMethod(contract, method, args, type) {
     if(!contract || !contract.methods[method]) {
@@ -766,6 +797,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
 
     return receipt;
+  }
+
+  async getTransactionArgs(txHash, abi) {
+    const tx = await this.web3.eth.getTransaction(txHash);
+    const {inputs} = this.parseData(tx.input, abi);
+    return inputs;
   }
 
   getMethodSignature(abi, methodName) {
