@@ -555,6 +555,8 @@ const log = require('./services/logService');
 
     chainService.subscribeForNewEvents(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
       await geoDataService.handleMediatorCreation(newEvent, 'foreign');
+      pprUnsubscribeByAddress[newEvent.returnValues.tokenId.toLowerCase()]();
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.tokenId, false, newEvent.blockNumber);
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
