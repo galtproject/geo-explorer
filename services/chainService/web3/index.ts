@@ -673,7 +673,17 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   async getBlockTimestamp(blockNumber) {
-    return (await this.web3.eth.getBlock(blockNumber)).timestamp;
+    return new Promise<number>(async (resolve, reject) => {
+      const block = await this.web3.eth.getBlock(blockNumber);
+      if(block) {
+        resolve(block.timestamp);
+      } else {
+        log(`Failed to get ${blockNumber} block timestamp, try again...`)
+        setTimeout(() => {
+          resolve(this.getBlockTimestamp(blockNumber));
+        }, 500);
+      }
+    });
   }
 
   async getTransactionReceipt(txHash, abiAddressArr) {
