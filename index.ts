@@ -177,6 +177,8 @@ const log = require('./services/logService');
       // registryAddress => bool
     };
 
+    const pprUnsubscribeByAddress = {};
+
     await pIteration.forEachSeries(chainService.contractsConfig.oldPPTokenRegistryAddresses || [], async (oldPPTokenRegistryAddress) => {
       const oldPrivatePropertyGlobalRegistry = await chainService.getPPTokenRegistryContract(oldPPTokenRegistryAddress);
 
@@ -200,8 +202,6 @@ const log = require('./services/logService');
       await geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
       await setLastBlockNumber(newEvent.blockNumber);
     });
-
-    const pprUnsubscribeByAddress = {};
 
     async function subscribeToPrivatePropertyRegistry (address, old = false, fromBlockNumber = null) {
       address = address.toLowerCase();
