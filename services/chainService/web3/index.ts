@@ -672,8 +672,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return methodAbi;
   }
 
-  async getBlockTimestamp(blockNumber) {
-    return new Promise<number>(async (resolve, reject) => {
+  async getBlockTimestamp(blockNumber): Promise<any> {
+    return new Promise(async (resolve, reject) => {
       const block = await this.web3.eth.getBlock(blockNumber);
       if(block) {
         resolve(block.timestamp);
