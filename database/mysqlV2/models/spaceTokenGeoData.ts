@@ -170,6 +170,10 @@ module.exports = async function (sequelize, models) {
     updatedAtBlock: {
       type: Sequelize.INTEGER
     },
+
+    lockerType: {
+      type: Sequelize.STRING(100)
+    }
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

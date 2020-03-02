@@ -755,6 +755,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
     }
 
+    findAllParam.include = [{
+      association: 'ppr'
+    }];
+
     return this.models.SpaceTokenGeoData.findAll(findAllParam);
   }
 
@@ -766,7 +770,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getSpaceToken(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
-      where: { tokenId, contractAddress }
+      where: { tokenId, contractAddress },
+      include: [{
+        association: 'ppr'
+      }]
     });
   }
 

@@ -154,6 +154,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     const eventReturn = contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
+      if(error) {
+        console.error('New event error', error);
+        return callback(error, e);
+      }
       this.getBlockTimestamp(e.blockNumber).then(blockTimestamp => {
         const blockDate = new Date();
         blockDate.setTime(parseInt(blockTimestamp) * 1000);

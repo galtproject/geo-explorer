@@ -178,7 +178,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       modelIpfsHash = _.last(_.trim(link, '/').split('/'))
     }
 
+    const ppr = await this.getPrivatePropertyRegistry(contractAddress);
+    let pprId;
+    if(ppr) {
+      pprId = ppr.id;
+    }
+
     geoDataToSave = _.extend({
+      pprId,
       type: details.type,
       subtype: details.subtype,
       imageHash,
