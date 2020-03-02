@@ -438,7 +438,7 @@ const log = require('./services/logService');
           await geoDataService.updatePrivatePropertyRegistry(address);
           if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller.toLowerCase()) {
             unsubscribe();
-            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
+            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber + 1);
           }
           await setLastBlockNumber(newEvent.blockNumber);
         }));
@@ -455,7 +455,7 @@ const log = require('./services/logService');
           await geoDataService.updatePrivatePropertyRegistry(address);
           if(eventName === 'PrivatePropertySetVerification' && contourVerificationAddress.toLowerCase() !== newEvent.returnValues.contourVerificationManager.toLowerCase()) {
             unsubscribe();
-            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
+            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber + 1);
           }
           await setLastBlockNumber(newEvent.blockNumber);
         }));
