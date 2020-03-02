@@ -101,9 +101,6 @@ module.exports = async function (sequelize, models) {
     ]
   });
 
-  PrivatePropertyRegistry.hasMany(models.SpaceTokenGeoData, {as: 'spaceTokens', foreignKey: 'pprId'});
-  models.SpaceTokenGeoData.hasMany(PrivatePropertyRegistry, {as: 'ppr', foreignKey: 'pprId'});
-
   // PrivatePropertyRegistry.belongsTo(models.SpaceTokenGeoData, {as: 'tokenGeoData', foreignKey: 'tokenGeoDataId'});
   // models.SpaceTokenGeoData.hasMany(PrivatePropertyRegistry, {as: 'orders', foreignKey: 'tokenGeoDataId'});
 
