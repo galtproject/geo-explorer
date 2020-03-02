@@ -887,9 +887,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
 
-    const CLAIM_UNIQUENESS = await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')]);
-    const verificationDisabled = CLAIM_UNIQUENESS === '0x0000000000000000000000000000000000000000000000000000000000000001' || CLAIM_UNIQUENESS === '1' || CLAIM_UNIQUENESS === 1;
-
     let creationTimeoutEndOn;
     if(ppr.contourVerification && ppr.contourVerification !== '0x0000000000000000000000000000000000000000') {
       const creationTimestamp = await this.chainService.callContractMethod(contract, 'propertyCreatedAt', [tokenId], 'number');
@@ -899,7 +896,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       creationTimeoutEndOn.setTime((creationTimestamp + newTokenTimeout) * 1000);
     }
 
-    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled, creationTimeoutEndOn } as any);
+    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, creationTimeoutEndOn } as any);
     return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
   }
 
