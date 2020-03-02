@@ -107,6 +107,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let lockerType;
     if(lockerOwner) {
       lockerType = await this.chainService.getLockerType(owner);
+      if(lockerType) {
+        lockerType = this.chainService.hexToString(lockerType)
+      }
       log('lockerType', lockerType);
     }
 
