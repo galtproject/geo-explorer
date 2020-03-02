@@ -184,22 +184,22 @@ const log = require('./services/logService');
 
       await chainService.getEventsFromBlock(oldPrivatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
         await pIteration.forEachSeries(events, async (e) => {
+          await geoDataService.handleNewPrivatePropertyRegistryEvent(e);
           await subscribeToPrivatePropertyRegistry(e.returnValues.token, true, lastBlockNumber);
-          return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
         });
       });
     });
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
+        await geoDataService.handleNewPrivatePropertyRegistryEvent(e);
         await subscribeToPrivatePropertyRegistry(e.returnValues.token, e.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase(), lastBlockNumber);
-        return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
     });
 
     chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, startBlockNumber, async (err, newEvent) => {
-      subscribeToPrivatePropertyRegistry(newEvent.returnValues.token, newEvent.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase(), lastBlockNumber);
       await geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.token, newEvent.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase(), lastBlockNumber);
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
