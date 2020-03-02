@@ -52,6 +52,8 @@ export default interface IExplorerChainService {
 
   getLockerOwner(address): Promise<string>;
 
+  getLockerType(address): Promise<string>;
+
   getContractSymbol(address): Promise<string>;
 
   callContractMethod(contract, method, args, type?): Promise<any>;

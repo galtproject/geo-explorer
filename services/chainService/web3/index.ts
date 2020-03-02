@@ -345,6 +345,15 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
   }
 
+  public async getLockerType(address) {
+    try {
+      const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"LOCKER_TYPE","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);
+      return contract.methods.LOCKER_TYPE().call({}).catch(() => null);
+    } catch (e) {
+      return null;
+    }
+  }
+
   public async getSpaceTokenOwner(contractAddress, tokenId) {
     if(this.isContractAddress(this.spaceGeoData, contractAddress)) {
       contractAddress = this.spaceToken._address;

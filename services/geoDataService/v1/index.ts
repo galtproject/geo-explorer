@@ -104,6 +104,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const lockerOwner = await this.chainService.getLockerOwner(owner);
     log('getLockerOwner', lockerOwner);
 
+    let lockerType;
+    if(lockerOwner) {
+      lockerType = await this.chainService.getLockerType(owner);
+      log('lockerType', lockerType);
+    }
+
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
     return this.saveSpaceTokenByDataLink(contractAddress, dataLink, {
@@ -112,6 +118,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       locker: lockerOwner ? owner : null,
       inLocker: !!lockerOwner,
       level,
+      lockerType,
       ...geoData,
       ...additionalData
     })
