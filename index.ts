@@ -49,6 +49,7 @@ const log = require('./services/logService');
   }, 30 * 1000);
 
   let startBlockNumber = await chainService.getCurrentBlock();
+  console.log('startBlockNumber', startBlockNumber);
 
   async function setLastBlockNumber(blockNumber) {
     const lastBlockNumber = parseInt(await database.getValue('lastBlockNumber'));
@@ -65,6 +66,7 @@ const log = require('./services/logService');
     lastBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 
     startBlockNumber = await chainService.getCurrentBlock();
+    console.log('fetchAndSubscribe startBlockNumber', startBlockNumber);
 
     await chainService.getEventsFromBlock(chainService.spaceGeoData, ChainServiceEvents.SetSpaceTokenContour, lastBlockNumber).then(async (events) => {
       await pIteration.forEach(events, geohashService.handleChangeContourEvent.bind(geohashService));
@@ -175,27 +177,29 @@ const log = require('./services/logService');
       // registryAddress => bool
     };
 
+    const pprUnsubscribeByAddress = {};
+
     await pIteration.forEachSeries(chainService.contractsConfig.oldPPTokenRegistryAddresses || [], async (oldPPTokenRegistryAddress) => {
       const oldPrivatePropertyGlobalRegistry = await chainService.getPPTokenRegistryContract(oldPPTokenRegistryAddress);
 
       await chainService.getEventsFromBlock(oldPrivatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
         await pIteration.forEachSeries(events, async (e) => {
+          await geoDataService.handleNewPrivatePropertyRegistryEvent(e);
           await subscribeToPrivatePropertyRegistry(e.returnValues.token, true, lastBlockNumber);
-          return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
         });
       });
     });
 
     await chainService.getEventsFromBlock(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, 0).then(async (events) => {
       await pIteration.forEachSeries(events, async (e) => {
+        await geoDataService.handleNewPrivatePropertyRegistryEvent(e);
         await subscribeToPrivatePropertyRegistry(e.returnValues.token, e.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase(), lastBlockNumber);
-        return geoDataService.handleNewPrivatePropertyRegistryEvent(e);
       });
     });
 
     chainService.subscribeForNewEvents(chainService.privatePropertyGlobalRegistry, ChainServiceEvents.NewPrivatePropertyRegistry, startBlockNumber, async (err, newEvent) => {
-      subscribeToPrivatePropertyRegistry(newEvent.returnValues.token, newEvent.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase(), lastBlockNumber);
       await geoDataService.handleNewPrivatePropertyRegistryEvent(newEvent);
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.token, newEvent.returnValues.token.toLowerCase() === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF'.toLowerCase(), lastBlockNumber);
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
@@ -223,7 +227,12 @@ const log = require('./services/logService');
         });
         subscribedToPrivatePropertyRegistry[address] = false;
       }
+
+      pprUnsubscribeByAddress[address] = unsubscribe;
+
       const contract = chainService.getPropertyRegistryContract(address, old);
+
+      const ppr = await geoDataService.getPrivatePropertyRegistry(address);
 
       const owner = await chainService.callContractMethod(contract, 'owner', []);
 
@@ -231,15 +240,19 @@ const log = require('./services/logService');
         return;
       }
 
-      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []);
+      const controllerAddress = await await chainService.callContractMethod(contract, 'controller', []).catch(() => null);
 
-      const controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
-
-      const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []);
-
+      let controllerContract;
+      let contourVerificationAddress = '';
       let verificationContract;
-      if(contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
-        verificationContract = chainService.getPropertyRegistryVerificationContract(contourVerificationAddress);
+
+      if (controllerAddress) {
+        controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
+
+        const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []).catch(() => null);
+        if(contourVerificationAddress && contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
+          verificationContract = chainService.getPropertyRegistryVerificationContract(contourVerificationAddress);
+        }
       }
 
       log('SetSpaceTokenContour');
@@ -425,7 +438,7 @@ const log = require('./services/logService');
           await geoDataService.updatePrivatePropertyRegistry(address);
           if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller.toLowerCase()) {
             unsubscribe();
-            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
+            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber + 1);
           }
           await setLastBlockNumber(newEvent.blockNumber);
         }));
@@ -442,7 +455,7 @@ const log = require('./services/logService');
           await geoDataService.updatePrivatePropertyRegistry(address);
           if(eventName === 'PrivatePropertySetVerification' && contourVerificationAddress.toLowerCase() !== newEvent.returnValues.contourVerificationManager.toLowerCase()) {
             unsubscribe();
-            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber);
+            return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber + 1);
           }
           await setLastBlockNumber(newEvent.blockNumber);
         }));
@@ -473,6 +486,30 @@ const log = require('./services/logService');
           await setLastBlockNumber(newEvent.blockNumber);
         }));
       });
+
+      let mediatorContract;
+      let mediatorType;
+      if(ppr && ppr.isBridgetForeign && ppr.foreignMediator && ppr.foreignMediator !== '0x0000000000000000000000000000000000000000') {
+        mediatorType = 'foreign';
+        mediatorContract = chainService.getMediatorContract(ppr.foreignMediator, mediatorType);
+      }
+      if(ppr && ppr.isBridgetHome && ppr.homeMediator && ppr.homeMediator !== '0x0000000000000000000000000000000000000000') {
+        mediatorType = 'home';
+        mediatorContract = chainService.getMediatorContract(ppr.homeMediator, mediatorType);
+      }
+
+      await pIteration.forEachSeries(['PPMediatorSetOtherSide'], async eventName => {
+        await chainService.getEventsFromBlock(mediatorContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            return geoDataService.handleMediatorOtherSideSet(address, e, mediatorType);
+          });
+        });
+
+        addSubscription(chainService.subscribeForNewEvents(mediatorContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
+          await geoDataService.handleMediatorOtherSideSet(address, newEvent, mediatorType);
+          await setLastBlockNumber(newEvent.blockNumber);
+        }));
+      });
     }
 
     await chainService.getEventsFromBlock(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderDeposit, lastBlockNumber).then(async (events) => {
@@ -494,6 +531,32 @@ const log = require('./services/logService');
 
     chainService.subscribeForNewEvents(chainService.ppDepositHolder, ChainServiceEvents.PPDepositHolderWithdraw, startBlockNumber, async (err, newEvent) => {
       await geoDataService.handlePrivatePropertyPledgeChangeEvent(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
+
+    await chainService.getEventsFromBlock(chainService.ppHomeMediatorFactory, ChainServiceEvents.PPMediatorNew, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handleMediatorCreation(e, 'home')
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppHomeMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handleMediatorCreation(newEvent, 'home');
+      pprUnsubscribeByAddress[newEvent.returnValues.tokenId.toLowerCase()]();
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.tokenId, false, newEvent.blockNumber);
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
+
+    await chainService.getEventsFromBlock(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handleMediatorCreation(e, 'foreign')
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handleMediatorCreation(newEvent, 'foreign');
+      pprUnsubscribeByAddress[newEvent.returnValues.tokenId.toLowerCase()]();
+      subscribeToPrivatePropertyRegistry(newEvent.returnValues.tokenId, false, newEvent.blockNumber);
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
@@ -557,6 +620,15 @@ const log = require('./services/logService');
       await pIteration.forEachSeries(events, async (e) => {
         const community = await geoDataService.handleNewCommunityEvent(e, true);
         return subscribeToCommunity(community.address, true);
+      });
+    });
+
+    await pIteration.forEachSeries(chainService.contractsConfig.oldPrivateFundFactoryAddresses || [], (pprCommunityFactoryAddress) => {
+      return chainService.getEventsFromBlock(chainService.getCommunityFactoryContract(pprCommunityFactoryAddress), ChainServiceEvents.NewCommunity, 0).then(async (events) => {
+        await pIteration.forEachSeries(events, async (e) => {
+          const community = await geoDataService.handleNewCommunityEvent(e, true);
+          return subscribeToCommunity(community.address, true);
+        });
       });
     });
 

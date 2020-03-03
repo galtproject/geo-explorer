@@ -9,7 +9,15 @@
     "drop-database": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_v2;'",
     "create-database": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_v2; ALTER DATABASE geo_explorer_v2 CHARACTER SET utf8 COLLATE utf8_general_ci;'",
     "recreate-database": "npm run drop-database; npm run create-database;",
-    "testCoverage": "./node_modules/.bin/nyc -r lcov -e .ts -x \"*.test.ts\" ./node_modules/.bin/mocha -r ts-node/register test/**/*.test.ts && nyc report"
+    "testCoverage": "./node_modules/.bin/nyc -r lcov -e .ts -x \"*.test.ts\" ./node_modules/.bin/mocha -r ts-node/register test/**/*.test.ts && nyc report",
+    "mainnet-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_mainnet;'",
+    "mainnet-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_mainnet; ALTER DATABASE geo_explorer_mainnet CHARACTER SET utf8 COLLATE utf8_general_ci;'",
+    "mainnet-recreate": "npm run mainnet-drop && npm run mainnet-create",
+    "mainnet": "DATABASE_NAME=geo_explorer_mainnet CONTRACTS_CONFIG=mainnet.json RPC_WS_SERVER=wss://wss-rpc.mainnet.galtproject.io/ API_PORT=3399 ts-node ./index.ts",
+    "poa-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_poa;'",
+    "poa-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_poa; ALTER DATABASE geo_explorer_poa CHARACTER SET utf8 COLLATE utf8_general_ci;'",
+    "poa-recreate": "npm run poa-drop && npm run poa-create",
+    "poa": "DATABASE_NAME=geo_explorer_poa CONTRACTS_CONFIG=poa.json RPC_WS_SERVER=ws://poa-rpc-parity-001.poa.network:8546 API_PORT=4422 ts-node ./index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -27,7 +35,7 @@
     "restana": "^2.7.0",
     "sequelize": "5.19.0",
     "typescript": "^3.6.3",
-    "web3": "^1.0.0-beta.52",
+    "web3": "1.2.6",
     "websocket": "^1.0.30",
     "yaeti": "^1.0.2"
   },

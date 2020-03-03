@@ -10,6 +10,8 @@
 module.exports = async function (sequelize) {
   const models: any = {};
 
+  models.PrivatePropertyRegistry = await require('./privatePropertyRegistry')(sequelize, models);
+
   models.GeohashSpaceToken = await require('./geohashSpaceToken')(sequelize, models);
   models.SpaceTokenGeoData = await require('./spaceTokenGeoData')(sequelize, models);
   models.SaleOrder = await require('./saleOrder')(sequelize, models);
@@ -19,7 +21,6 @@ module.exports = async function (sequelize) {
 
   models.TokenizableMember = await require('./tokenizableMember')(sequelize, models);
 
-  models.PrivatePropertyRegistry = await require('./privatePropertyRegistry')(sequelize, models);
   models.PprTokenProposal = await require('./pprTokenProposal')(sequelize, models);
   models.PprLegalAgreement = await require('./pprLegalAgreement')(sequelize, models);
   models.PprMember = await require('./pprMember')(sequelize, models);

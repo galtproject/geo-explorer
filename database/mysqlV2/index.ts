@@ -755,6 +755,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
     }
 
+    findAllParam.include = [{
+      association: 'ppr'
+    }];
+
     return this.models.SpaceTokenGeoData.findAll(findAllParam);
   }
 
@@ -766,7 +770,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getSpaceToken(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.findOne({
-      where: { tokenId, contractAddress }
+      where: { tokenId, contractAddress },
+      include: [{
+        association: 'ppr'
+      }]
     });
   }
 
@@ -1052,6 +1059,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async getPrivatePropertyRegistry(address) {
     return this.models.PrivatePropertyRegistry.findOne({
       where: {address: {[Op.like]: address}},
+      // include: [{
+      //   model: this.models.SpaceTokenGeoData,
+      //   as: 'spaceTokens',
+      // }]
+    });
+  }
+
+  async getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress) {
+    return this.models.PrivatePropertyRegistry.findOne({
+      where: mediatorType === 'foreign' ? {foreignMediator: {[Op.like]: mediatorAddress}} :  {homeMediator: {[Op.like]: mediatorAddress}},
       // include: [{
       //   model: this.models.SpaceTokenGeoData,
       //   as: 'spaceTokens',

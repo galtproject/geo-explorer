@@ -94,6 +94,8 @@ export default interface IExplorerDatabase {
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
 
+  getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress): Promise<IPrivatePropertyRegistry>;
+
   filterPrivatePropertyRegistry(filterQuery: PrivatePropertyRegistryQuery): Promise<IPrivatePropertyRegistry[]>;
 
   filterPrivatePropertyRegistryCount(filterQuery: PrivatePropertyRegistryQuery): Promise<number>;
@@ -547,6 +549,13 @@ export interface IPrivatePropertyRegistry {
   description?;
   chainCreatedAt?;
   defaultBurnTimeout?;
+
+  isBridgetForeign?;
+  isBridgetHome?;
+  homeMediator?;
+  homeMediatorNetwork?;
+  foreignMediator?;
+  foreignMediatorNetwork?;
 
   createdAtBlock?;
   updatedAtBlock?;

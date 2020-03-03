@@ -117,6 +117,9 @@ module.exports = async function (sequelize, models) {
     burnWithoutPledgeOn: {
       type: Sequelize.DATE
     },
+    creationTimeoutEndOn: {
+      type: Sequelize.DATE
+    },
     verificationPledge: {
       type: Sequelize.FLOAT,
       defaultValue: 0
@@ -167,6 +170,10 @@ module.exports = async function (sequelize, models) {
     updatedAtBlock: {
       type: Sequelize.INTEGER
     },
+
+    lockerType: {
+      type: Sequelize.STRING(100)
+    }
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
@@ -174,6 +181,9 @@ module.exports = async function (sequelize, models) {
       // {fields: ['owner']}
     ]
   });
+
+  SpaceTokenGeoData.belongsTo(models.PrivatePropertyRegistry, {as: 'ppr', foreignKey: 'pprId'});
+  models.PrivatePropertyRegistry.hasMany(SpaceTokenGeoData, {as: 'spaceTokens', foreignKey: 'pprId'});
 
   return SpaceTokenGeoData.sync({});
 };

@@ -72,6 +72,27 @@ module.exports = async function (sequelize, models) {
     chainCreatedAt: {
       type: Sequelize.DATE
     },
+
+    isBridgetForeign: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+    isBridgetHome: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+    homeMediator: {
+      type: Sequelize.STRING(100)
+    },
+    homeMediatorNetwork: {
+      type: Sequelize.STRING(100)
+    },
+    foreignMediator: {
+      type: Sequelize.STRING(100)
+    },
+    foreignMediatorNetwork: {
+      type: Sequelize.STRING(100)
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
@@ -80,17 +101,6 @@ module.exports = async function (sequelize, models) {
     ]
   });
 
-
-  models.SpaceTokensPrivateRegistries = sequelize.define('spaceTokensPrivateRegistries', {} as any, {} as any);
-
-  PrivatePropertyRegistry.belongsToMany(models.SpaceTokenGeoData, {as: 'spaceTokens', through: models.SpaceTokensPrivateRegistries});
-  models.SpaceTokenGeoData.belongsToMany(PrivatePropertyRegistry, {as: 'privateRegistries', through: models.SpaceTokensPrivateRegistries});
-
-  let result = await PrivatePropertyRegistry.sync({});
-
-  await models.SpaceTokensPrivateRegistries.sync({});
-
-  //
   // PrivatePropertyRegistry.belongsTo(models.SpaceTokenGeoData, {as: 'tokenGeoData', foreignKey: 'tokenGeoDataId'});
   // models.SpaceTokenGeoData.hasMany(PrivatePropertyRegistry, {as: 'orders', foreignKey: 'tokenGeoDataId'});
 
@@ -98,5 +108,5 @@ module.exports = async function (sequelize, models) {
   //
   // await models.SpaceTokensOrders.sync({});
 
-  return result;
+  return PrivatePropertyRegistry.sync({});
 };

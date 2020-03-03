@@ -26,7 +26,7 @@ import {
   IExplorerGeoDataEvent, IExplorerNewApplicationEvent,
   IExplorerSaleOrderEvent
 } from "../../interfaces";
-import IExplorerChainService from "../../chainService/interface";
+import IExplorerChainService, {ChainServiceEvents} from "../../chainService/interface";
 import IExplorerGeohashService from "../../geohashService/interface";
 
 const _ = require("lodash");
@@ -101,8 +101,30 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       await this.database.addOrUpdateContour(geoData.geohashContour, tokenId, contractAddress, level, geoData.spaceTokenType);
     }
 
-    const lockerOwner = await this.chainService.getLockerOwner(owner);
+    let lockerOwner = await this.chainService.getLockerOwner(owner);
     log('getLockerOwner', lockerOwner);
+
+    let lockerType;
+    if(lockerOwner) {
+      lockerType = await this.chainService.getLockerType(owner);
+      if(lockerType) {
+        lockerType = this.chainService.hexToString(lockerType)
+      }
+      log('lockerType', lockerType);
+
+      const contract = await this.chainService.getPropertyRegistryContract(contractAddress);
+      const transferEvents = await this.chainService.getEventsFromBlock(
+        contract,
+        ChainServiceEvents.SpaceTokenTransfer,
+        0,
+        {tokenId}
+      );
+      const lastTransfer = _.last(transferEvents);
+      if(lastTransfer) {
+        lockerOwner = lastTransfer.returnValues.from;
+        log('lockerOwner by event', lockerOwner);
+      }
+    }
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
 
@@ -112,6 +134,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       locker: lockerOwner ? owner : null,
       inLocker: !!lockerOwner,
       level,
+      lockerType,
       ...geoData,
       ...additionalData
     })
@@ -178,7 +201,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       modelIpfsHash = _.last(_.trim(link, '/').split('/'))
     }
 
+    const ppr = await this.getPrivatePropertyRegistry(contractAddress);
+    let pprId;
+    if(ppr) {
+      pprId = ppr.id;
+    }
+
     geoDataToSave = _.extend({
+      pprId,
       type: details.type,
       subtype: details.subtype,
       imageHash,
@@ -385,7 +415,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     log('order saved', dbOrder.orderId, event.contractAddress);
 
-    await dbOrder.setSpaceTokens(dbSpaceTokens);
+    await dbOrder.setSpaceTokens(dbSpaceTokens).catch(() => {/*already set */});
   };
 
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
@@ -579,10 +609,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const timestamp = await this.chainService.getBlockTimestamp(event.blockNumber);
     const chainCreatedAt = new Date();
     chainCreatedAt.setTime(timestamp * 1000);
-    return this.updatePrivatePropertyRegistry(address, chainCreatedAt);
+    return this.updatePrivatePropertyRegistry(address, {chainCreatedAt});
   }
 
-  async updatePrivatePropertyRegistry(address, chainCreatedAt?) {
+  async updatePrivatePropertyRegistry(address, additionalData = {}) {
     const contract = await this.chainService.getPropertyRegistryContract(address);
 
     const owner = await contract.methods.owner().call({});
@@ -598,46 +628,60 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const [name, symbol, controller] = await Promise.all([
       contract.methods.name().call({}),
       contract.methods.symbol().call({}),
-      contract.methods.controller().call({})
+      contract.methods.controller ? contract.methods.controller().call({}).catch(() => null) : null
     ]);
 
-    const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
-    const [controllerOwner, contourVerification, defaultBurnTimeout] = await Promise.all([
-      controllerContract.methods.owner().call({}),
-      controllerContract.methods.contourVerificationManager ? controllerContract.methods.contourVerificationManager().call({}) : '0x0000000000000000000000000000000000000000',
-      controllerContract.methods.defaultBurnTimeoutDuration().call({})
-    ]);
 
-    let verificationContract;
-    if(contourVerification !== '0x0000000000000000000000000000000000000000') {
-      verificationContract = await this.chainService.getPropertyRegistryVerificationContract(contourVerification);
-    }
-
-    let minter = await controllerContract.methods.minter().call({});
-
-    const [geoDataManager, feeManager, burner, contourVerificationOwner] = await Promise.all([
-      controllerContract.methods.geoDataManager().call({}),
-      controllerContract.methods.feeManager().call({}),
-      controllerContract.methods.burner().call({}),
-      verificationContract ? verificationContract.methods.owner().call({}) : null
-    ]);
-
-    const roles = {
-      owner,
-      controllerOwner,
-      minter,
-      geoDataManager,
-      feeManager,
-      burner,
-      contourVerificationOwner
+    let roles: any = {
+      owner
     };
+
+    if(controller) {
+      const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
+      const [controllerOwner, contourVerification, defaultBurnTimeout] = await Promise.all([
+        controllerContract.methods.owner().call({}),
+        controllerContract.methods.contourVerificationManager ? controllerContract.methods.contourVerificationManager().call({}).catch(() => null) : '0x0000000000000000000000000000000000000000',
+        controllerContract.methods.defaultBurnTimeoutDuration().call({})
+      ]);
+
+      let verificationContract;
+      if(contourVerification && contourVerification !== '0x0000000000000000000000000000000000000000') {
+        verificationContract = await this.chainService.getPropertyRegistryVerificationContract(contourVerification);
+      }
+
+      let minter = await controllerContract.methods.minter().call({});
+
+      const [geoDataManager, feeManager, burner, contourVerificationOwner] = await Promise.all([
+        controllerContract.methods.geoDataManager().call({}),
+        controllerContract.methods.feeManager().call({}),
+        controllerContract.methods.burner().call({}),
+        verificationContract ? verificationContract.methods.owner().call({}) : null
+      ]);
+
+      roles = {
+        ...roles,
+        owner,
+        controllerOwner,
+        minter,
+        geoDataManager,
+        feeManager,
+        burner,
+        contourVerificationOwner
+      };
+
+      additionalData = {
+        ...additionalData,
+        contourVerification,
+        defaultBurnTimeout
+      }
+    }
 
     await this.database.addOrPrivatePropertyRegistry({address});
 
     const dbObject = await this.database.getPrivatePropertyRegistry(address);
 
     await pIteration.forEach(['owner', 'minter', 'geoDataManager', 'feeManager', 'burner', 'contourVerificationOwner'], async (roleName) => {
-      if (dbObject[roleName] != roles[roleName]) {
+      if (roles[roleName] && dbObject[roleName] != roles[roleName]) {
         if (dbObject[roleName]) {
           await this.deletePprMember(address, dbObject[roleName]);
         }
@@ -648,8 +692,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     const totalSupply = parseInt((await contract.methods.totalSupply().call({})).toString(10));
-    //TODO: remove support for old registry
-    const dataLink = await (contract.methods.tokenDataLink || contract.methods.contractDataLink)().call({});
+    const dataLink = await contract.methods.contractDataLink().call({});
 
     let description = dataLink;
     let dataJson = '';
@@ -660,17 +703,22 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const pprData: IPrivatePropertyRegistry = {
-      address, controller, contourVerification, owner, totalSupply, name, symbol, dataLink, dataJson, description, defaultBurnTimeout, ...roles
+      address, controller, owner, totalSupply, name, symbol, dataLink, dataJson, description
     };
 
-    if (chainCreatedAt) {
-      pprData.chainCreatedAt = chainCreatedAt;
-    }
-    await this.database.addOrPrivatePropertyRegistry(pprData);
+    await this.database.addOrPrivatePropertyRegistry({
+      ...pprData,
+      ...additionalData,
+      ...roles
+    });
   }
 
   async getPrivatePropertyRegistry(address) {
     return this.database.getPrivatePropertyRegistry(address);
+  }
+
+  getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress) {
+    return this.database.getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress);
   }
 
   async filterPrivatePropertyRegistries(filterQuery: FilterPrivatePropertyRegistryGeoQuery) {
@@ -861,15 +909,24 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updatePrivatePropertyPledge(registryAddress, tokenId) {
+    if(!this.chainService.ppDepositHolder) {
+      return;
+    }
+    const ppr = await this.database.getPrivatePropertyRegistry(registryAddress);
     const verificationPledge = await this.chainService.callContractMethod(this.chainService.ppDepositHolder, 'balanceOf', [registryAddress, tokenId], 'wei');
 
     const contract = await this.chainService.getPropertyRegistryContract(registryAddress);
 
-    const CLAIM_UNIQUENESS = await this.chainService.callContractMethod(contract, 'propertyExtraData', [tokenId, this.chainService.stringToHex('CLAIM_UNIQUENESS')]);
-    console.log('CLAIM_UNIQUENESS', CLAIM_UNIQUENESS);
-    const verificationDisabled = CLAIM_UNIQUENESS === '0x0000000000000000000000000000000000000000000000000000000000000001' || CLAIM_UNIQUENESS === '1' || CLAIM_UNIQUENESS === 1;
+    let creationTimeoutEndOn;
+    if(ppr.contourVerification && ppr.contourVerification !== '0x0000000000000000000000000000000000000000') {
+      const creationTimestamp = await this.chainService.callContractMethod(contract, 'propertyCreatedAt', [tokenId], 'number');
+      const verificationContract = await this.chainService.getPropertyRegistryVerificationContract(ppr.contourVerification);
+      const newTokenTimeout = await this.chainService.callContractMethod(verificationContract, 'newTokenTimeout', [], 'number');
+      creationTimeoutEndOn = new Date();
+      creationTimeoutEndOn.setTime((creationTimestamp + newTokenTimeout) * 1000);
+    }
 
-    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, verificationDisabled } as any);
+    await this.saveSpaceTokenById(registryAddress, tokenId, { verificationPledge, creationTimeoutEndOn } as any);
     return this.updatePrivatePropertyPledgeTokenTimeout(registryAddress)
   }
 
@@ -912,6 +969,40 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     };
   }
 
+  async handleMediatorCreation(event, mediatorType) {
+    const {mediator, tokenId} = event.returnValues;
+    return this.updatePrivateRegistryMediatorAddress(tokenId, mediator, mediatorType);
+  }
+
+  async handleMediatorOtherSideSet(registryAddress, event, mediatorType) {
+    const ppr = await this.getPrivatePropertyRegistry(registryAddress);
+    return this.updatePrivateRegistryMediatorAddress(registryAddress, mediatorType === 'foreign' ? ppr.foreignMediator : ppr.homeMediator, mediatorType);
+  }
+
+  async updatePrivateRegistryMediatorAddress(registryAddress, mediatorAddress, mediatorType) {
+    const mediatorContract = await this.chainService.getMediatorContract(mediatorAddress, mediatorType);
+    const network = await this.chainService.callContractMethod(mediatorContract, 'oppositeChainId', []);
+    const mediatorContractOnOtherSide = await this.chainService.callContractMethod(mediatorContract, 'mediatorContractOnOtherSide', []);
+
+    let additionalData = {};
+    if(mediatorType === 'home') {
+      additionalData['isBridgetHome'] = true;
+      additionalData['homeMediator'] = mediatorAddress;
+      additionalData['homeMediatorNetwork'] = await this.chainService.getNetworkId();
+
+      additionalData['foreignMediator'] = mediatorContractOnOtherSide;
+      additionalData['foreignMediatorNetwork'] = network;
+    } else {
+      additionalData['isBridgetForeign'] = true;
+      additionalData['foreignMediator'] = mediatorAddress;
+      additionalData['foreignMediatorNetwork'] = await this.chainService.getNetworkId();
+
+      additionalData['homeMediator'] = mediatorContractOnOtherSide;
+      additionalData['homeMediatorNetwork'] = network;
+    }
+    return this.updatePrivatePropertyRegistry(registryAddress, additionalData);
+  }
+
   // =============================================================
   // Communities
   // =============================================================
@@ -927,7 +1018,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunity(raAddress, isPpr, createdAtBlock?) {
-    // log('updateCommunity', raAddress, isPpr);
+    log('updateCommunity', raAddress, isPpr);
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isPpr);
     const registryAddress = await this.chainService.callContractMethod(raContract, 'fundRegistry', []);
 
@@ -1371,7 +1462,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     })
   }
 
-  async abstractUpdateCommunityRule(community, ruleData) {
+  async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
     const {dataLink, createdAt} = ruleData;
     let description = dataLink;
     let type = null;
@@ -1398,7 +1489,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
-    return this.database.addOrUpdateCommunityRule(community, {
+    const result = await this.database.addOrUpdateCommunityRule(community, {
       ...ruleData,
       communityId: community.id,
       communityAddress: community.address,
@@ -1407,6 +1498,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
+    await this.updateCommunity(community.address, community.isPpr);
+    return result;
   }
 
   handleCommunityTokenApprovedEvent(communityAddress, event) {

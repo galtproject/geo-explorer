@@ -80,6 +80,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   tokenizableFactory: any;
 
   ppDepositHolder: any;
+  ppHomeMediatorFactory: any;
+  ppForeignMediatorFactory: any;
 
   contractsConfig: any;
 
@@ -152,6 +154,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     const eventReturn = contract.events[eventName]({fromBlock: blockNumber}, (error, e) => {
+      if(error) {
+        console.error('New event error', error);
+        return callback(error, e);
+      }
       this.getBlockTimestamp(e.blockNumber).then(blockTimestamp => {
         const blockDate = new Date();
         blockDate.setTime(parseInt(blockTimestamp) * 1000);
@@ -224,7 +230,22 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     this.communityCache = {};
     this.tokenizableCache = {};
 
-    ['spaceGeoData', 'propertyMarket', 'spaceToken', 'newPropertyManager', 'privatePropertyGlobalRegistry', 'privatePropertyMarket', 'communityFactory', 'communityMockFactory', 'pprCommunityFactory', 'tokenizableFactory', 'ppDepositHolder'].forEach(contractName => {
+    [
+      'spaceGeoData',
+      'propertyMarket',
+      'spaceToken',
+      'newPropertyManager',
+      'privatePropertyGlobalRegistry',
+      'privatePropertyMarket',
+      'communityFactory',
+      'communityMockFactory',
+      'pprCommunityFactory',
+      'tokenizableFactory',
+      'ppDepositHolder',
+      'ppForeignMediatorFactory',
+      'ppHomeMediatorFactory',
+      'ppForeignMediatorFactory'
+    ].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);
       const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
@@ -282,96 +303,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
 
-    let abi;
-    if(old) {
-      //TODO: remove support for old registry
-      abi = _.clone(this.contractsConfig['ppTokenAbi']);
-      abi.forEach(abiItem => {
-        if(abiItem['name'] === 'getDetails') {
-          abiItem['outputs'] = [
-            {
-              "internalType": "enum IPPToken.TokenType",
-              "name": "tokenType",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "contour",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "int256",
-              "name": "highestPoint",
-              "type": "int256"
-            },
-            {
-              "internalType": "enum IPPToken.AreaSource",
-              "name": "areaSource",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint256",
-              "name": "area",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "ledgerIdentifier",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "string",
-              "name": "humanAddress",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "dataLink",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "setupStage",
-              "type": "uint256"
-            }
-          ];
-        }
-      });
-
-      abi.push({
-        "constant": true,
-        "inputs": [],
-        "name": "minter",
-        "outputs": [
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      });
-
-      abi.push({
-        "constant": true,
-        "inputs": [],
-        "name": "tokenDataLink",
-        "outputs": [
-          {
-            "internalType": "string",
-            "name": "",
-            "type": "string"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      });
-    } else {
-      abi = this.contractsConfig['ppTokenAbi'];
-    }
+    let abi = this.contractsConfig['ppTokenAbi'] || this.contractsConfig['ppBridgedTokenAbi'];
 
     const privatePropertyContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyContract;
@@ -382,13 +314,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.pprCache[address]) {
       return this.pprCache[address];
     }
-    let abi;
-    if(old) {
-      abi = _.clone(this.contractsConfig['ppTokenControllerAbi']);
-      abi = abi.filter(abiItem => abiItem['name'] != 'SetMinter')
-    } else {
-      abi = this.contractsConfig['ppTokenControllerAbi'];
-    }
+    let abi = this.contractsConfig['ppTokenControllerAbi'];
 
     const privatePropertyControllerContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyControllerContract;
@@ -409,10 +335,20 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return privatePropertyVerificationContract;
   }
 
+
   public async getLockerOwner(address) {
     try {
       const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);
       return contract.methods.owner().call({}).catch(() => null);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  public async getLockerType(address) {
+    try {
+      const contract = new this.web3.eth.Contract(JSON.parse('[{"constant":true,"inputs":[],"name":"LOCKER_TYPE","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"}]'), address);
+      return contract.methods.LOCKER_TYPE().call({}).catch(() => null);
     } catch (e) {
       return null;
     }
@@ -446,19 +382,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         cPoint = cPoint.toString(10);
 
         // log('cPoint', cPoint);
-        if(galtUtils.contractPoint.isContractPoint(cPoint)) {
+        // if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
           heightsContour.push(height);
-        } else {
-          const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-          heightsContour.push(height);
-          const geohash = galtUtils.numberToGeohash(geohash5);
-          geohashContour.push(geohash);
-          contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
-        }
+        // } else {
+        //   const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
+        //   heightsContour.push(height);
+        //   const geohash = galtUtils.numberToGeohash(geohash5);
+        //   geohashContour.push(geohash);
+        //   contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
+        // }
       });
       return {
         geohashContour,
@@ -499,19 +435,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         cPoint = cPoint.toString(10);
 
         // log('cPoint', cPoint);
-        if(galtUtils.contractPoint.isContractPoint(cPoint)) {
+        // if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
           heightsContour.push(height);
-        } else {
-          const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-          heightsContour.push(height);
-          const geohash = galtUtils.numberToGeohash(geohash5);
-          geohashContour.push(geohash);
-          contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
-        }
+        // } else {
+        //   const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
+        //   heightsContour.push(height);
+        //   const geohash = galtUtils.numberToGeohash(geohash5);
+        //   geohashContour.push(geohash);
+        //   contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
+        // }
       });
       const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
       return {
@@ -636,6 +572,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     })
   }
 
+  getMediatorContract(address, type) {
+    if(this.pprCache[address]) {
+      return this.pprCache[address];
+    }
+
+    const mediatorContract = new this.web3.eth.Contract(this.contractsConfig[type === 'foreign' ? 'ppForeignMediatorAbi' : 'ppHomeMediatorAbi'], address);
+    this.pprCache[address] = mediatorContract;
+    return mediatorContract;
+  }
+
   // =============================================================
   // Community
   // =============================================================
@@ -688,8 +634,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // Common
   // =============================================================
 
+  getMediatorFactoryAbi() {
+    return this.contractsConfig['ppHomeMediatorFactoryAbi'] || this.contractsConfig['ppForeignMediatorFactoryAbi'];
+  }
+
   public async callContractMethod(contract, method, args, type) {
-    if(!contract.methods[method]) {
+    if(!contract || !contract.methods[method]) {
       return null;
     }
     let value = await contract.methods[method].apply(contract, args).call({});
@@ -735,8 +685,22 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return methodAbi;
   }
 
-  async getBlockTimestamp(blockNumber) {
-    return (await this.web3.eth.getBlock(blockNumber)).timestamp;
+  async getBlockTimestamp(blockNumber): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      const block = await this.web3.eth.getBlock(blockNumber);
+      if(block) {
+        resolve(block.timestamp);
+      } else {
+        log(`Failed to get ${blockNumber} block timestamp, try again...`)
+        setTimeout(() => {
+          resolve(this.getBlockTimestamp(blockNumber));
+        }, 500);
+      }
+    });
+  }
+
+  getNetworkId(): Promise<any> {
+    return this.web3.eth.net.getId();
   }
 
   async getTransactionReceipt(txHash, abiAddressArr) {
@@ -766,6 +730,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     });
 
     return receipt;
+  }
+
+  async getTransactionArgs(txHash, abi) {
+    const tx = await this.web3.eth.getTransaction(txHash);
+    const {inputs} = this.parseData(tx.input, abi);
+    return inputs;
   }
 
   getMethodSignature(abi, methodName) {

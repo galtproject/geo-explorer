@@ -46,7 +46,31 @@ import {
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
+
+  // ====================================================
+  // Property Tokens
+  // ====================================================
   handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
+
+  filterSpaceTokens(spaceTokensQuery: FilterSpaceTokensGeoQuery): Promise<ISpaceTokensListResponse>;
+
+  getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
+
+  getSpaceTokenMetadataById(tokenId, contractAddress): Promise<any>;
+
+  // ====================================================
+  // Applications
+  // ====================================================
+
+  handleNewApplicationEvent(event: IExplorerNewApplicationEvent): Promise<void>;
+
+  filterApplications(applicationsQuery: FilterApplicationsGeoQuery): Promise<IApplicationsListResponse>;
+
+  getApplicationById(applicationId, contractAddress): Promise<IApplication>;
+
+  // ====================================================
+  // Sale Orders
+  // ====================================================
 
   handleSaleOrderEvent(event: IExplorerSaleOrderEvent): Promise<void>;
 
@@ -60,29 +84,27 @@ export default interface IExplorerGeoDataService {
 
   getSaleOfferById(orderId, buyer, contractAddress): Promise<ISaleOffer>;
 
-  handleNewApplicationEvent(event: IExplorerNewApplicationEvent): Promise<void>;
-
-  filterApplications(applicationsQuery: FilterApplicationsGeoQuery): Promise<IApplicationsListResponse>;
-
-  getApplicationById(applicationId, contractAddress): Promise<IApplication>;
-
-  filterSpaceTokens(spaceTokensQuery: FilterSpaceTokensGeoQuery): Promise<ISpaceTokensListResponse>;
-
-  getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
-
-  getSpaceTokenMetadataById(tokenId, contractAddress): Promise<any>;
+  // ====================================================
+  // Tokenizable
+  // ====================================================
 
   handleTokenizableTransferEvent(contractAddress, event: any): Promise<any>;
 
   filterTokenizableMembers(query): Promise<ITokenizableMembersListResponse>;
 
+  // ====================================================
+  // PrivateProperty
+  // ====================================================
+
   handleNewPrivatePropertyRegistryEvent(event: IExplorerNewPrivatePropertyRegistryEvent): Promise<void>;
 
-  updatePrivatePropertyRegistry(address): Promise<void>;
+  updatePrivatePropertyRegistry(address, additionalData?): Promise<void>;
 
   filterPrivatePropertyRegistries(pprQuery: FilterPrivatePropertyRegistryGeoQuery): Promise<IPrivatePropertyRegistryListResponse>;
 
   getPrivatePropertyRegistry(address): Promise<IPrivatePropertyRegistry>;
+
+  getPrivatePropertyRegistryByMediator(mediatorType, mediatorAddress): Promise<IPrivatePropertyRegistry>;
 
   handlePrivatePropertyRegistryProposalEvent(registryAddress, event: any): Promise<IPrivatePropertyProposal>;
 
@@ -105,6 +127,18 @@ export default interface IExplorerGeoDataService {
   filterPrivatePropertyLegalAgreements(query): Promise<IPrivatePropertyLegalAgreementsListResponse>;
 
   filterPrivatePropertyMembers(query): Promise<IPrivatePropertyMembersListResponse>;
+
+  // ====================================================
+  // Bridges
+  // ====================================================
+
+  handleMediatorCreation(event: any, mediatorType: string): Promise<any>;
+
+  handleMediatorOtherSideSet(registryAddress, event: any, mediatorType: string): Promise<any>;
+
+  // ====================================================
+  // Community
+  // ====================================================
 
   handleNewCommunityEvent(address: string, isPpr): Promise<ICommunity>;
 
