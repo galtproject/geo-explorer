@@ -26,7 +26,7 @@ import {
   IExplorerGeoDataEvent, IExplorerNewApplicationEvent,
   IExplorerSaleOrderEvent
 } from "../../interfaces";
-import IExplorerChainService from "../../chainService/interface";
+import IExplorerChainService, {ChainServiceEvents} from "../../chainService/interface";
 import IExplorerGeohashService from "../../geohashService/interface";
 
 const _ = require("lodash");
@@ -101,7 +101,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       await this.database.addOrUpdateContour(geoData.geohashContour, tokenId, contractAddress, level, geoData.spaceTokenType);
     }
 
-    const lockerOwner = await this.chainService.getLockerOwner(owner);
+    let lockerOwner = await this.chainService.getLockerOwner(owner);
     log('getLockerOwner', lockerOwner);
 
     let lockerType;
@@ -111,6 +111,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         lockerType = this.chainService.hexToString(lockerType)
       }
       log('lockerType', lockerType);
+
+      const contract = await this.chainService.getPropertyRegistryContract(contractAddress);
+      const transferEvents = await this.chainService.getEventsFromBlock(
+        contract,
+        ChainServiceEvents.SpaceTokenTransfer,
+        0,
+        {tokenId}
+      );
+      const lastTransfer = _.last(transferEvents);
+      if(lastTransfer) {
+        lockerOwner = lastTransfer.returnValues.from;
+        log('lockerOwner by event', lockerOwner);
+      }
     }
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
