@@ -402,7 +402,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     log('order saved', dbOrder.orderId, event.contractAddress);
 
-    await dbOrder.setSpaceTokens(dbSpaceTokens);
+    await dbOrder.setSpaceTokens(dbSpaceTokens).catch(() => {/*already set */});
   };
 
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {

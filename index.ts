@@ -623,6 +623,15 @@ const log = require('./services/logService');
       });
     });
 
+    await pIteration.forEachSeries(chainService.contractsConfig.oldPrivateFundFactoryAddresses || [], (pprCommunityFactoryAddress) => {
+      return chainService.getEventsFromBlock(chainService.getCommunityFactoryContract(pprCommunityFactoryAddress), ChainServiceEvents.NewCommunity, 0).then(async (events) => {
+        await pIteration.forEachSeries(events, async (e) => {
+          const community = await geoDataService.handleNewCommunityEvent(e, true);
+          return subscribeToCommunity(community.address, true);
+        });
+      });
+    });
+
     log('new pprCommunityFactory:');
     chainService.subscribeForNewEvents(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, startBlockNumber, async (err, newEvent) => {
       const community = await geoDataService.handleNewCommunityEvent(newEvent, true);
