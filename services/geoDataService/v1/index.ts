@@ -627,12 +627,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const controllerContract = await this.chainService.getPropertyRegistryControllerContract(controller);
       const [controllerOwner, contourVerification, defaultBurnTimeout] = await Promise.all([
         controllerContract.methods.owner().call({}),
-        controllerContract.methods.contourVerificationManager ? controllerContract.methods.contourVerificationManager().call({}) : '0x0000000000000000000000000000000000000000',
+        controllerContract.methods.contourVerificationManager ? controllerContract.methods.contourVerificationManager().call({}).catch(() => null) : '0x0000000000000000000000000000000000000000',
         controllerContract.methods.defaultBurnTimeoutDuration().call({})
       ]);
 
       let verificationContract;
-      if(contourVerification !== '0x0000000000000000000000000000000000000000') {
+      if(contourVerification && contourVerification !== '0x0000000000000000000000000000000000000000') {
         verificationContract = await this.chainService.getPropertyRegistryVerificationContract(contourVerification);
       }
 

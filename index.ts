@@ -249,8 +249,8 @@ const log = require('./services/logService');
       if (controllerAddress) {
         controllerContract = chainService.getPropertyRegistryControllerContract(controllerAddress, old);
 
-        const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []);
-        if(contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
+        const contourVerificationAddress = await await chainService.callContractMethod(controllerContract, 'contourVerificationManager', []).catch(() => null);
+        if(contourVerificationAddress && contourVerificationAddress !== '0x0000000000000000000000000000000000000000') {
           verificationContract = chainService.getPropertyRegistryVerificationContract(contourVerificationAddress);
         }
       }
