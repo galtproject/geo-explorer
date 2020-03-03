@@ -1018,7 +1018,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunity(raAddress, isPpr, createdAtBlock?) {
-    // log('updateCommunity', raAddress, isPpr);
+    log('updateCommunity', raAddress, isPpr);
     const raContract = await this.chainService.getCommunityRaContract(raAddress, isPpr);
     const registryAddress = await this.chainService.callContractMethod(raContract, 'fundRegistry', []);
 
@@ -1462,7 +1462,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     })
   }
 
-  async abstractUpdateCommunityRule(community, ruleData) {
+  async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
     const {dataLink, createdAt} = ruleData;
     let description = dataLink;
     let type = null;
@@ -1489,7 +1489,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
-    return this.database.addOrUpdateCommunityRule(community, {
+    const result = await this.database.addOrUpdateCommunityRule(community, {
       ...ruleData,
       communityId: community.id,
       communityAddress: community.address,
@@ -1498,6 +1498,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
+    await this.updateCommunity(community.address, community.isPpr);
+    return result;
   }
 
   handleCommunityTokenApprovedEvent(communityAddress, event) {

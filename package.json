@@ -13,7 +13,11 @@
     "mainnet-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_mainnet;'",
     "mainnet-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_mainnet; ALTER DATABASE geo_explorer_mainnet CHARACTER SET utf8 COLLATE utf8_general_ci;'",
     "mainnet-recreate": "npm run mainnet-drop && npm run mainnet-create",
-    "mainnet": "DATABASE_NAME=geo_explorer_mainnet CONTRACTS_CONFIG=mainnet.json RPC_WS_SERVER=wss://wss-rpc.mainnet.galtproject.io/ API_PORT=3399 ts-node ./index.ts"
+    "mainnet": "DATABASE_NAME=geo_explorer_mainnet CONTRACTS_CONFIG=mainnet.json RPC_WS_SERVER=wss://wss-rpc.mainnet.galtproject.io/ API_PORT=3399 ts-node ./index.ts",
+    "poa-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_poa;'",
+    "poa-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_poa; ALTER DATABASE geo_explorer_poa CHARACTER SET utf8 COLLATE utf8_general_ci;'",
+    "poa-recreate": "npm run poa-drop && npm run poa-create",
+    "poa": "DATABASE_NAME=geo_explorer_poa CONTRACTS_CONFIG=poa.json RPC_WS_SERVER=ws://poa-rpc-parity-001.poa.network:8546 API_PORT=4422 ts-node ./index.ts"
   },
   "author": "",
   "license": "ISC",
