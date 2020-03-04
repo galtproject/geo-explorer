@@ -1202,6 +1202,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     timeout = parseInt(timeout.toString(10));
 
     const proposalManager = markerData.proposalManager;
+    if(proposalManager === '0x0000000000000000000000000000000000000000') {
+      return;
+    }
     // const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
 
     //TODO: get from database
@@ -1407,6 +1410,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     createdAt.setTime(createdAtBlockTimestamp * 1000);
 
     const votingName = voting ? voting.name : 'unknown';
+    if(!votingName) {
+      console.log('voting', JSON.stringify(voting));
+    }
 
     console.log('proposal', votingName, pmAddress, proposalId, isActual);
 
