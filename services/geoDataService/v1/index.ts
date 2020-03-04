@@ -1278,7 +1278,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       marker = proposal.marker;
     }
 
-    const [voting, proposalManagerContract, storageContract] = await Promise.all([
+    let [voting, proposalManagerContract, storageContract] = await Promise.all([
       this.database.getCommunityVoting(community.id, marker),
       this.chainService.getCommunityProposalManagerContract(pmAddress),
       this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr)
@@ -1295,6 +1295,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       proposalManagerContract.methods.getProposalVoting(proposalId).call({}),
       proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({})
     ]);
+
+    let minAcceptQuorum = this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum);
+    let support = this.chainService.weiToEther(proposalVotingProgress.requiredSupport);
 
     const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
@@ -1365,7 +1368,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       const timeoutDate = new Date();
       timeoutDate.setTime(timeoutAt * 1000);
       if (new Date() >= timeoutDate) {
-        if (ayeShare > voting.minAcceptQuorum && ayeShare > voting.support) {
+        if (ayeShare > minAcceptQuorum && ayeShare > support) {
           status = 'approved';
         } else {
           status = 'rejected';
@@ -1403,15 +1406,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const createdAt = new Date();
     createdAt.setTime(createdAtBlockTimestamp * 1000);
 
-    console.log('proposal', voting.name, pmAddress, proposalId, isActual);
+    const votingName = voting ? voting.name : 'unknown';
+
+    console.log('proposal', votingName, pmAddress, proposalId, isActual);
 
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
       marker,
       proposalId,
       pmAddress,
-      markerName: voting.name,
-      destination: voting.destination,
+      markerName: votingName,
+      destination: proposalData.destination,
       creatorAddress: proposalData.creator,
       communityId: community.id,
       acceptedShare: ayeShare,

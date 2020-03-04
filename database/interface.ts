@@ -184,7 +184,7 @@ export default interface IExplorerDatabase {
 
   addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal): Promise<ICommunityProposal>;
 
-  getCommunityProposal(votingId, proposalId): Promise<ICommunityProposal>;
+  getCommunityProposal(communityAddress, votingId, proposalId): Promise<ICommunityProposal>;
 
   getCommunityProposalByVotingAddress(votingAddress, proposalId): Promise<ICommunityProposal>;
 

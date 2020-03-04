@@ -1713,9 +1713,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   // Community Proposals
   // =============================================================
 
-  async getCommunityProposal(votingId, proposalId) {
+  async getCommunityProposal(communityAddress, votingId, proposalId) {
     return this.models.CommunityProposal.findOne({
-      where: {votingId, proposalId},
+      where: {communityAddress: {[Op.like]: communityAddress}, votingId, proposalId},
       include: {association: 'rule'}
     });
   }
@@ -1728,23 +1728,23 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   async addOrUpdateCommunityProposal(voting: ICommunityVoting, proposal: ICommunityProposal) {
-    let dbObject = await this.getCommunityProposal(voting.id, proposal.proposalId);
+    proposal.votingId = voting ? voting.id : null;
 
-    proposal.votingId = voting.id;
+    let dbObject = await this.getCommunityProposal(proposal.communityAddress, proposal.votingId, proposal.proposalId);
 
     if(dbObject) {
       await this.models.CommunityProposal.update(proposal, {
-        where: {proposalId: proposal.proposalId, votingId: voting.id}
+        where: {proposalId: proposal.proposalId, votingId: proposal.votingId}
       });
     } else {
       await this.models.CommunityProposal.create(proposal).catch((e) => {
         console.warn('WARN CommunityProposal.create', e.parent.sqlMessage);
         return this.models.CommunityProposal.update(proposal, {
-          where: {proposalId: proposal.proposalId, votingId: voting.id}
+          where: {proposalId: proposal.proposalId, votingId: proposal.votingId}
         });
       });
     }
-    return this.getCommunityProposal(voting.id, proposal.proposalId);
+    return this.getCommunityProposal(proposal.communityAddress, proposal.votingId, proposal.proposalId);
   }
 
   updateProposalByDbId(proposalDbId, updateData) {
