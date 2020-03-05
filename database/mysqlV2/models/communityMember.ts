@@ -36,6 +36,9 @@ module.exports = async function (sequelize, models) {
     photosJson: {
       type: Sequelize.TEXT
     },
+    expelledJson: {
+      type: Sequelize.TEXT
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

@@ -1075,7 +1075,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
   }
 
-  async updateCommunityMember(community: ICommunity, address) {
+  async updateCommunityMember(community: ICommunity, address, additionalData = {}) {
     const [contract, raContract] = await Promise.all([
       this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
       this.chainService.getCommunityRaContract(community.address, community.isPpr)
@@ -1106,7 +1106,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         fullNameHash,
         communityAddress: community.address,
         isPpr: community.isPpr,
-        photosJson
+        photosJson,
+        ...additionalData
       });
     } else {
       const member = await this.database.getCommunityMember(community.id, address);
@@ -1135,7 +1136,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       });
     }
 
-    await this.updateCommunityMember(community, propertyToken.owner);
+    if(propertyToken) {
+      await this.updateCommunityMember(community, propertyToken.owner);
+    }
 
     return this.updateCommunity(communityAddress, isPpr);
   }
@@ -1159,7 +1162,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       await community.removeSpaceTokens([propertyToken]);
     }
 
-    await this.updateCommunityMember(community, propertyToken.owner);
+    if(propertyToken) {
+      await this.updateCommunityMember(community, propertyToken.owner);
+    }
 
     return this.updateCommunity(communityAddress, isPpr);
   }
@@ -1529,24 +1534,41 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
     const propertyToken = await this.database.getSpaceToken(tokenId, registryAddress || this.chainService.spaceGeoData._address);
 
+    let expelledResult;
+    if (community.isPpr) {
+      expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [registryAddress, tokenId]);
+    } else {
+      expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [tokenId]);
+    }
+    expelledResult.amount = this.chainService.weiToEther(expelledResult.amount);
+
+    if(!propertyToken) {
+      return;
+    }
     if (isApproved) {
-      let expelledResult;
-      if (community.isPpr) {
-        expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [registryAddress, tokenId]);
-      } else {
-        expelledResult = await this.chainService.callContractMethod(contract, 'getExpelledToken', [tokenId]);
-      }
       if (expelledResult.isExpelled) {
-        await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */
-        });
+        await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
       } else {
-        await community.addApprovedSpaceTokens([propertyToken]).catch(() => {/* already in community */
-        });
+        await community.addApprovedSpaceTokens([propertyToken]).catch(() => {/* already in community */});
       }
     } else {
-      await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */
-      });
+      await community.removeApprovedSpaceTokens([propertyToken]).catch(() => {/* already deleted */});
     }
+
+    const member = await this.database.getCommunityMember(communityAddress, propertyToken.owner);
+    let expelledObj = {};
+    try {
+      expelledObj = JSON.parse(member.expelledJson);
+    } catch (e) {}
+    if(expelledResult.isExpelled) {
+      expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId] = expelledResult.amount;
+    } else {
+      delete expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId];
+    }
+    console.log('expelledJson', JSON.stringify(expelledObj));
+    return this.updateCommunityMember(community, propertyToken.owner, {
+      expelledJson: JSON.stringify(expelledObj)
+    });
   }
 
   async getCommunity(address) {

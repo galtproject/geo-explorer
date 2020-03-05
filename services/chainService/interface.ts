@@ -188,7 +188,8 @@ export enum ChainServiceEvents {
   CommunityAddRule = 'AddFundRule',
   CommunityRemoveRule = 'DisableFundRule',
   CommunityApproveToken = 'ApproveMint',
-  CommunityExpelToken = 'Expel'
+  CommunityExpelToken = 'Expel',
+  CommunityDecrementExpelToken = 'DecrementExpel'
 }
 
 export interface ChainServiceSaleOrder {

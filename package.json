@@ -17,7 +17,11 @@
     "poa-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_poa;'",
     "poa-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_poa; ALTER DATABASE geo_explorer_poa CHARACTER SET utf8 COLLATE utf8_general_ci;'",
     "poa-recreate": "npm run poa-drop && npm run poa-create",
-    "poa": "DATABASE_NAME=geo_explorer_poa CONTRACTS_CONFIG=poa.json RPC_WS_SERVER=ws://poa-rpc-parity-001.poa.network:8546 API_PORT=4422 ts-node ./index.ts"
+    "poa": "DATABASE_NAME=geo_explorer_poa CONTRACTS_CONFIG=poa.json RPC_WS_SERVER=ws://poa-rpc-parity-001.poa.network:8546 API_PORT=4422 ts-node ./index.ts",
+    "kovan-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_kovan;'",
+    "kovan-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_kovan; ALTER DATABASE geo_explorer_kovan CHARACTER SET utf8 COLLATE utf8_general_ci;'",
+    "kovan-recreate": "npm run kovan-drop && npm run kovan-create",
+    "kovan": "DATABASE_NAME=geo_explorer_kovan CONTRACTS_CONFIG=kovan-a.json RPC_WS_SERVER=wss://kovan.infura.io/ws/v3/f2d134e9767442c88963a0244d171faf API_PORT=4400 ts-node ./index.ts"
   },
   "author": "",
   "license": "ISC",

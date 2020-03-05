@@ -692,6 +692,7 @@ export interface ICommunityMember {
   fullNameHash?;
   isPpr?;
   photosJson?;
+  expelledJson?;
 
   destroy?();
 }

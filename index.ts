@@ -757,26 +757,17 @@ const log = require('./services/logService');
         await setLastBlockNumber(newEvent.blockNumber);
       });
 
-      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityApproveToken, lastBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleCommunityTokenApprovedEvent(address, e);
+      await pIteration.forEachSeries(['CommunityApproveToken', 'CommunityExpelToken', 'CommunityDecrementExpelToken'], async (eventName) => {
+        await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents[eventName], lastBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            await geoDataService.handleCommunityTokenApprovedEvent(address, e);
+          });
         });
-      });
 
-      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityApproveToken, startBlockNumber, async (err, newEvent) => {
-        await geoDataService.handleCommunityTokenApprovedEvent(address, newEvent);
-        await setLastBlockNumber(newEvent.blockNumber);
-      });
-
-      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityExpelToken, lastBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleCommunityTokenApprovedEvent(address, e);
+        chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents[eventName], startBlockNumber, async (err, newEvent) => {
+          await geoDataService.handleCommunityTokenApprovedEvent(address, newEvent);
+          await setLastBlockNumber(newEvent.blockNumber);
         });
-      });
-
-      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityExpelToken, startBlockNumber, async (err, newEvent) => {
-        await geoDataService.handleCommunityTokenApprovedEvent(address, newEvent);
-        await setLastBlockNumber(newEvent.blockNumber);
       });
     }
 
