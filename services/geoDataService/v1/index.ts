@@ -1144,18 +1144,22 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleCommunityBurnEvent(communityAddress, event, isPpr) {
+   return this.checkMintedCommunityPropertyToken(communityAddress, event.returnValues.registry || this.chainService.spaceGeoData._address, event.returnValues.tokenId, isPpr);
+  }
+
+  async checkMintedCommunityPropertyToken(communityAddress, registryAddress, tokenId, isPpr) {
     const [community, propertyToken] = await Promise.all([
       this.database.getCommunity(communityAddress),
-      this.database.getSpaceToken(event.returnValues.tokenId, event.returnValues.registry || this.chainService.spaceGeoData._address)
+      this.database.getSpaceToken(tokenId, registryAddress)
     ]);
 
     const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
 
     let isMinted;
     if (community.isPpr) {
-      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.registry, event.returnValues.tokenId]);
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [registryAddress, tokenId]);
     } else {
-      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [event.returnValues.tokenId]);
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [tokenId]);
     }
 
     if (!isMinted) {
@@ -1557,16 +1561,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const member = await this.database.getCommunityMember(communityAddress, propertyToken.owner);
     let expelledObj = {};
+    const expelledKey = propertyToken.contractAddress + '_' + propertyToken.tokenId;
     try {
       expelledObj = JSON.parse(member.expelledJson);
     } catch (e) {}
     if(expelledResult.isExpelled) {
-      expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId] = expelledResult.amount;
+      expelledObj[expelledKey] = parseFloat(expelledResult.amount);
     }
-    if(!expelledResult.isExpelled || !expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId]) {
-      delete expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId];
+    if(!expelledResult.isExpelled || !parseFloat(expelledObj[expelledKey])) {
+      delete expelledObj[expelledKey];
     }
     console.log('expelledJson', JSON.stringify(expelledObj));
+    await this.checkMintedCommunityPropertyToken(communityAddress, propertyToken.contractAddress, propertyToken.tokenId, community.isPpr);
     return this.updateCommunityMember(community, propertyToken.owner, {
       expelledJson: JSON.stringify(expelledObj)
     });
