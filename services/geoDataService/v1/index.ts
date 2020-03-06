@@ -1562,7 +1562,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } catch (e) {}
     if(expelledResult.isExpelled) {
       expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId] = expelledResult.amount;
-    } else {
+    }
+    if(!expelledResult.isExpelled || !expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId]) {
       delete expelledObj[propertyToken.contractAddress + '_' + propertyToken.tokenId];
     }
     console.log('expelledJson', JSON.stringify(expelledObj));
