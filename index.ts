@@ -548,17 +548,19 @@ const log = require('./services/logService');
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
-    await chainService.getEventsFromBlock(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, lastBlockNumber).then(async (events) => {
-      await pIteration.forEach(events, (e) => {
-        return geoDataService.handleMediatorCreation(e, 'foreign')
+    await pIteration.forEachSeries(['ppForeignMediatorFactory', 'ppPoaMediatorFactory', 'ppXDaiMediatorFactory'], async contractName => {
+      await chainService.getEventsFromBlock(chainService[contractName], ChainServiceEvents.PPMediatorNew, lastBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, (e) => {
+          return geoDataService.handleMediatorCreation(e, 'foreign')
+        });
       });
-    });
 
-    chainService.subscribeForNewEvents(chainService.ppForeignMediatorFactory, ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
-      await geoDataService.handleMediatorCreation(newEvent, 'foreign');
-      pprUnsubscribeByAddress[newEvent.returnValues.tokenId.toLowerCase()]();
-      subscribeToPrivatePropertyRegistry(newEvent.returnValues.tokenId, false, newEvent.blockNumber);
-      await setLastBlockNumber(newEvent.blockNumber);
+      chainService.subscribeForNewEvents(chainService[contractName], ChainServiceEvents.PPMediatorNew, startBlockNumber, async (err, newEvent) => {
+        await geoDataService.handleMediatorCreation(newEvent, 'foreign');
+        pprUnsubscribeByAddress[newEvent.returnValues.tokenId.toLowerCase()]();
+        subscribeToPrivatePropertyRegistry(newEvent.returnValues.tokenId, false, newEvent.blockNumber);
+        await setLastBlockNumber(newEvent.blockNumber);
+      });
     });
 
     await chainService.getEventsFromBlock(chainService.privatePropertyMarket, ChainServiceEvents.SaleOrderStatusChanged, lastBlockNumber).then(async (events) => {

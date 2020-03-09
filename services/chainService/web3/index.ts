@@ -86,6 +86,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   ppDepositHolder: any;
   ppHomeMediatorFactory: any;
   ppForeignMediatorFactory: any;
+  ppPoaMediatorFactory: any;
+  ppXDaiMediatorFactory: any;
 
   contractsConfig: any;
 
@@ -248,7 +250,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       'ppDepositHolder',
       'ppForeignMediatorFactory',
       'ppHomeMediatorFactory',
-      'ppForeignMediatorFactory'
+      'ppForeignMediatorFactory',
+      'ppPoaMediatorFactory',
+      'ppXDaiMediatorFactory'
     ].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);
