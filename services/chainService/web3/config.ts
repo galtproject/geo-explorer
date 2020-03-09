@@ -23,5 +23,7 @@ module.exports = {
   'tokenizableFactoryName': 'tokenizableLockerFactory',
   'ppDepositHolderName': 'ppDepositHolder',
   'ppHomeMediatorFactoryName': 'ppHomeMediatorFactory',
-  'ppForeignMediatorFactoryName': 'ppForeignMediatorFactory'
+  'ppForeignMediatorFactoryName': 'ppForeignMediatorFactory',
+  'ppPoaMediatorFactoryName': 'ppPoaMediatorFactory',
+  'ppXDaiMediatorFactoryName': 'ppXDaiMediatorFactory'
 };
