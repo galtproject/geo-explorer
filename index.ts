@@ -53,6 +53,7 @@ const log = require('./services/logService');
 
   async function setLastBlockNumber(blockNumber) {
     const lastBlockNumber = parseInt(await database.getValue('lastBlockNumber'));
+    console.log('setLastBlockNumber', blockNumber, lastBlockNumber);
     if(lastBlockNumber > parseInt(blockNumber)) {
       return;
     }
@@ -436,11 +437,11 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
+          await setLastBlockNumber(newEvent.blockNumber);
           if(eventName === 'PrivatePropertySetController' && controllerAddress.toLowerCase() !== newEvent.returnValues.controller.toLowerCase()) {
             unsubscribe();
             return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber + 1);
           }
-          await setLastBlockNumber(newEvent.blockNumber);
         }));
       });
 
@@ -453,11 +454,11 @@ const log = require('./services/logService');
 
         addSubscription(chainService.subscribeForNewEvents(controllerContract, ChainServiceEvents[eventName], subscribeFromBlockNumber, async (err, newEvent) => {
           await geoDataService.updatePrivatePropertyRegistry(address);
+          await setLastBlockNumber(newEvent.blockNumber);
           if(eventName === 'PrivatePropertySetVerification' && contourVerificationAddress.toLowerCase() !== newEvent.returnValues.contourVerificationManager.toLowerCase()) {
             unsubscribe();
             return subscribeToPrivatePropertyRegistry(address, old, newEvent.blockNumber + 1);
           }
-          await setLastBlockNumber(newEvent.blockNumber);
         }));
       });
 
@@ -756,26 +757,17 @@ const log = require('./services/logService');
         await setLastBlockNumber(newEvent.blockNumber);
       });
 
-      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityApproveToken, lastBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleCommunityTokenApprovedEvent(address, e);
+      await pIteration.forEachSeries(['CommunityApproveToken', 'CommunityExpelToken', 'CommunityDecrementExpelToken'], async (eventName) => {
+        await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents[eventName], lastBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            await geoDataService.handleCommunityTokenApprovedEvent(address, e);
+          });
         });
-      });
 
-      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityApproveToken, startBlockNumber, async (err, newEvent) => {
-        await geoDataService.handleCommunityTokenApprovedEvent(address, newEvent);
-        await setLastBlockNumber(newEvent.blockNumber);
-      });
-
-      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityExpelToken, lastBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleCommunityTokenApprovedEvent(address, e);
+        chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents[eventName], startBlockNumber, async (err, newEvent) => {
+          await geoDataService.handleCommunityTokenApprovedEvent(address, newEvent);
+          await setLastBlockNumber(newEvent.blockNumber);
         });
-      });
-
-      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityExpelToken, startBlockNumber, async (err, newEvent) => {
-        await geoDataService.handleCommunityTokenApprovedEvent(address, newEvent);
-        await setLastBlockNumber(newEvent.blockNumber);
       });
     }
 

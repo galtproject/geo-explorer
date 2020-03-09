@@ -47,10 +47,14 @@ module.exports = async (extendConfig) => {
   serviceInstance.configFile = configFile;
 
   setInterval(async () => {
-    const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
-    if (newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
-      log('😱 New contracts, reset database', contractsConfigUrl);
-      serviceInstance.setContractsConfig(newContractsConfig, true);
+    try {
+      const {data: newContractsConfig} = await axios.get(contractsConfigUrl);
+      if (newContractsConfig.blockNumber != serviceInstance.contractsConfig.blockNumber) {
+        log('😱 New contracts, reset database', contractsConfigUrl);
+        serviceInstance.setContractsConfig(newContractsConfig, true);
+      }
+    } catch (e) {
+      console.warn("Warning! Can't fetch contracts", e.message);
     }
   }, 1000 * 60);
 
