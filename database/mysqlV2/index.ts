@@ -1533,7 +1533,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getCommunityMemberTokens(community, memberAddress) {
     return community.getSpaceTokens({
-      where: {owner: {[Op.like]: memberAddress}}
+      where: {owner: {[Op.like]: memberAddress}},
+      include: [{
+        association: 'ppr'
+      }]
     });
   }
 
