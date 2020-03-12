@@ -1763,6 +1763,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['proposalId'] = communityProposalQuery.proposalId.toString();
     }
 
+    if(communityProposalQuery.data) {
+      allWheres['data'] = communityProposalQuery.data;
+    }
+
     if(communityProposalQuery.marker) {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
@@ -1807,7 +1811,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', Op.and]),
       include: ruleInclude
     }
   }
