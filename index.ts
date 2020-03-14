@@ -758,13 +758,6 @@ const log = require('./services/logService');
         await setLastBlockNumber(newEvent.blockNumber);
       });
 
-
-      await chainService.getEventsFromBlock(contractStorage, ChainServiceEvents.CommunityChangeName, lastBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.updateCommunity(address, isPpr);
-        });
-      });
-
       chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityChangeName, startBlockNumber, async (err, newEvent) => {
         await geoDataService.updateCommunity(address, isPpr);
         await setLastBlockNumber(newEvent.blockNumber);
