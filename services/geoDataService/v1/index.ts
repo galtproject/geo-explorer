@@ -1044,7 +1044,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.database.filterCommunityMemberCount({communityAddress: raAddress})
     ]);
 
-    log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount, 'dataLink', dataLink);
+    log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount);
 
     let description = dataLink;
     let dataJson = '';
@@ -1053,6 +1053,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       description = data.description;
       dataJson = JSON.stringify(data);
     }
+    log('community', dataJson, 'dataLink', dataLink);
 
     const _community = await this.database.addOrUpdateCommunity({
       address: raAddress,
