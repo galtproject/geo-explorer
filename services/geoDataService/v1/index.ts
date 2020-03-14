@@ -1044,7 +1044,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.database.filterCommunityMemberCount({communityAddress: raAddress})
     ]);
 
-    log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount);
+    log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount, 'dataLink', dataLink);
 
     let description = dataLink;
     let dataJson = '';
