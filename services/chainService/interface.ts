@@ -181,6 +181,7 @@ export enum ChainServiceEvents {
   CommunityRevokeReputation = 'RevokeDelegated',
   CommunityAddMarker = 'AddProposalMarker',
   CommunityRemoveMarker = 'RemoveProposalMarker',
+  CommunityChangeName = 'SetNameAndDataLink',
   CommunityNewProposal = 'NewProposal',
   CommunityNayProposal = 'NayProposal',
   CommunityAyeProposal = 'AyeProposal',
