@@ -34,6 +34,7 @@ export default interface IExplorerChainService {
   communityMockFactory: any;
 
   pprCommunityFactory: any;
+  pprManagedCommunityFactory: any;
 
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;

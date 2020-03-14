@@ -80,6 +80,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   pprCommunityRegistry: any;
   communityFactory: any;
   pprCommunityFactory: any;
+  pprManagedCommunityFactory: any;
   communityMockFactory: any;
   tokenizableFactory: any;
 
@@ -246,6 +247,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       'communityFactory',
       'communityMockFactory',
       'pprCommunityFactory',
+      'pprManagedCommunityFactory',
       'tokenizableFactory',
       'ppDepositHolder',
       'ppForeignMediatorFactory',
