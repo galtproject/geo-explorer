@@ -36,7 +36,7 @@ const {GeesomeClient} = require('geesome-libs/src/GeesomeClient');
 const {isIpldHash} = require('geesome-libs/src/ipfsHelper');
 const log = require('../../logService');
 
-const {bytes32ToIpfsHash} = require('@galtproject/utils');
+const {bytes32ToIpfsHash, tokenData} = require('@galtproject/utils');
 
 module.exports = async (database: IExplorerDatabase, geohashService: IExplorerGeohashService, chainService: IExplorerChainService) => {
   const geesome = new GeesomeClient({
@@ -88,13 +88,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let level;
     if (geoData.humanAddress) {
-      const split = geoData.humanAddress.split('|\n');
-      split.some(s => {
-        if (s && s.split('=')[0] === 'floor') {
-          level = s.split('=')[1];
-          return true;
-        }
-      })
+      const {floor} = tokenData.getHumanAddressFromContractString(geoData.humanAddress);
+      level = floor;
     }
 
     if (level || geoData.spaceTokenType) {
@@ -273,7 +268,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async getSpaceTokenMetadataById(tokenId, contractAddress) {
     const spaceGeoData = await this.database.getSpaceToken(tokenId, contractAddress);
 
-    const tokenData = JSON.parse(spaceGeoData.dataJson);
+    const ipldData = JSON.parse(spaceGeoData.dataJson);
     let attributes = [];
 
     attributes.push({
@@ -292,34 +287,43 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let description = '';
 
-    if (tokenData.details) {
-      attributes = attributes.concat(tokenData.details.features.map(f => ({trait_type: 'feature', value: f})));
+    if (ipldData.details) {
+      attributes = attributes.concat(ipldData.details.features.map(f => ({trait_type: 'feature', value: f})));
 
-      description = tokenData.details.description;
-      if (tokenData.details.legalDescription) {
-        description += '\n\n' + tokenData.details.legalDescription;
+      description = ipldData.details.description;
+      if (ipldData.details.legalDescription) {
+        description += '\n\n' + ipldData.details.legalDescription;
       }
     }
 
     let name = '';
 
-    if (tokenData.humanAddress) {
-      name = tokenData.humanAddress.countryRegion || '';
+    const humanAddress = tokenData.getHumanAddressFromIpld(ipldData);
+    if (humanAddress) {
+      name = humanAddress.country || '';
 
-      if (name) {
-        name += ', ';
+      if (name && humanAddress.region) {
+        name += ', ' + humanAddress.region;
       }
 
-      if (tokenData.humanAddress.cityStreet) {
-        name += tokenData.humanAddress.cityStreet;
+      if (name && humanAddress.city) {
+        name += ', ' + humanAddress.city;
+      }
+
+      if (name && humanAddress.street) {
+        name += ', ' + humanAddress.street;
+      }
+
+      if (name && humanAddress.buildingNumber) {
+        name += ', ' + humanAddress.buildingNumber;
       }
 
       if (spaceGeoData.tokenType === 'room') {
-        if (tokenData.humanAddress.floor)
-          name += ', Floor ' + tokenData.humanAddress.floor;
+        if (humanAddress.floor)
+          name += ', Floor ' + humanAddress.floor;
 
-        if (tokenData.humanAddress.litera)
-          name += ', ' + tokenData.humanAddress.litera;
+        if (humanAddress.roomNumber)
+          name += ', ' + humanAddress.roomNumber;
       }
     } else {
       name = spaceGeoData.ledgerIdentifier || 'Token #' + spaceGeoData.tokenId;
