@@ -1160,14 +1160,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const raContract = await this.chainService.getCommunityRaContract(community.address, community.isPpr);
 
-    let isMinted;
+    let reputationMinted;
     if (community.isPpr) {
-      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [registryAddress, tokenId], 'wei');
+      reputationMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [registryAddress, tokenId], 'wei');
     } else {
-      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [tokenId]);
+      reputationMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [tokenId]);
     }
+    console.log('reputationMinted', reputationMinted)
 
-    if (!isMinted) {
+    if (!reputationMinted) {
       await community.removeSpaceTokens([propertyToken]);
     }
 
