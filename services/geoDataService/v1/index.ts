@@ -1162,7 +1162,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let isMinted;
     if (community.isPpr) {
-      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [registryAddress, tokenId]);
+      isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [registryAddress, tokenId], 'wei');
     } else {
       isMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [tokenId]);
     }
