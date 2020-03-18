@@ -693,6 +693,7 @@ export interface ICommunityMember {
   isPpr?;
   photosJson?;
   expelledJson?;
+  tokensJson?;
 
   destroy?();
 }

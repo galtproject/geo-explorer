@@ -1103,6 +1103,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       } catch (e) {
         // photos not found
       }
+      let tokensJson = tokens.map(t => ({tokenId: t.tokenId, contractAddress: t.contractAddress, tokenType: t.tokenType}));
       await this.database.addOrUpdateCommunityMember(community, {
         address,
         currentReputation,
@@ -1112,6 +1113,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         communityAddress: community.address,
         isPpr: community.isPpr,
         photosJson,
+        tokensJson: JSON.stringify(tokensJson),
         ...additionalData
       });
     } else {
