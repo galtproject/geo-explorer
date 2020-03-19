@@ -1103,7 +1103,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       } catch (e) {
         // photos not found
       }
-      let tokensJson = tokens.map(t => ({tokenId: t.tokenId, contractAddress: t.contractAddress, tokenType: t.tokenType}));
+      let tokensJson = tokens.map(t => ({tokenId: t.tokenId, contractAddress: t.contractAddress, tokenType: t.tokenType, humanAddress: t.humanAddress}));
       await this.database.addOrUpdateCommunityMember(community, {
         address,
         currentReputation,
