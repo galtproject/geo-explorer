@@ -156,7 +156,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
-    let {details, floorPlans, photos, models, modelIpfsHash} = spaceData;
+    let {details, floorPlans, photos, models, modelIpfsHash, offset} = spaceData;
 
     if (!details) {
       details = spaceData.data;
@@ -169,21 +169,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if (!details) {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
-
-    // if (details.region) {
-    //   geoDataToSave = _.extend({
-    //     fullRegion: details.region.join(', '),
-    //     regionLvl1: _.isArray(details.region[0]) ? '' : (details.region[0] || ''),
-    //     regionLvl2: details.region[1] || '',
-    //     regionLvl3: details.region[2] || '',
-    //     regionLvl4: details.region[3] || '',
-    //     regionLvl5: details.region[4] || '',
-    //     regionLvl6: details.region[5] || '',
-    //     regionLvl7: details.region[6] || '',
-    //     regionLvl8: details.region[7] || '',
-    //     regionLvl9: details.region[8] || '',
-    //   }, geoDataToSave);
-    // }
 
     let imageHash;
     if (photos && photos[0]) {
@@ -214,6 +199,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
       dataJson: JSON.stringify(spaceData),
+      offsetJson: JSON.stringify(offset),
       ledgerIdentifier: details.ledgerIdentifier || geoData.ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     }, geoDataToSave);

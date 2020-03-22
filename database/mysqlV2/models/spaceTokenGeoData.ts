@@ -161,6 +161,9 @@ module.exports = async function (sequelize, models) {
     heightsContourJson: {
       type: Sequelize.TEXT
     },
+    offsetJson: {
+      type: Sequelize.TEXT
+    },
     featureArray: {
       type: Sequelize.TEXT
     },
