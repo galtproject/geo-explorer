@@ -199,7 +199,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
       dataJson: JSON.stringify(spaceData),
-      offsetJson: JSON.stringify(offset),
+      offsetJson: offset ? JSON.stringify(offset) : null,
       ledgerIdentifier: details.ledgerIdentifier || geoData.ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     }, geoDataToSave);
