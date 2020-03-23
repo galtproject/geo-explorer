@@ -1103,7 +1103,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       tokenType: t.tokenType,
       humanAddress: t.humanAddress,
       type: t.type,
-      subtype: t.subtype
+      subtype: t.subtype,
+      area: t.area
     }));
     await this.database.addOrUpdateCommunityMember(community, {
       address,
