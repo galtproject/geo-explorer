@@ -1509,7 +1509,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityTokensQuery.groupBy) {
       findAllParam.group = [communityTokensQuery.groupBy];
       findAllParam.attributes = [communityTokensQuery.groupBy];
-      return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
+      return community.getSpaceTokens(findAllParam).then(list => list.map(s => s.dataValues));
     }
 
     return community.getSpaceTokens(findAllParam);
