@@ -80,6 +80,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   pprCommunityRegistry: any;
   communityFactory: any;
   pprCommunityFactory: any;
+  pprManagedCommunityFactory: any;
   communityMockFactory: any;
   tokenizableFactory: any;
 
@@ -246,6 +247,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       'communityFactory',
       'communityMockFactory',
       'pprCommunityFactory',
+      'pprManagedCommunityFactory',
       'tokenizableFactory',
       'ppDepositHolder',
       'ppForeignMediatorFactory',
@@ -428,7 +430,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       try {
         ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
       } catch (e) {
-        console.warn('Web3Utils.hexToUtf8', e);
+        // console.warn('Web3Utils.hexToUtf8', e);
       }
 
       const geohashContour = [];

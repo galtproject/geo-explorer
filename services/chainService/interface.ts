@@ -34,6 +34,7 @@ export default interface IExplorerChainService {
   communityMockFactory: any;
 
   pprCommunityFactory: any;
+  pprManagedCommunityFactory: any;
 
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
@@ -180,6 +181,7 @@ export enum ChainServiceEvents {
   CommunityRevokeReputation = 'RevokeDelegated',
   CommunityAddMarker = 'AddProposalMarker',
   CommunityRemoveMarker = 'RemoveProposalMarker',
+  CommunityChangeName = 'SetNameAndDataLink',
   CommunityNewProposal = 'NewProposal',
   CommunityNayProposal = 'NayProposal',
   CommunityAyeProposal = 'AyeProposal',

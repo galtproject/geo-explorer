@@ -1509,7 +1509,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityTokensQuery.groupBy) {
       findAllParam.group = [communityTokensQuery.groupBy];
       findAllParam.attributes = [communityTokensQuery.groupBy];
-      return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
+      findAllParam.joinTableAttributes = [];
+      // findAllParam.raw = true;
+      console.log('findAllParam', findAllParam);
+      return community.getSpaceTokens(findAllParam).then(list => list.map(s => s.dataValues));
     }
 
     return community.getSpaceTokens(findAllParam);
@@ -1533,7 +1536,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getCommunityMemberTokens(community, memberAddress) {
     return community.getSpaceTokens({
-      where: {owner: {[Op.like]: memberAddress}}
+      where: {owner: {[Op.like]: memberAddress}},
+      include: [{
+        association: 'ppr'
+      }]
     });
   }
 
@@ -1760,6 +1766,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['proposalId'] = communityProposalQuery.proposalId.toString();
     }
 
+    if(communityProposalQuery.data) {
+      allWheres['data'] = communityProposalQuery.data;
+    }
+
     if(communityProposalQuery.marker) {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
@@ -1804,7 +1814,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', Op.and]),
       include: ruleInclude
     }
   }

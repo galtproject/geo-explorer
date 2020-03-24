@@ -245,6 +245,7 @@ export interface ISpaceTokenGeoData {
   regionLvl7?;
   regionLvl8?;
   regionLvl9?;
+  humanAddress;
   photosCount;
   floorPlansCount;
   bathroomsCount;
@@ -693,6 +694,7 @@ export interface ICommunityMember {
   isPpr?;
   photosJson?;
   expelledJson?;
+  tokensJson?;
 
   destroy?();
 }

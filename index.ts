@@ -618,14 +618,6 @@ const log = require('./services/logService');
       await setLastBlockNumber(newEvent.blockNumber);
     });
 
-    log('last pprCommunityFactory:');
-    await chainService.getEventsFromBlock(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, 0).then(async (events) => {
-      await pIteration.forEachSeries(events, async (e) => {
-        const community = await geoDataService.handleNewCommunityEvent(e, true);
-        return subscribeToCommunity(community.address, true);
-      });
-    });
-
     await pIteration.forEachSeries(chainService.contractsConfig.oldPrivateFundFactoryAddresses || [], (pprCommunityFactoryAddress) => {
       return chainService.getEventsFromBlock(chainService.getCommunityFactoryContract(pprCommunityFactoryAddress), ChainServiceEvents.NewCommunity, 0).then(async (events) => {
         await pIteration.forEachSeries(events, async (e) => {
@@ -635,13 +627,20 @@ const log = require('./services/logService');
       });
     });
 
-    log('new pprCommunityFactory:');
-    chainService.subscribeForNewEvents(chainService.pprCommunityFactory, ChainServiceEvents.NewCommunity, startBlockNumber, async (err, newEvent) => {
-      const community = await geoDataService.handleNewCommunityEvent(newEvent, true);
-      await subscribeToCommunity(community.address, true);
-      await setLastBlockNumber(newEvent.blockNumber);
+    await pIteration.forEachSeries(['pprCommunityFactory', 'pprManagedCommunityFactory'], async (contractName) => {
+      await chainService.getEventsFromBlock(chainService[contractName], ChainServiceEvents.NewCommunity, 0).then(async (events) => {
+        await pIteration.forEachSeries(events, async (e) => {
+          const community = await geoDataService.handleNewCommunityEvent(e, true);
+          return subscribeToCommunity(community.address, true);
+        });
+      });
+
+      chainService.subscribeForNewEvents(chainService[contractName], ChainServiceEvents.NewCommunity, startBlockNumber, async (err, newEvent) => {
+        const community = await geoDataService.handleNewCommunityEvent(newEvent, true);
+        await subscribeToCommunity(community.address, true);
+        await setLastBlockNumber(newEvent.blockNumber);
+      });
     });
-    log('community done');
 
     async function subscribeToCommunity (address, isPpr) {
       address = address.toLowerCase();
@@ -756,6 +755,11 @@ const log = require('./services/logService');
 
       chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityRemoveRule, startBlockNumber, async (err, newEvent) => {
         await geoDataService.handleCommunityRuleEvent(address, newEvent);
+        await setLastBlockNumber(newEvent.blockNumber);
+      });
+
+      chainService.subscribeForNewEvents(contractStorage, ChainServiceEvents.CommunityChangeName, startBlockNumber, async (err, newEvent) => {
+        await geoDataService.updateCommunity(address, isPpr);
         await setLastBlockNumber(newEvent.blockNumber);
       });
 
