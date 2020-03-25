@@ -93,6 +93,8 @@ export default interface IExplorerChainService {
 
   getCommunityStorageAbi(isPpr?): any;
 
+  getCommunityRuleRegistryContract(address): Promise<any>;
+
   getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;

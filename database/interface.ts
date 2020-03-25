@@ -657,6 +657,7 @@ export interface ICommunity {
 
   address;
   storageAddress?;
+  ruleRegistryAddress?;
   pmAddress?;
   multiSigAddress?;
   name?;

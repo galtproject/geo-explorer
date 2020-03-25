@@ -1015,9 +1015,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const registryContract = await this.chainService.getCommunityFundRegistryContract(registryAddress);
 
-    const [storageAddress, multiSigAddress] = await Promise.all([
+    const [storageAddress, multiSigAddress, ruleRegistryAddress] = await Promise.all([
       this.chainService.callContractMethod(registryContract, 'getStorageAddress', []),
-      this.chainService.callContractMethod(registryContract, 'getMultiSigAddress', [])
+      this.chainService.callContractMethod(registryContract, 'getMultiSigAddress', []),
+      this.chainService.callContractMethod(registryContract, 'getRuleRegistryAddress', []).catch(() => null)
     ]);
 
     const [contract, community] = await Promise.all([
@@ -1049,6 +1050,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const _community = await this.database.addOrUpdateCommunity({
       address: raAddress,
       storageAddress,
+      ruleRegistryAddress,
       multiSigAddress,
       isPpr,
       isPrivate,
@@ -1478,13 +1480,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityRule(communityAddress, ruleId) {
     const community = await this.database.getCommunity(communityAddress);
 
-    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress);
+    let contract;
+    if(community.ruleRegistryAddress) {
+      contract = await this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress);
+    } else {
+      contract = await this.chainService.getCommunityStorageContract(community.storageAddress);
+    }
 
     const ruleData = await this.chainService.callContractMethod(contract, 'fundRules', [ruleId]);
 
     ruleData.createdAt = undefined;
     ruleData.id = undefined;
     ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
+    ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
