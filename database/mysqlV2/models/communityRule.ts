@@ -24,6 +24,9 @@ module.exports = async function (sequelize, models) {
     ruleId: {
       type: Sequelize.STRING(100)
     },
+    typeId: {
+      type: Sequelize.STRING(100)
+    },
     ipfsHash: {
       type: Sequelize.STRING(100)
     },
