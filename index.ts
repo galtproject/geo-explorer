@@ -258,41 +258,40 @@ const log = require('./services/logService');
 
       log('SetSpaceTokenContour');
       await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetSpaceTokenContour, fromBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          log('handleChangeSpaceTokenDataEvent');
-          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
-          log('handlePrivatePropertyBurnTimeoutEvent');
-          await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, {
-            contractAddress: controllerAddress,
-            returnValues: e.returnValues
+        await pIteration.forEachSeries(_.chunk(events, 10), chunk => {
+          return pIteration.forEach(chunk, async (e) => {
+            await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+            await geoDataService.handlePrivatePropertyBurnTimeoutEvent(address, {
+              contractAddress: controllerAddress,
+              returnValues: e.returnValues
+            });
+            return geohashService.handleChangeContourEvent(e);
           });
-          log('handleChangeContourEvent');
-          return geohashService.handleChangeContourEvent(e);
         });
       });
+      //
+      // log('SetPrivatePropertyDetails');
+      // await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetPrivatePropertyDetails, fromBlockNumber).then(async (events) => {
+      //   await pIteration.forEach(events, (e) => {
+      //     return geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+      //   });
+      // });
 
-      log('SetPrivatePropertyDetails');
-      await chainService.getEventsFromBlock(contract, ChainServiceEvents.SetPrivatePropertyDetails, fromBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, (e) => {
-          return geoDataService.handleChangeSpaceTokenDataEvent(address, e);
-        });
-      });
+      // log('SpaceTokenTransfer');
+      // await chainService.getEventsFromBlock(contract, ChainServiceEvents.SpaceTokenTransfer, fromBlockNumber).then(async (events) => {
+      //   await pIteration.forEach(events, async (e) => {
+      //     await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+      //     return geoDataService.updatePrivatePropertyRegistry(address);
+      //   });
+      // });
 
-      log('SpaceTokenTransfer');
-      await chainService.getEventsFromBlock(contract, ChainServiceEvents.SpaceTokenTransfer, fromBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
-          return geoDataService.updatePrivatePropertyRegistry(address);
-        });
-      });
-
-      log('BurnPrivatePropertyToken');
-      await chainService.getEventsFromBlock(contract, ChainServiceEvents.BurnPrivatePropertyToken, fromBlockNumber).then(async (events) => {
-        await pIteration.forEach(events, async (e) => {
-          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
-          return geoDataService.updatePrivatePropertyRegistry(address);
-        });
-      });
+      // log('BurnPrivatePropertyToken');
+      // await chainService.getEventsFromBlock(contract, ChainServiceEvents.BurnPrivatePropertyToken, fromBlockNumber).then(async (events) => {
+      //   await pIteration.forEach(events, async (e) => {
+      //     await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+      //     return geoDataService.updatePrivatePropertyRegistry(address);
+      //   });
+      // });
 
       addSubscription(chainService.subscribeForNewEvents(contract, ChainServiceEvents.SetSpaceTokenContour, subscribeFromBlockNumber, async (err, newEvent) => {
         await geohashService.handleChangeContourEvent(newEvent);
