@@ -30,6 +30,9 @@ module.exports = async function (sequelize, models) {
     ipfsHash: {
       type: Sequelize.STRING(100)
     },
+    descriptionIpfsHash: {
+      type: Sequelize.STRING(100)
+    },
     manager: {
       type: Sequelize.STRING(100)
     },

@@ -1518,6 +1518,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
     const {dataLink, createdAt} = ruleData;
     let description = dataLink;
+    let descriptionIpfsHash;
     let type = null;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
@@ -1526,7 +1527,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       try {
         log('rule data', data);
         if (data.description) {
-          description = await this.geesome.getContentData(data.description).catch(() => '');
+          const ipldData = await this.geesome.getObject(data.description);
+          descriptionIpfsHash = ipldData.storageId;
+          description = await this.geesome.getContentData(descriptionIpfsHash).catch(() => '');
         } else if (data.text) {
           if (isIpldHash(data.text)) {
             description = await this.geesome.getContentData(data.text).catch(() => '');
@@ -1546,6 +1549,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ...ruleData,
       communityId: community.id,
       communityAddress: community.address,
+      descriptionIpfsHash,
       description,
       dataLink,
       dataJson,
