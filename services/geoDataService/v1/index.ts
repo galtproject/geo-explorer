@@ -1412,7 +1412,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         txData.closedAt = timeoutDate;
       }
 
-      if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName === 'addRuleType')) {
+      if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName, 'addRuleType')) {
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId: pmAddress + '-' + proposalId,
           isActive: false,
