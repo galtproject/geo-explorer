@@ -1476,6 +1476,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
       totalAccepted: this.chainService.weiToEther(proposalVotingData.totalAyes),
       totalDeclined: this.chainService.weiToEther(proposalVotingData.totalNays),
+      totalAbstained: this.chainService.weiToEther(proposalVotingData.totalAbstains || '0'),
       isActual,
       timeoutAt,
       ruleDbId

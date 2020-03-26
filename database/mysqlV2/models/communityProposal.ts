@@ -84,6 +84,9 @@ module.exports = async function (sequelize, models) {
     totalDeclined: {
       type: Sequelize.FLOAT
     },
+    totalAbstained: {
+      type: Sequelize.FLOAT
+    },
     createdAtBlock: {
       type: Sequelize.INTEGER
     },
