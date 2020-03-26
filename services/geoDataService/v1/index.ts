@@ -1353,7 +1353,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           txData.executeTxId,
           [
             {address: community.storageAddress, abi: this.chainService.getCommunityStorageAbi(community.isPpr)},
-            {address: community.ruleRegistryAddress, abi: this.chainService.getCommunityRuleRegistryContract()}
+            {address: community.ruleRegistryAddress, abi: this.chainService.getCommunityRuleRegistryAbi()}
           ]
         );
 
