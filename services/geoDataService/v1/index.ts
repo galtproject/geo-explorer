@@ -1373,7 +1373,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
     if(!proposalParsedData.methodName) {
-      proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+      proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityRuleRegistryAbi());
     }
     console.log('proposalParsedData.methodName', proposalParsedData.methodName);
 
