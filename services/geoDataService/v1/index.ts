@@ -1352,7 +1352,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         const txReceipt = await this.chainService.getTransactionReceipt(
           txData.executeTxId,
           [
-            {address: community.storageAddress, abi: this.chainService.getCommunityStorageAbi(community.isPpr)}
+            {address: community.storageAddress, abi: this.chainService.getCommunityStorageAbi(community.isPpr)},
+            {address: community.ruleRegistryAddress, abi: this.chainService.getCommunityRuleRegistryContract()}
           ]
         );
 
