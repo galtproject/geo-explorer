@@ -807,7 +807,7 @@ const log = require('./services/logService');
         await setLastBlockNumber(newEvent.blockNumber);
       });
 
-      await pIteration.forEachSeries(['CommunityAyeProposal', 'CommunityNayProposal', 'CommunityApprovedProposal', 'AbstainProposal'], async (eventName) => {
+      await pIteration.forEachSeries(['CommunityAyeProposal', 'CommunityNayProposal', 'CommunityApprovedProposal', 'CommunityAbstainProposal'], async (eventName) => {
         await chainService.getEventsFromBlock(contractPm, ChainServiceEvents[eventName], lastBlockNumber).then(async (events) => {
           await pIteration.forEach(events, async (e) => {
             await geoDataService.handleCommunityUpdateProposalEvent(communityAddress, e);
