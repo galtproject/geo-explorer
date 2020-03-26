@@ -1339,6 +1339,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         success: true,
         proposalId
       });
+      console.log('executeEvents', executeEvents);
       if (executeEvents.length) {
         txData.executeTxId = executeEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
