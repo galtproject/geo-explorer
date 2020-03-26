@@ -1021,18 +1021,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.callContractMethod(registryContract, 'getRuleRegistryAddress', []).catch(() => null)
     ]);
 
-    const [contract, community] = await Promise.all([
+    const [storageContract, ruleRegistryContract, community] = await Promise.all([
       this.chainService.getCommunityStorageContract(storageAddress, isPpr),
+      ruleRegistryAddress ? this.chainService.getCommunityRuleRegistryContract(ruleRegistryAddress) : null,
       this.database.getCommunity(raAddress)
     ]);
 
     const [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
-      contract.methods.name().call({}),
-      contract.methods.dataLink().call({}),
-      this.chainService.callContractMethod(contract, 'getActiveFundRulesCount', [], 'number'),
+      storageContract.methods.name().call({}),
+      storageContract.methods.dataLink().call({}),
+      this.chainService.callContractMethod(ruleRegistryContract || storageContract, 'getActiveFundRulesCount', [], 'number'),
       (async () => community ? await this.database.getCommunityTokensCount(community) : 0)(),
       this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei'),
-      (async () => (await contract.methods.config(await contract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000')(),
+      (async () => (await storageContract.methods.config(await storageContract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000')(),
       this.database.filterCommunityMemberCount({communityAddress: raAddress})
     ]);
 
