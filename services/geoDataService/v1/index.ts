@@ -1439,6 +1439,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     console.log('proposal', votingName, pmAddress, proposalId, isActual);
+    console.log('proposalVotingProgress', proposalVotingProgress);
 
     await this.database.addOrUpdateCommunityProposal(voting, {
       communityAddress,
