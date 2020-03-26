@@ -1372,10 +1372,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
 
-    if (proposalParsedData.methodName === 'disableFundRule') {
+    if (_.startsWith(proposalParsedData.methodName, 'disableRuleType')) {
       const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
       if (status === 'executed') {
-        const addFundRuleProposal = (dbRule.proposals || []).filter(p => p.markerName === 'storage.addFundRule')[0];
+        const addFundRuleProposal = (dbRule.proposals || []).filter(p => _.startsWith(p.markerName, 'storage.addRuleType'))[0];
         if (addFundRuleProposal) {
           await this.database.updateProposalByDbId(addFundRuleProposal.id, {isActual: false});
         }
@@ -1403,7 +1403,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         txData.closedAt = timeoutDate;
       }
 
-      if (!ruleDbId && proposeTxId && proposalParsedData.methodName === 'addFundRule') {
+      if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName === 'addRuleType')) {
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId: pmAddress + '-' + proposalId,
           isActive: false,
