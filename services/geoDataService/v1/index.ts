@@ -1465,8 +1465,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
       minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
-      totalAccepted: this.chainService.weiToEther(proposalVotingProgress.totalAyes),
-      totalDeclined: this.chainService.weiToEther(proposalVotingProgress.totalNays),
+      totalAccepted: this.chainService.weiToEther(proposalVotingData.totalAyes),
+      totalDeclined: this.chainService.weiToEther(proposalVotingData.totalNays),
       isActual,
       timeoutAt,
       ruleDbId
