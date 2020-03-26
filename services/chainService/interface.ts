@@ -95,6 +95,8 @@ export default interface IExplorerChainService {
 
   getCommunityRuleRegistryContract(address): Promise<any>;
 
+  getCommunityRuleRegistryAbi(): Promise<any>;
+
   getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;

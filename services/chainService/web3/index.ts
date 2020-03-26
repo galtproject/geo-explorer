@@ -615,9 +615,13 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(this.contractsConfig['fundRuleRegistryAbi'], address);
+    const communityContract = new this.web3.eth.Contract(this.getCommunityRuleRegistryAbi(), address);
     this.communityCache[address] = communityContract;
     return communityContract;
+  }
+
+  getCommunityRuleRegistryAbi() {
+    return this.contractsConfig['fundRuleRegistryAbi'];
   }
 
   getCommunityRaContract(address, isPpr) {

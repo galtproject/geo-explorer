@@ -1354,6 +1354,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         );
 
         const AddFundRuleEvent = txReceipt.events.filter(e => e.name === 'AddFundRule')[0];
+        console.log('AddFundRuleEvent', AddFundRuleEvent);
         if (AddFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
           ruleDbId = dbRule.id;
@@ -1370,7 +1371,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
-    const proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+    let proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+    if(!proposalParsedData.methodName) {
+      proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityStorageAbi(community.isPpr));
+    }
+    console.log('proposalParsedData.methodName', proposalParsedData.methodName);
 
     if (_.startsWith(proposalParsedData.methodName, 'disableRuleType')) {
       const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
