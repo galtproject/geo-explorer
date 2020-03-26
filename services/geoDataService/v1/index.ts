@@ -1334,6 +1334,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let ruleDbId = proposal ? proposal.ruleDbId : null;
     let isActual = proposal ? proposal.isActual : true;
 
+    console.log('status', status, (!proposal || !proposal.executeTxId));
+
     if (status === 'executed' && (!proposal || !proposal.executeTxId)) {
       const executeEvents = await this.chainService.getEventsFromBlock(proposalManagerContract, 'Execute', createdAtBlock, {
         success: true,
