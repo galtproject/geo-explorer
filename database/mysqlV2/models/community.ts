@@ -24,6 +24,9 @@ module.exports = async function (sequelize, models) {
     multiSigAddress: {
       type: Sequelize.STRING(100)
     },
+    ruleRegistryAddress: {
+      type: Sequelize.STRING(100)
+    },
     name: {
       type: Sequelize.STRING(100)
     },
