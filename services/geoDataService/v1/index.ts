@@ -1394,8 +1394,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
 
-    let [ayeShare, nayShare, createdAtBlockTimestamp] = await Promise.all([
+    let [ayeShare, abstainShare, nayShare, createdAtBlockTimestamp] = await Promise.all([
       this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei'),
+      this.chainService.callContractMethod(proposalManagerContract, 'getAbstainShare', [proposalId], 'wei'),
       this.chainService.callContractMethod(proposalManagerContract, 'getNayShare', [proposalId], 'wei'),
       this.chainService.getBlockTimestamp(createdAtBlock)
     ]);
@@ -1461,8 +1462,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communityId: community.id,
       acceptedShare: ayeShare,
       acceptedCount: proposalVotingData.ayes.length,
-      declinedShare: nayShare,
+      abstainedShare: abstainShare,
+      abstainedCount: proposalVotingData.abstains.length,
       declinedCount: proposalVotingData.nays.length,
+      declinedShare: nayShare,
       createdAtBlock,
       createdAt,
       ...txData,

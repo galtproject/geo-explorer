@@ -57,6 +57,9 @@ module.exports = async function (sequelize, models) {
     acceptedShare: {
       type: Sequelize.FLOAT
     },
+    abstainedShare: {
+      type: Sequelize.FLOAT
+    },
     declinedShare: {
       type: Sequelize.FLOAT
     },
@@ -73,6 +76,9 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.INTEGER
     },
     acceptedCount: {
+      type: Sequelize.INTEGER
+    },
+    abstainedCount: {
       type: Sequelize.INTEGER
     },
     declinedCount: {
