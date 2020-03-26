@@ -189,6 +189,7 @@ export enum ChainServiceEvents {
   CommunityNewProposal = 'NewProposal',
   CommunityNayProposal = 'NayProposal',
   CommunityAyeProposal = 'AyeProposal',
+  CommunityAbstainProposal = 'AbstainProposal',
   CommunityApprovedProposal = 'Approved',
   CommunityRejectedProposal = 'Rejected',
   CommunityAddRule = 'AddFundRule',
