@@ -1483,6 +1483,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
 
     let contract;
+    console.log('community.ruleRegistryAddress', community.ruleRegistryAddress);
     if(community.ruleRegistryAddress) {
       contract = await this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress);
     } else {
