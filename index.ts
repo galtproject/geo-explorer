@@ -664,6 +664,8 @@ const log = require('./services/logService');
 
       const ruleRegistryAddress = await chainService.callContractMethod(registryContract, 'getRuleRegistryAddress', []).catch(() => null);
 
+      console.log('ruleRegistryAddress', ruleRegistryAddress);
+
       let ruleRegistryContract;
       if(ruleRegistryAddress) {
         ruleRegistryContract = await chainService.getCommunityRuleRegistryContract(ruleRegistryAddress);
