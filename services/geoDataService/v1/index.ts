@@ -1302,10 +1302,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       marker = proposal.marker;
     }
 
-    let [voting, proposalManagerContract, storageContract] = await Promise.all([
+    let [voting, proposalManagerContract, storageContract, ruleRegistryContract] = await Promise.all([
       this.database.getCommunityVoting(community.id, marker),
       this.chainService.getCommunityProposalManagerContract(pmAddress),
-      this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr)
+      this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
+      community.ruleRegistryAddress ? this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress) : null
     ]);
 
     let txData: any = {};
@@ -1362,7 +1363,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         if (AddFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
           ruleDbId = dbRule.id;
-          const disableEvents = await this.chainService.getEventsFromBlock(storageContract, 'DisableFundRule', createdAtBlock, {id: AddFundRuleEvent.values.id});
+          const disableEvents = await this.chainService.getEventsFromBlock(ruleRegistryContract || storageContract, 'DisableFundRule', createdAtBlock, {id: AddFundRuleEvent.values.id});
           if (disableEvents.length) {
             isActual = false;
           }
