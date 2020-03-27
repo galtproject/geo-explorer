@@ -76,6 +76,9 @@ module.exports = async function (sequelize, models) {
     minAcceptQuorum: {
       type: Sequelize.FLOAT
     },
+    currentQuorum: {
+      type: Sequelize.FLOAT
+    },
     timeoutAt: {
       type: Sequelize.INTEGER
     },
