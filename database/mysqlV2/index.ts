@@ -1786,6 +1786,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['status'] = {[Op.in]: communityProposalQuery.status};
     }
 
+    if(communityProposalQuery.maxClosedAt) {
+      allWheres['closedAt'] = {[Op.lte]: communityProposalQuery.maxClosedAt};
+    }
+
     if(communityProposalQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityProposalQuery.communityAddress};
     }
