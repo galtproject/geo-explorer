@@ -1402,18 +1402,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.getBlockTimestamp(createdAtBlock)
     ]);
 
-    if (status === 'active') {
-      const timeoutDate = new Date();
-      timeoutDate.setTime(timeoutAt * 1000);
-      if (new Date() >= timeoutDate) {
-        if (ayeShare > minAcceptQuorum && ayeShare > support) {
-          status = 'approved';
-        } else {
-          status = 'rejected';
-        }
-        txData.closedAt = timeoutDate;
-      }
+    const timeoutDate = new Date();
+    timeoutDate.setTime(timeoutAt * 1000);
+    txData.closedAt = timeoutDate;
 
+    if (status === 'active') {
       if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName, 'addRuleType')) {
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId: pmAddress + '-' + proposalId,
