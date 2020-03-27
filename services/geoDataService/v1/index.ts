@@ -1428,9 +1428,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
-    if (isActual && status === 'rejected') {
-      isActual = false;
-    }
+    // if (isActual && status === 'rejected') {
+    //   isActual = false;
+    // }
 
     let dataLink = proposalData.dataLink;
     let description = dataLink;
