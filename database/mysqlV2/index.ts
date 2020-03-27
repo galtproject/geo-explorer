@@ -1818,7 +1818,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', Op.and]),
       include: ruleInclude
     }
   }
