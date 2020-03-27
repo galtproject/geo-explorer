@@ -1810,6 +1810,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['isActual'] = communityProposalQuery.isActual;
     }
 
+    if(!_.isUndefined(communityProposalQuery.acceptedEnoughToExecute)) {
+      allWheres['acceptedEnoughToExecute'] = communityProposalQuery.acceptedEnoughToExecute;
+    }
+
     return allWheres;
   }
 
@@ -1826,7 +1830,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', 'acceptedEnoughToExecute', Op.and]),
       include: ruleInclude
     }
   }
