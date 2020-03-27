@@ -1322,7 +1322,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ]);
 
     let minAcceptQuorum = this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum);
-    let support = this.chainService.weiToEther(proposalVotingProgress.requiredSupport);
+    let requiredSupport = this.chainService.weiToEther(proposalVotingProgress.requiredSupport);
 
     const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
@@ -1442,6 +1442,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       console.log('voting', JSON.stringify(voting));
     }
 
+    let acceptedEnoughToExecute = ayeShare >= ((minAcceptQuorum / 100) * (requiredSupport / 100) * 100);
+
     console.log('proposal', votingName, pmAddress, proposalId, isActual);
     // console.log('proposalVotingProgress', proposalVotingProgress);
 
@@ -1468,9 +1470,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataLink,
       dataJson,
       data: proposalData.data,
-      requiredSupport: this.chainService.weiToEther(proposalVotingProgress.requiredSupport),
+      requiredSupport,
+      minAcceptQuorum,
+      acceptedEnoughToExecute,
       currentSupport: this.chainService.weiToEther(proposalVotingProgress.currentSupport),
-      minAcceptQuorum: this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum),
       totalAccepted: this.chainService.weiToEther(proposalVotingData.totalAyes),
       totalDeclined: this.chainService.weiToEther(proposalVotingData.totalNays),
       totalAbstained: this.chainService.weiToEther(proposalVotingData.totalAbstains || '0'),

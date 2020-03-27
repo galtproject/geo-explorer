@@ -111,7 +111,7 @@ export default interface IExplorerChainService {
 
   stringToHex(value): string;
 
-  weiToEther(value): string;
+  weiToEther(value): number;
 
   getContractMethod(contractName, methodName): any;
 

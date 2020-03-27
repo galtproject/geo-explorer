@@ -54,6 +54,10 @@ module.exports = async function (sequelize, models) {
     description: {
       type: Sequelize.TEXT
     },
+    acceptedEnoughToExecute: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
     acceptedShare: {
       type: Sequelize.FLOAT
     },
