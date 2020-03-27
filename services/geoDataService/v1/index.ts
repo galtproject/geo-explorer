@@ -1457,7 +1457,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       acceptedShare: ayeShare,
       acceptedCount: proposalVotingData.ayes.length,
       abstainedShare: abstainShare,
-      abstainedCount: proposalVotingData.abstains.length,
+      abstainedCount: proposalVotingData.abstains ? proposalVotingData.abstains.length : null,
       declinedCount: proposalVotingData.nays.length,
       declinedShare: nayShare,
       createdAtBlock,
