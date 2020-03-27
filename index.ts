@@ -277,13 +277,13 @@ const log = require('./services/logService');
       //   });
       // });
 
-      // log('SpaceTokenTransfer');
-      // await chainService.getEventsFromBlock(contract, ChainServiceEvents.SpaceTokenTransfer, fromBlockNumber).then(async (events) => {
-      //   await pIteration.forEach(events, async (e) => {
-      //     await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
-      //     return geoDataService.updatePrivatePropertyRegistry(address);
-      //   });
-      // });
+      log('SpaceTokenTransfer');
+      await chainService.getEventsFromBlock(contract, ChainServiceEvents.SpaceTokenTransfer, fromBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleChangeSpaceTokenDataEvent(address, e);
+          return geoDataService.updatePrivatePropertyRegistry(address);
+        });
+      });
 
       // log('BurnPrivatePropertyToken');
       // await chainService.getEventsFromBlock(contract, ChainServiceEvents.BurnPrivatePropertyToken, fromBlockNumber).then(async (events) => {
