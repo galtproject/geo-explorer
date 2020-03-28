@@ -1409,6 +1409,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           ruleId: pmAddress + '-' + proposalId,
           isActive: false,
           isAbstract: true,
+          typeId: proposalParsedData.methodName.replace('addRuleType', ''),
           manager: pmAddress,
           dataLink: proposalParsedData.inputs.dataLink,
           ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
