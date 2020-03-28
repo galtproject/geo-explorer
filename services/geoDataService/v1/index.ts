@@ -1321,9 +1321,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({})
     ]);
 
-    let minAcceptQuorum = this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum);
-    let requiredSupport = this.chainService.weiToEther(proposalVotingProgress.requiredSupport);
-
     const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
     let status = {
@@ -1441,10 +1438,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if (!votingName) {
       console.log('voting', JSON.stringify(voting));
     }
-    const currentQuorum = this.chainService.weiToEther(proposalVotingProgress.currentQuorum);
-    const currentSupport = this.chainService.weiToEther(proposalVotingProgress.currentSupport);
 
-    let acceptedEnoughToExecute = currentQuorum >= minAcceptQuorum && currentSupport >= requiredSupport;
+    let minAcceptQuorum: any = this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum);
+    let requiredSupport: any = this.chainService.weiToEther(proposalVotingProgress.requiredSupport);
+    const currentQuorum: any = this.chainService.weiToEther(proposalVotingProgress.currentQuorum);
+    const currentSupport: any = this.chainService.weiToEther(proposalVotingProgress.currentSupport);
+
+    let acceptedEnoughToExecute = parseFloat(currentQuorum) >= parseFloat(minAcceptQuorum) && parseFloat(currentSupport) >= parseFloat(requiredSupport);
 
     console.log('proposal', proposalId, votingName, pmAddress, isActual);
     console.log('acceptedEnoughToExecute', acceptedEnoughToExecute, 'currentQuorum', currentQuorum, 'minAcceptQuorum', minAcceptQuorum, 'currentSupport', currentSupport, 'requiredSupport', requiredSupport);
