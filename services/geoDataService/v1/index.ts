@@ -1427,7 +1427,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
       description = data.description;
       dataJson = JSON.stringify(data);
     }
