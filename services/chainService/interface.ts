@@ -192,6 +192,7 @@ export enum ChainServiceEvents {
   CommunityAbstainProposal = 'AbstainProposal',
   CommunityApprovedProposal = 'Approved',
   CommunityRejectedProposal = 'Rejected',
+  CommunityExecuteProposal = 'Execute',
   CommunityAddRule = 'AddFundRule',
   CommunityRemoveRule = 'DisableFundRule',
   CommunityApproveToken = 'ApproveMint',
