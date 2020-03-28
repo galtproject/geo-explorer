@@ -1446,6 +1446,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let acceptedEnoughToExecute = currentQuorum >= minAcceptQuorum && currentSupport >= requiredSupport;
 
+    console.log('acceptedEnoughToExecute', acceptedEnoughToExecute, 'currentQuorum', currentQuorum, 'minAcceptQuorum', minAcceptQuorum, 'currentSupport', currentSupport, 'requiredSupport', requiredSupport);
+
     console.log('proposal', votingName, pmAddress, proposalId, isActual);
     // console.log('proposalVotingProgress', proposalVotingProgress);
 
