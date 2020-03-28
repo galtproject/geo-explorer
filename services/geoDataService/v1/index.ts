@@ -1526,12 +1526,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
     const {dataLink, createdAt} = ruleData;
-    let description = dataLink;
+    let description = 'Not found';
     let descriptionIpfsHash;
     let type = null;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
       // log('dataItem', dataItem);
       try {
         log('rule data', data);
