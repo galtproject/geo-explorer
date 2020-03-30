@@ -52,7 +52,7 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
   });
 
   service.post('/v1/check-subscribe', async (req, res) => {
-    if(!req.body.eventsMetaData || req.body.eventsMetaData.length > 100) {
+    if(!req.body.eventsMetaData || req.body.eventsMetaData.length > 1000) {
       throw "invalid_input";
     }
     await respondByScheme(res, {
