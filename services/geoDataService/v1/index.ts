@@ -1216,7 +1216,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]),
       this.database.filterCommunityProposalCount({communityAddress, marker})
     ]);
-    console.log('updateCommunityVoting', this.chainService.hexToString(markerData.name), 'markerData.destination', markerData.destination);
+    console.log('updateCommunityVoting', marker, markerData);
 
     support = this.chainService.weiToEther(support);
     minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
