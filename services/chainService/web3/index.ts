@@ -610,6 +610,20 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'];
   }
 
+  getCommunityRuleRegistryContract(address) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityContract = new this.web3.eth.Contract(this.getCommunityRuleRegistryAbi(), address);
+    this.communityCache[address] = communityContract;
+    return communityContract;
+  }
+
+  getCommunityRuleRegistryAbi() {
+    return this.contractsConfig['fundRuleRegistryAbi'];
+  }
+
   getCommunityRaContract(address, isPpr) {
     if(this.communityCache[address]) {
       return this.communityCache[address];
@@ -720,6 +734,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     abiAddressArr.forEach(item => {
       const {abi, address} = item;
+      if(!address) {
+        return;
+      }
       receipt.logs.filter(log => log.address.toLowerCase() === address.toLowerCase()).forEach((log) => {
         const eventObject = _.find(abi, (abiItem) => {
           if(!abiItem.signature) {

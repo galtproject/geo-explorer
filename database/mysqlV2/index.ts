@@ -1786,6 +1786,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['status'] = {[Op.in]: communityProposalQuery.status};
     }
 
+    if(communityProposalQuery.maxClosedAt) {
+      allWheres['closedAt'] = {[Op.lte]: communityProposalQuery.maxClosedAt};
+    }
+
+    if(communityProposalQuery.minClosedAt) {
+      if(allWheres['closedAt']) {
+        allWheres['closedAt'][Op.gte] = communityProposalQuery.minClosedAt;
+      } else {
+        allWheres['closedAt'] = {[Op.gte]: communityProposalQuery.minClosedAt};
+      }
+    }
+
     if(communityProposalQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityProposalQuery.communityAddress};
     }
@@ -1796,6 +1808,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     if(!_.isUndefined(communityProposalQuery.isActual)) {
       allWheres['isActual'] = communityProposalQuery.isActual;
+    }
+
+    if(!_.isUndefined(communityProposalQuery.acceptedEnoughToExecute)) {
+      allWheres['acceptedEnoughToExecute'] = communityProposalQuery.acceptedEnoughToExecute;
     }
 
     return allWheres;
@@ -1814,7 +1830,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', 'acceptedEnoughToExecute', Op.and]),
       include: ruleInclude
     }
   }

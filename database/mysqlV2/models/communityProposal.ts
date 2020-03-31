@@ -54,7 +54,14 @@ module.exports = async function (sequelize, models) {
     description: {
       type: Sequelize.TEXT
     },
+    acceptedEnoughToExecute: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
     acceptedShare: {
+      type: Sequelize.FLOAT
+    },
+    abstainedShare: {
       type: Sequelize.FLOAT
     },
     declinedShare: {
@@ -69,10 +76,16 @@ module.exports = async function (sequelize, models) {
     minAcceptQuorum: {
       type: Sequelize.FLOAT
     },
+    currentQuorum: {
+      type: Sequelize.FLOAT
+    },
     timeoutAt: {
       type: Sequelize.INTEGER
     },
     acceptedCount: {
+      type: Sequelize.INTEGER
+    },
+    abstainedCount: {
       type: Sequelize.INTEGER
     },
     declinedCount: {
@@ -82,6 +95,9 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.FLOAT
     },
     totalDeclined: {
+      type: Sequelize.FLOAT
+    },
+    totalAbstained: {
       type: Sequelize.FLOAT
     },
     createdAtBlock: {

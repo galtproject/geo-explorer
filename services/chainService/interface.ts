@@ -93,6 +93,10 @@ export default interface IExplorerChainService {
 
   getCommunityStorageAbi(isPpr?): any;
 
+  getCommunityRuleRegistryContract(address): Promise<any>;
+
+  getCommunityRuleRegistryAbi(): Promise<any>;
+
   getCommunityRaContract(address, isPpr): Promise<any>;
 
   getCommunityProposalManagerContract(address): Promise<any>;
@@ -107,7 +111,7 @@ export default interface IExplorerChainService {
 
   stringToHex(value): string;
 
-  weiToEther(value): string;
+  weiToEther(value): number;
 
   getContractMethod(contractName, methodName): any;
 
@@ -185,8 +189,10 @@ export enum ChainServiceEvents {
   CommunityNewProposal = 'NewProposal',
   CommunityNayProposal = 'NayProposal',
   CommunityAyeProposal = 'AyeProposal',
+  CommunityAbstainProposal = 'AbstainProposal',
   CommunityApprovedProposal = 'Approved',
   CommunityRejectedProposal = 'Rejected',
+  CommunityExecuteProposal = 'Execute',
   CommunityAddRule = 'AddFundRule',
   CommunityRemoveRule = 'DisableFundRule',
   CommunityApproveToken = 'ApproveMint',
