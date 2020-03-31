@@ -318,7 +318,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     let {contractType} = await this.ppTokenRegistry.methods.tokens(address).call({});
     contractType = contractType ? this.hexToString(contractType) : 'regular';
 
-    let abi = contractType === 'bridged' || this.contractsConfig['ppBridgedTokenAbi'] ? this.contractsConfig['ppBridgedTokenAbi'] : this.contractsConfig['ppTokenAbi'];
+    let abi = contractType === 'bridged' || !this.contractsConfig['ppTokenAbi'] ? this.contractsConfig['ppBridgedTokenAbi'] : this.contractsConfig['ppTokenAbi'];
 
     const privatePropertyContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyContract;
