@@ -1216,7 +1216,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]),
       this.database.filterCommunityProposalCount({communityAddress, marker})
     ]);
-    console.log('updateCommunityVoting', marker, 'markerData.destination', markerData.destination);
+    console.log('updateCommunityVoting', this.chainService.hexToString(markerData.name), marker, markerData);
 
     support = this.chainService.weiToEther(support);
     minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
@@ -1427,7 +1427,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let description = dataLink;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
       description = data.description;
       dataJson = JSON.stringify(data);
     }
@@ -1523,12 +1526,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
     const {dataLink, createdAt} = ruleData;
-    let description = dataLink;
+    let description = 'Not found';
     let descriptionIpfsHash;
     let type = null;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch(() => ({}));
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
       // log('dataItem', dataItem);
       try {
         log('rule data', data);
