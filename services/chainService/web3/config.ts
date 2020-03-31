@@ -26,5 +26,6 @@ module.exports = {
   'ppHomeMediatorFactoryName': 'ppHomeMediatorFactory',
   'ppForeignMediatorFactoryName': 'ppForeignMediatorFactory',
   'ppPoaMediatorFactoryName': 'ppPoaMediatorFactory',
-  'ppXDaiMediatorFactoryName': 'ppXDaiMediatorFactory'
+  'ppXDaiMediatorFactoryName': 'ppXDaiMediatorFactory',
+  'ppTokenRegistryName': 'ppTokenRegistry'
 };

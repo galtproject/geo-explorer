@@ -231,7 +231,7 @@ const log = require('./services/logService');
 
       pprUnsubscribeByAddress[address] = unsubscribe;
 
-      const contract = chainService.getPropertyRegistryContract(address, old);
+      const contract = await chainService.getPropertyRegistryContract(address, old);
 
       const ppr = await geoDataService.getPrivatePropertyRegistry(address);
 

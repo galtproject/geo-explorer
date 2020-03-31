@@ -76,6 +76,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   privatePropertyGlobalRegistry: any;
   privatePropertyMarket: any;
 
+  ppTokenRegistry: any;
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
   communityFactory: any;
@@ -254,7 +255,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       'ppHomeMediatorFactory',
       'ppForeignMediatorFactory',
       'ppPoaMediatorFactory',
-      'ppXDaiMediatorFactory'
+      'ppXDaiMediatorFactory',
+      'ppTokenRegistry'
     ].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);
@@ -301,7 +303,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   // Space Tokens
   // =============================================================
 
-  getPropertyRegistryContract(address, old?) {
+  async getPropertyRegistryContract(address, old?) {
     if(this.isContractAddress(this.spaceToken, address)) {
       return this.spaceToken;
     }
@@ -313,7 +315,10 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
 
-    let abi = this.contractsConfig['ppTokenAbi'] || this.contractsConfig['ppBridgedTokenAbi'];
+    let {contractType} = await this.ppTokenRegistry.methods.tokens(address).call({});
+    contractType = contractType ? this.hexToString(contractType) : 'regular';
+
+    let abi = contractType === 'bridged' || this.contractsConfig['ppTokenAbi'] ? this.contractsConfig['ppTokenAbi'] : this.contractsConfig['ppBridgedTokenAbi'];
 
     const privatePropertyContract = new this.web3.eth.Contract(abi, address);
     this.pprCache[address] = privatePropertyContract;
@@ -368,14 +373,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.isContractAddress(this.spaceGeoData, contractAddress)) {
       contractAddress = this.spaceToken._address;
     }
-    return this.getPropertyRegistryContract(contractAddress).methods.ownerOf(tokenId).call({});
+    return (await this.getPropertyRegistryContract(contractAddress)).methods.ownerOf(tokenId).call({});
   }
 
   public async getSpaceTokenArea(contractAddress, tokenId) {
     if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
     }
-    return this.getPropertyRegistryContract(contractAddress).methods.getArea(tokenId).call({}).then(result => {
+    return (await this.getPropertyRegistryContract(contractAddress)).methods.getArea(tokenId).call({}).then(result => {
       return Web3Utils.fromWei(result.toString(10), 'ether');
     })
   }
@@ -384,7 +389,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.isContractAddress(this.spaceToken, contractAddress)) {
       contractAddress = this.spaceGeoData._address;
     }
-    return this.getPropertyRegistryContract(contractAddress).methods.getContour(tokenId).call({}).then(result => {
+    return (await this.getPropertyRegistryContract(contractAddress)).methods.getContour(tokenId).call({}).then(result => {
       const geohashContour = [];
       const contractContour = [];
       const heightsContour = [];
@@ -424,7 +429,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         geohashContour: []
       };
     }
-    return this.getPropertyRegistryContract(contractAddress).methods.getDetails(tokenId).call({}).then(result => {
+    return (await this.getPropertyRegistryContract(contractAddress)).methods.getDetails(tokenId).call({}).then(result => {
 
       console.log('getDetails', result);
       let ledgerIdentifier;
