@@ -431,7 +431,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
     return (await this.getPropertyRegistryContract(contractAddress)).methods.getDetails(tokenId).call({}).then(result => {
 
-      console.log('getDetails', result);
+      // console.log('getDetails', result);
       let ledgerIdentifier;
       try {
         ledgerIdentifier = Web3Utils.hexToUtf8(result.ledgerIdentifier);
@@ -450,7 +450,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
-        log('cPoint', cPoint);
+        // log('cPoint', cPoint);
         // if(galtUtils.contractPoint.isContractPoint(cPoint)) {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
