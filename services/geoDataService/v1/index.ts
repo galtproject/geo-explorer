@@ -1209,24 +1209,27 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityVoting(communityAddress, marker) {
     const community = await this.database.getCommunity(communityAddress);
 
-    const contract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
+    const storageContract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
-    let [markerData, {support, minAcceptQuorum, timeout}, communityProposalsCount] = await Promise.all([
-      contract.methods.proposalMarkers(marker).call({}),
-      this.chainService.callContractMethod(contract, 'getProposalVotingConfig', [marker]),
+    let [markerData, communityProposalsCount] = await Promise.all([
+      storageContract.methods.proposalMarkers(marker).call({}),
       this.database.filterCommunityProposalCount({communityAddress, marker})
     ]);
     console.log('updateCommunityVoting', this.chainService.hexToString(markerData.name), marker, markerData);
-
-    support = this.chainService.weiToEther(support);
-    minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
-    timeout = parseInt(timeout.toString(10));
 
     const proposalManager = markerData.proposalManager;
     if (proposalManager === '0x0000000000000000000000000000000000000000') {
       return;
     }
-    // const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
+
+    const proposalManagerContract = await this.chainService.getCommunityProposalManagerContract(proposalManager);
+
+    let contractToGetConfig = proposalManagerContract.methods.getProposalVotingConfig ? proposalManagerContract : storageContract;
+    let {support, minAcceptQuorum, timeout} = await this.chainService.callContractMethod(contractToGetConfig, 'getProposalVotingConfig', [marker]);
+
+    support = this.chainService.weiToEther(support);
+    minAcceptQuorum = this.chainService.weiToEther(minAcceptQuorum);
+    timeout = parseInt(timeout.toString(10));
 
     //TODO: get from database
     // const activeProposalsCount = await this.chainService.callContractMethod(proposalManagerContract, 'getActiveProposalsCount', [marker], 'number');
