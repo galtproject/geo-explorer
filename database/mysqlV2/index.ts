@@ -1526,6 +1526,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       [communityTokensQuery.sortBy || 'createdAt', communityTokensQuery.sortDir || 'DESC']
     ];
 
+    console.log('filterCommunityTokensfilterCommunityTokens', findAllParam);
+
     if(communityTokensQuery.groupBy) {
       findAllParam.group = [communityTokensQuery.groupBy];
       findAllParam.attributes = [communityTokensQuery.groupBy];
