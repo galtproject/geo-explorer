@@ -350,6 +350,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return privatePropertyVerificationContract;
   }
 
+  getLockerContract(address) {
+    if(this.pprCache[address]) {
+      return this.pprCache[address];
+    }
+    let abi = this.contractsConfig['ppLockerAbi'];
+    if(!abi) {
+      return null;
+    }
+
+    const lockerContract = new this.web3.eth.Contract(abi, address);
+    this.pprCache[address] = lockerContract;
+    return lockerContract;
+  }
 
   public async getLockerOwner(address) {
     try {
@@ -699,7 +712,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   weiToEther(value) {
-    return this.web3.utils.fromWei(value, 'ether');
+    return parseFloat(this.web3.utils.fromWei(value, 'ether'));
   }
 
   async getCurrentBlock() {
