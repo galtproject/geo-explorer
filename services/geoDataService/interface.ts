@@ -42,7 +42,7 @@ import {
   IPrivatePropertyLegalAgreement,
   IPprMember,
   ITokenizableMember,
-  CommunityApprovedQuery
+  CommunityApprovedQuery, PropertyLockersQuery, IPrivatePropertyLocker
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -127,6 +127,14 @@ export default interface IExplorerGeoDataService {
   filterPrivatePropertyLegalAgreements(query): Promise<IPrivatePropertyLegalAgreementsListResponse>;
 
   filterPrivatePropertyMembers(query): Promise<IPrivatePropertyMembersListResponse>;
+
+  // ====================================================
+  // Property Lockers
+  // ====================================================
+
+  handlePropertyLockerCreation(event): Promise<any>;
+
+  filterPropertyLockers(filterQuery: PropertyLockersQuery): Promise<IPropertyLockersListResponse>;
 
   // ====================================================
   // Bridges
@@ -231,6 +239,11 @@ export interface IPrivatePropertyLegalAgreementsListResponse {
 
 export interface IPrivatePropertyMembersListResponse {
   list: IPprMember[];
+  total: number;
+}
+
+export interface IPropertyLockersListResponse {
+  list: IPrivatePropertyLocker[];
   total: number;
 }
 

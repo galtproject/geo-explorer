@@ -137,6 +137,16 @@ export default interface IExplorerDatabase {
   filterPprMemberCount(filterQuery: PprMemberQuery): Promise<number>;
 
   // =============================================================
+  // Property Lockers
+  // =============================================================
+
+  addOrUpdatePropertyLocker(lockerData): Promise<IPrivatePropertyLocker>;
+
+  filterPropertyLockers(filterQuery: PropertyLockersQuery): Promise<IPrivatePropertyLocker[]>;
+
+  filterPropertyLockersCount(filterQuery: PropertyLockersQuery): Promise<number>;
+
+  // =============================================================
   // Communities
   // =============================================================
 
@@ -531,6 +541,24 @@ export interface TokenizableMemberQuery {
   sortDir?: string;
 
   contractAddress?: string;
+  address?: string;
+}
+
+export interface IPrivatePropertyLocker {
+  id?;
+
+  address;
+  depositManager;
+}
+
+export interface PropertyLockersQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  depositManager?: string;
   address?: string;
 }
 

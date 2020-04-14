@@ -27,5 +27,6 @@ module.exports = {
   'ppForeignMediatorFactoryName': 'ppForeignMediatorFactory',
   'ppPoaMediatorFactoryName': 'ppPoaMediatorFactory',
   'ppXDaiMediatorFactoryName': 'ppXDaiMediatorFactory',
-  'ppTokenRegistryName': 'ppTokenRegistry'
+  'ppTokenRegistryName': 'ppTokenRegistry',
+  'ppLockerFactoryName': 'ppLockerFactory'
 };

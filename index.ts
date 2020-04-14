@@ -598,6 +598,17 @@ const log = require('./services/logService');
       });
     });
 
+    await chainService.getEventsFromBlock(chainService.ppLockerFactory, ChainServiceEvents.NewPropertyLocker, lastBlockNumber).then(async (events) => {
+      await pIteration.forEach(events, (e) => {
+        return geoDataService.handlePropertyLockerCreation(e)
+      });
+    });
+
+    chainService.subscribeForNewEvents(chainService.ppLockerFactory, ChainServiceEvents.NewPropertyLocker, startBlockNumber, async (err, newEvent) => {
+      await geoDataService.handlePropertyLockerCreation(newEvent);
+      await setLastBlockNumber(newEvent.blockNumber);
+    });
+
     const subscribedToCommunity = {
       // communityAddress => bool
     };
