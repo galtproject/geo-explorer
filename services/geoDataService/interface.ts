@@ -112,7 +112,7 @@ export default interface IExplorerGeoDataService {
 
   handlePrivatePropertyBurnTimeoutEvent(registryAddress, event: any): Promise<any>;
 
-  updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId: any): Promise<any>;
+  updatePrivatePropertyTokenTimeout(registryAddress, controllerAddress, tokenId: any, event: any): Promise<any>;
 
   handlePrivatePropertyPledgeBurnTimeoutEvent(registryAddress, event: any): Promise<any>;
 
@@ -120,7 +120,7 @@ export default interface IExplorerGeoDataService {
 
   handlePrivatePropertyPledgeChangeEvent(event: any): Promise<any>;
 
-  updatePrivatePropertyPledge(registryAddress, tokenId): Promise<any>;
+  updatePrivatePropertyPledge(registryAddress, tokenId, event: any): Promise<any>;
 
   handlePrivatePropertyLegalAgreementEvent(registryAddress, event): Promise<any>;
 

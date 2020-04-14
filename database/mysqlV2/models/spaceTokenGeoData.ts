@@ -188,5 +188,15 @@ module.exports = async function (sequelize, models) {
   SpaceTokenGeoData.belongsTo(models.PrivatePropertyRegistry, {as: 'ppr', foreignKey: 'pprId'});
   models.PrivatePropertyRegistry.hasMany(SpaceTokenGeoData, {as: 'spaceTokens', foreignKey: 'pprId'});
 
-  return SpaceTokenGeoData.sync({});
+  await SpaceTokenGeoData.sync({});
+
+  models.SpaceTokenOwners = sequelize.define('spaceTokenOwners', {
+    address: {type: Sequelize.STRING(200)},
+  } as any, {} as any);
+
+  SpaceTokenGeoData.hasMany(models.SpaceTokenOwners, {as: 'owners', foreignKey: 'tokenDbId'});
+  models.SpaceTokenOwners.belongsTo(SpaceTokenGeoData, {as: 'token', foreignKey: 'tokenDbId'});
+
+  await models.SpaceTokenOwners.sync({});
+  return SpaceTokenGeoData;
 };

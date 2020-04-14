@@ -64,6 +64,8 @@ export default interface IExplorerDatabase {
 
   addOrUpdateGeoData(geoData: ISpaceTokenGeoData): Promise<ISpaceTokenGeoData>;
 
+  setTokenOwners(tokenId, contractAddress, owners): Promise<void>;
+
   deleteGeoData(tokenId: number, contractAddress: string): Promise<void>;
 
   getSpaceToken(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
@@ -276,6 +278,8 @@ export interface ISpaceTokenGeoData {
 
   spaceTokensOrders?;
   modelIpfsHash?;
+
+  getOwners();
 }
 
 export interface ISaleOrder {

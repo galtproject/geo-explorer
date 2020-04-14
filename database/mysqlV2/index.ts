@@ -179,10 +179,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     if(dbObject) {
       geoData.createdAtBlock = dbObject.createdAtBlock || geoData.createdAtBlock;
+      geoData.updatedAtBlock = dbObject.createdAtBlock > geoData.updatedAtBlock ? dbObject.createdAtBlock : geoData.updatedAtBlock;
       await this.models.SpaceTokenGeoData.update(geoData, {
         where: {tokenId: geoData.tokenId, contractAddress: {[Op.like]: geoData.contractAddress}}
       });
     } else {
+      geoData.updatedAtBlock = geoData.createdAtBlock;
       return this.models.SpaceTokenGeoData.create(geoData).catch((e) => {
         console.warn('WARN SpaceTokenGeoData.create', e.parent.sqlMessage);
       });
@@ -192,6 +194,22 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async deleteGeoData(tokenId, contractAddress) {
     return this.models.SpaceTokenGeoData.destroy({ where: {tokenId, contractAddress: {[Op.like]: contractAddress} }});
+  }
+
+  async getTokenOwner(tokenDbId, address) {
+    address = address.toLowerCase();
+    let tokenOwner = await this.models.SpaceTokenOwners.findOne({
+      where: { tokenDbId, address }
+    });
+    if(!tokenOwner) {
+      tokenOwner = this.models.SpaceTokenOwners.create({tokenDbId, address})
+    }
+    return tokenOwner;
+  }
+
+  async setTokenOwners(tokenId, contractAddress, owners) {
+    let dbObject = await this.getSpaceTokenGeoData(tokenId, contractAddress);
+    return dbObject.setOwners(await pIteration.map(owners, (address) => this.getTokenOwner(dbObject.id, address)));
   }
 
   // =============================================================
@@ -692,12 +710,6 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres[field] = fieldWhereObj;
     });
 
-    if(spaceTokensQuery.regions && spaceTokensQuery.regions.length) {
-      for(let i = 1; i <= 9; i++) {
-        allWheres['regionLvl' + i] = {[Op.in]: spaceTokensQuery.regions};
-      }
-    }
-
     if(spaceTokensQuery.types && spaceTokensQuery.types.length) {
       allWheres['type'] = {[Op.in]: spaceTokensQuery.types};
     }
@@ -720,19 +732,27 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field] = spaceTokensQuery[field];
     });
 
-    ['owner', 'contractAddress'].forEach((field) => {
+    ['contractAddress'].forEach((field) => {
       if(spaceTokensQuery[field])
         allWheres[field] = {[Op.like]: spaceTokensQuery[field]};
     });
 
     // console.log('allWheres', allWheres);
 
-    return {
+    const result: any = {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9', 'tokenType', 'geohashesCount', 'owner', 'contractAddress', 'level', 'levelNumber', 'modelIpfsHash', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'tokenType', 'geohashesCount', 'contractAddress', 'level', 'levelNumber', 'modelIpfsHash', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
+    };
+    if(spaceTokensQuery['owner']) {
+      result.include = [{
+        association: 'owners',
+        required: true,
+        where: {address: spaceTokensQuery['owner'].toLowerCase()}
+      }];
     }
+    return result;
   }
 
   async filterSpaceTokens(spaceTokensQuery: SpaceTokensQuery) {
@@ -755,9 +775,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       return this.models.SpaceTokenGeoData.findAll(findAllParam).then(list => list.map(s => s.dataValues));
     }
 
-    findAllParam.include = [{
+    findAllParam.include = (findAllParam.include || []).concat([{
       association: 'ppr'
-    }];
+    }]);
 
     return this.models.SpaceTokenGeoData.findAll(findAllParam);
   }
@@ -1536,9 +1556,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getCommunityMemberTokens(community, memberAddress) {
     return community.getSpaceTokens({
-      where: {owner: {[Op.like]: memberAddress}},
       include: [{
         association: 'ppr'
+      },{
+        association: 'owners',
+        required: true,
+        where: {address: memberAddress.toLowerCase()}
       }]
     });
   }

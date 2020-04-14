@@ -85,6 +85,8 @@ export default interface IExplorerChainService {
 
   getPropertyRegistryContract(address, old?): Promise<any>;
 
+  getLockerContract(address): Promise<any>;
+
   getPropertyRegistryControllerContract(address, old?): Promise<any>;
 
   getPropertyRegistryVerificationContract(address): Promise<any>;
@@ -197,7 +199,7 @@ export enum ChainServiceEvents {
   CommunityRemoveRule = 'DisableFundRule',
   CommunityApproveToken = 'ApproveMint',
   CommunityExpelToken = 'Expel',
-  CommunityDecrementExpelToken = 'DecrementExpel'
+  CommunityBurnExpelledToken = 'BurnExpelled'
 }
 
 export interface ChainServiceSaleOrder {
