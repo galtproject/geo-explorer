@@ -128,6 +128,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterPrivatePropertyMembers(req.body));
   });
 
+  service.post('/v1/property-lockers/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterPropertyLockers(req.body));
+  });
+
   service.get('/v1/tm/:address/:tokenId', async (req, res) => {
     res.send(await geoDataService.getSpaceTokenMetadataById(req.params.tokenId, req.params.address));
   });

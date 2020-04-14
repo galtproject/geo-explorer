@@ -39,6 +39,8 @@ export default interface IExplorerChainService {
   decentralizedCommunityRegistry: any;
   pprCommunityRegistry: any;
 
+  ppLockerFactory: any;
+
   callbackOnReconnect: any;
 
   getEventsFromBlock(contract, eventName: string, blockNumber?: number, filter?: any): Promise<IExplorerChainContourEvent[]>;
@@ -173,6 +175,8 @@ export enum ChainServiceEvents {
   PrivatePropertyDisableVerification = 'DisableVerification',
   PrivatePropertySetVerification = 'SetContourVerificationManager',
   PrivatePropertySetExtraData = 'SetPropertyExtraData',
+
+  NewPropertyLocker = 'NewPPLocker',
 
   PPDepositHolderDeposit = 'Deposit',
   PPDepositHolderWithdraw = 'Withdrawal',

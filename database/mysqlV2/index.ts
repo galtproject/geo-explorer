@@ -34,7 +34,7 @@ import IExplorerDatabase, {
   PprMemberQuery,
   ITokenizableMember,
   TokenizableMemberQuery,
-  CommunityApprovedQuery
+  CommunityApprovedQuery, PropertyLockersQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -1408,6 +1408,80 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     // console.log('findAllParam', findAllParam);
     return this.models.PprMember.count(findAllParam);
+  }
+
+  // =============================================================
+  // Property lockers
+  // =============================================================
+
+  async getPropertyLocker(address) {
+    return this.models.TokenizableMember.findOne({
+      where: {address: {[Op.like]: address}}
+    });
+  }
+
+  async addOrUpdatePropertyLocker(lockerData) {
+    let dbObject = await this.getPropertyLocker(lockerData.address);
+
+    if(dbObject) {
+      await this.models.PropertyLocker.update(lockerData, {
+        where: {address: {[Op.like]: lockerData.address}}
+      });
+    } else {
+      await this.models.PropertyLocker.create(lockerData).catch((e) => {
+        console.warn('WARN TokenizableMember.create', e.parent.sqlMessage);
+        return this.models.PropertyLocker.update(lockerData, {
+          where: {address: {[Op.like]: lockerData.address}}
+        });
+      });
+    }
+    return this.getPropertyLocker(lockerData.address);
+  }
+
+  preparePropertyLockersWhere(propertyLockersQuery) {
+    const allWheres: any = {};
+
+    if(propertyLockersQuery.address) {
+      allWheres['address'] = {[Op.like]: propertyLockersQuery.address};
+    }
+
+    if(propertyLockersQuery.depositManager) {
+      allWheres['depositManager'] = {[Op.like]: propertyLockersQuery.depositManager};
+    }
+
+    return allWheres;
+  }
+
+  propertyLockersQueryToFindAllParam(propertyLockersQuery: PropertyLockersQuery) {
+    const allWheres = this.preparePropertyLockersWhere(propertyLockersQuery);
+
+    return {
+      where: resultWhere(allWheres, ['address', 'depositManager'])
+    }
+  }
+
+  async filterPropertyLockers(propertyLockersQuery: PropertyLockersQuery) {
+    if(propertyLockersQuery.limit > 1000) {
+      propertyLockersQuery.limit = 1000;
+    }
+
+    console.log('propertyLockersQuery', propertyLockersQuery);
+
+    const findAllParam: any = this.propertyLockersQueryToFindAllParam(propertyLockersQuery);
+
+    findAllParam.limit = propertyLockersQuery.limit || 20;
+    findAllParam.offset = propertyLockersQuery.offset || 0;
+
+    return this.models.PropertyLocker.findAll(findAllParam);
+  }
+
+  async filterPropertyLockersCount(propertyLockersQuery: PropertyLockersQuery) {
+    const findAllParam: any = this.propertyLockersQueryToFindAllParam(propertyLockersQuery);
+
+    // findAllParam.distinct = true;
+
+    // console.log('findAllParam', findAllParam);
+    return this.models.PropertyLocker.count(findAllParam);
   }
 
   // =============================================================

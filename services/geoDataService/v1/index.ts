@@ -11,7 +11,7 @@ import IExplorerDatabase, {
   CommunityApprovedQuery,
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity, IPrivatePropertyRegistry,
-  ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery,
+  ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery, PropertyLockersQuery,
   SaleOffersQuery,
   TokenizableMemberQuery
 } from "../../../database/interface";
@@ -1032,6 +1032,20 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       additionalData['homeMediatorNetwork'] = network;
     }
     return this.updatePrivatePropertyRegistry(registryAddress, additionalData);
+  }
+
+  async handlePropertyLockerCreation(event) {
+    return this.database.addOrUpdatePropertyLocker({
+      address: event.returnValues.locker,
+      depositManager: event.returnValues.owner,
+    })
+  }
+
+  async filterPropertyLockers(filterQuery: PropertyLockersQuery) {
+    return {
+      list: await this.database.filterPropertyLockers(filterQuery),
+      total: await this.database.filterPropertyLockersCount(filterQuery)
+    };
   }
 
   // =============================================================
