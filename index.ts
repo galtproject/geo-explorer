@@ -36,7 +36,10 @@ const log = require('./services/logService');
 
   chainService.onReconnect(fetchAndSubscribe);
 
-  // return console.log(await database.getCommunityMemberTokens(await database.getCommunity('0xd474164879d658716d765e8b9f7813460c54798a'), '0x12ad4b6591504c1683d90cbdb5cbef212a5b60c4'));
+  // return console.log(await database.filterCommunityTokensCount({
+  //   communityAddress: '0xd474164879d658716d765e8b9f7813460c54798a',
+  //   owner: '0x12ad4b6591504c1683d90cbdb5cbef212a5b60c4'
+  // }));
 
   let lastBlockNumber = parseInt(await database.getValue('lastBlockNumber')) || 0;
 

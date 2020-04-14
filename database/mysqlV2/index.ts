@@ -1545,14 +1545,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
 
-    // findAllParam.distinct = true;
-    //
-    // if(communityTokensQuery.groupBy) {
-    //   findAllParam.group = [communityTokensQuery.groupBy];
-    //   findAllParam.attributes = [communityTokensQuery.groupBy];
-    // }
+    findAllParam.attributes = [];
+    findAllParam.raw = true;
+    findAllParam.include.forEach(item => {
+      item.attributes = [];
+    });
 
-    // console.log('findAllParam',findAllParam);
     return community.countSpaceTokens(findAllParam);
   }
 
