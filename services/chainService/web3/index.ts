@@ -712,7 +712,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   weiToEther(value) {
-    return this.web3.utils.fromWei(value, 'ether');
+    return parseFloat(this.web3.utils.fromWei(value, 'ether'));
   }
 
   async getCurrentBlock() {

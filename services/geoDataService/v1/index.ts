@@ -1218,6 +1218,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       reputationMinted = await this.chainService.callContractMethod(raContract, 'reputationMinted', [tokenId]);
     }
 
+
     if (!reputationMinted) {
       await community.removeSpaceTokens([propertyToken]);
     }

@@ -1546,6 +1546,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const findAllParam: any = this.spaceTokensQueryToFindAllParam(communityTokensQuery);
 
     if (findAllParam.include) {
+      // https://github.com/sequelize/sequelize/issues/5168
       findAllParam.attributes = [];
       findAllParam.raw = true;
       findAllParam.include.forEach(item => {
