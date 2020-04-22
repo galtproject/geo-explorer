@@ -46,7 +46,7 @@ module.exports = async function (sequelize, models) {
       type: Sequelize.INTEGER
     },
     reputationTotalSupply: {
-      type: Sequelize.INTEGER
+      type: Sequelize.DOUBLE
     },
     tokensCount: {
       type: Sequelize.INTEGER
