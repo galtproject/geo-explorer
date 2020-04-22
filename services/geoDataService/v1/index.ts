@@ -137,7 +137,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         }
       }
 
-      // log('lockerOwners', lockerOwners);
+      log('lockerOwners', lockerOwners);
     }
 
     const dataLink = geoData.dataLink.replace('config_address=', '');
@@ -1156,7 +1156,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } catch (e) {
       // photos not found
     }
-    let tokensJson = tokens.map(t => ({
+    let tokensJson = (await pIteration.filter(tokens, t => {
+      return this.chainService.callContractMethod(raContract, 'ownerReputationMinted', [address, t.contractAddress, t.tokenId], 'wei');
+    })).map(t => ({
       tokenId: t.tokenId,
       contractAddress: t.contractAddress,
       tokenType: t.tokenType,
