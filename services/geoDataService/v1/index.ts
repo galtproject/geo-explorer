@@ -1250,7 +1250,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityTokenOwners(community, propertyToken, additionalData = {}) {
     const owners = await propertyToken.getOwners();
     // console.log('updateCommunityTokenOwners', owners);
-    await pIteration.forEach(owners, (owner) => {
+    await pIteration.forEachSeries(owners, (owner) => {
       return this.updateCommunityMember(community, owner.address, additionalData);
     })
   }
