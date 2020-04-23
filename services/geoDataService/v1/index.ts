@@ -234,6 +234,19 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } else {
       await this.database.setTokenOwners(geoDataToSave.tokenId, contractAddress, [geoData.owner]);
     }
+
+    if (geoData.lockerOwners.length) {
+      const lockerContract = await this.chainService.getLockerContract(geoDataToSave.locker);
+      if(geoDataToSave.lockerType === "REPUTATION" && lockerContract.methods.getLockerInfo) {
+        const communityAddresses = await lockerContract.methods.getTras().call({});
+        await pIteration.forEachSeries(communityAddresses, async (communityAddress) => {
+          return this.updateCommunityTokenOwners(
+            await this.database.getCommunity(communityAddress),
+            await this.database.getSpaceTokenGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress)
+          );
+        })
+      }
+    }
   }
 
   async addOrUpdateGeoData(geoDataToSave) {
@@ -1250,7 +1263,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async updateCommunityTokenOwners(community, propertyToken, additionalData = {}) {
     const owners = await propertyToken.getOwners();
     // console.log('updateCommunityTokenOwners', owners);
-    await pIteration.forEachSeries(owners, (owner) => {
+    await pIteration.forEach(owners, (owner) => {
       return this.updateCommunityMember(community, owner.address, additionalData);
     })
   }
