@@ -240,8 +240,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       if(geoDataToSave.lockerType === "REPUTATION" && lockerContract.methods.getLockerInfo) {
         const communityAddresses = await lockerContract.methods.getTras().call({});
         await pIteration.forEachSeries(communityAddresses, async (communityAddress) => {
+          const community = await this.database.getCommunity(communityAddress);
+          if(!community) {
+            return;
+          }
           return this.updateCommunityTokenOwners(
-            await this.database.getCommunity(communityAddress),
+            community,
             await this.database.getSpaceTokenGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress)
           );
         })
