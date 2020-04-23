@@ -1125,6 +1125,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunityMember(community: ICommunity, address, additionalData = {}) {
+    console.log('updateCommunityMember', address);
     const [contract, raContract] = await Promise.all([
       this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
       this.chainService.getCommunityRaContract(community.address, community.isPpr)
@@ -1248,6 +1249,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async updateCommunityTokenOwners(community, propertyToken, additionalData = {}) {
     const owners = await propertyToken.getOwners();
+    console.log('updateCommunityTokenOwners', owners);
     await pIteration.forEach(owners, (owner) => {
       return this.updateCommunityMember(community, owner.address, additionalData);
     })
