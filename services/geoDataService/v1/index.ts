@@ -1148,7 +1148,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.getCommunityRaContract(community.address, community.isPpr)
     ]);
 
-    const [currentReputation, basicReputation, fullNameHash, tokens] = await Promise.all([
+    let [currentReputation, basicReputation, fullNameHash, tokens] = await Promise.all([
       this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei'),
       this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei'),
       this.chainService.callContractMethod(contract, 'membersIdentification', [address], 'bytes32'),
@@ -1156,6 +1156,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ]);
 
     // console.log('updateCommunityMember', address, tokens.length);
+
+    tokens = await pIteration.filter(tokens, t => {
+      return this.chainService.callContractMethod(raContract, 'ownerReputationMinted', [address, t.contractAddress, t.tokenId], 'wei');
+    });
 
     if (tokens.length === 0) {
       const member = await this.database.getCommunityMember(community.id, address);
@@ -1174,9 +1178,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } catch (e) {
       // photos not found
     }
-    let tokensJson = (await pIteration.filter(tokens, t => {
-      return this.chainService.callContractMethod(raContract, 'ownerReputationMinted', [address, t.contractAddress, t.tokenId], 'wei');
-    })).map(t => ({
+    let tokensJson = tokens.map(t => ({
       tokenId: t.tokenId,
       contractAddress: t.contractAddress,
       tokenType: t.tokenType,
