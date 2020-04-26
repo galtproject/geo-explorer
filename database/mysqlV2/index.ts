@@ -2014,7 +2014,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['communityAddress'] = {[Op.like]: communityRuleQuery.communityAddress};
     }
 
-    ['isActive', 'type', 'ruleId'].forEach((field) => {
+    ['isActive', 'type', 'ruleId', 'meetingId'].forEach((field) => {
       if(!_.isUndefined(communityRuleQuery[field]) && !_.isNull(communityRuleQuery[field]))
         allWheres[field] = {[Op.eq]: communityRuleQuery[field]};
     });
@@ -2026,7 +2026,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityRuleWhere(communityRuleQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'meetingId', 'type', Op.and]),
       include: {association: 'proposal'}
     }
   }
@@ -2105,8 +2105,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityRuleWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and]),
-      include: {association: 'proposal'}
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and])
     }
   }
 
