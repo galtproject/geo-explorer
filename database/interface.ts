@@ -227,6 +227,20 @@ export default interface IExplorerDatabase {
   filterCommunitiesWithApprovedTokensCount(filterQuery: CommunityApprovedQuery): Promise<number>;
 
   // =============================================================
+  // Community Meetings
+  // =============================================================
+
+  addOrUpdateCommunityMeeting(community: ICommunity, meeting: ICommunityMeeting): Promise<ICommunityMeeting>;
+
+  getCommunityRule(communityId, meetingId): Promise<ICommunityMeeting>;
+
+  getCommunityRuleByCommunityAddress(communityAddress, meetingId): Promise<ICommunityMeeting>;
+
+  filterCommunityMeeting(filterQuery: CommunityMeetingQuery): Promise<ICommunityMeeting[]>;
+
+  filterCommunityMeetingCount(filterQuery: CommunityMeetingQuery): Promise<number>;
+
+  // =============================================================
   // Values
   // =============================================================
 
@@ -817,6 +831,19 @@ export interface ICommunityRule {
   destroy?();
 }
 
+export interface ICommunityMeeting {
+  id?;
+  communityId;
+
+  communityAddress;
+  meetingId;
+  dataLink?;
+  dataJson?;
+  description?;
+  Sequelize?;
+  isActive?;
+}
+
 export interface CommunityQuery {
   limit?: number;
   offset?: number;
@@ -875,6 +902,16 @@ export interface CommunityProposalQuery {
 
 
 export interface CommunityRuleQuery {
+  limit?: number;
+  offset?: number;
+
+  sortBy?: string;
+  sortDir?: string;
+
+  communityAddress?: string;
+}
+
+export interface CommunityMeetingQuery {
   limit?: number;
   offset?: number;
 

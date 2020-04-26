@@ -168,6 +168,8 @@ export default interface IExplorerGeoDataService {
 
   updateCommunityProposal(communityAddress, pmAddress, marker, proposalId, proposeTxId?);
 
+  handleCommunityMeetingEvent(communityAddress, event);
+
   handleCommunityRuleEvent(communityAddress, event);
 
   handleCommunityTokenApprovedEvent(communityAddress, event);

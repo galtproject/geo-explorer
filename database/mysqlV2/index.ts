@@ -34,7 +34,7 @@ import IExplorerDatabase, {
   PprMemberQuery,
   ITokenizableMember,
   TokenizableMemberQuery,
-  CommunityApprovedQuery, PropertyLockersQuery
+  CommunityApprovedQuery, PropertyLockersQuery, ICommunityMeeting, CommunityMeetingQuery
 } from "../interface";
 
 const _ = require("lodash");
@@ -2048,6 +2048,85 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const findAllParam: any = this.communityRuleQueryToFindAllParam(communityRuleQuery);
 
     return this.models.CommunityRule.count(findAllParam);
+  }
+
+  // =============================================================
+  // Community Rule
+  // =============================================================
+
+  async getCommunityMeeting(communityId, meetingId) {
+    return this.models.CommunityMeeting.findOne({
+      where: {communityId, meetingId}
+    });
+  }
+
+  async getCommunityMeetingByCommunityAddress(communityAddress, meetingId) {
+    return this.models.CommunityMeeting.findOne({
+      where: {communityAddress: {[Op.like]: communityAddress}, meetingId}
+    });
+  }
+
+  async addOrUpdateCommunityMeeting(community: ICommunity, meeting: ICommunityMeeting) {
+    let dbObject = await this.getCommunityMeeting(community.id, meeting.meetingId);
+
+    meeting.communityId = community.id;
+
+    if(dbObject) {
+      await this.models.CommunityMeeting.update(meeting, {
+        where: {meetingId: meeting.meetingId, communityId: community.id}
+      });
+    } else {
+      await this.models.CommunityMeeting.create(meeting).catch((e) => {
+        console.warn('WARN CommunityRule.create', e.parent.sqlMessage);
+        return this.models.CommunityMeeting.update(meeting, {
+          where: {meetingId: meeting.meetingId, communityId: community.id}
+        });
+      });
+    }
+    return this.getCommunityMeeting(community.id, meeting.meetingId);
+  }
+
+  prepareCommunityMeetingWhere(communityMeetingQuery) {
+    const allWheres: any = {};
+
+    if(communityMeetingQuery.communityAddress) {
+      allWheres['communityAddress'] = {[Op.like]: communityMeetingQuery.communityAddress};
+    }
+
+    ['isActive', 'type', 'ruleId'].forEach((field) => {
+      if(!_.isUndefined(communityMeetingQuery[field]) && !_.isNull(communityMeetingQuery[field]))
+        allWheres[field] = {[Op.eq]: communityMeetingQuery[field]};
+    });
+
+    return allWheres;
+  }
+
+  communityMeetingQueryToFindAllParam(communityMeetingQuery: CommunityMeetingQuery) {
+    const allWheres = this.prepareCommunityRuleWhere(communityMeetingQuery);
+
+    return {
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and]),
+      include: {association: 'proposal'}
+    }
+  }
+
+  async filterCommunityMeeting(communityMeetingQuery: CommunityMeetingQuery) {
+    if(communityMeetingQuery.limit > 1000) {
+      communityMeetingQuery.limit = 1000;
+    }
+
+    const findAllParam: any = this.communityMeetingQueryToFindAllParam(communityMeetingQuery);
+
+    findAllParam.limit = communityMeetingQuery.limit || 20;
+    findAllParam.offset = communityMeetingQuery.offset || 0;
+
+    return this.models.CommunityMeeting.findAll(findAllParam);
+  }
+
+  async filterCommunityMeetingCount(communityMeetingQuery: CommunityRuleQuery) {
+    const findAllParam: any = this.communityMeetingQueryToFindAllParam(communityMeetingQuery);
+
+    return this.models.CommunityMeeting.count(findAllParam);
   }
 
   // =============================================================

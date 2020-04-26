@@ -1664,6 +1664,62 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return result;
   }
 
+  handleCommunityMeetingEvent(communityAddress, event) {
+    return this.updateCommunityMeeting(communityAddress, event.returnValues.id);
+  }
+
+  async updateCommunityMeeting(communityAddress, meetingId) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    let contract = await this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress);
+    const ruleData = await this.chainService.callContractMethod(contract, 'meetings', [meetingId]);
+
+    ruleData.createdAt = undefined;
+    ruleData.id = undefined;
+    ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
+    ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
+
+    return this.abstractUpdateCommunityMeeting(community, {
+      meetingId: meetingId,
+      isActive: ruleData.active,
+      ...ruleData
+    })
+  }
+
+  async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
+    const {dataLink, createdAt} = meetingData;
+    let description = 'Not found';
+    let dataJson = '';
+    if (isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
+      // log('dataItem', dataItem);
+      try {
+        log('meeting data', data);
+        if (data.description) {
+          const ipldData = await this.geesome.getObject(data.description);
+          description = await this.geesome.getContentData(ipldData.storageId).catch(() => '');
+        }
+        dataJson = JSON.stringify(data);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const result = await this.database.addOrUpdateCommunityMeeting(community, {
+      ...meetingData,
+      communityId: community.id,
+      communityAddress: community.address,
+      description,
+      dataLink,
+      dataJson
+    });
+    await this.updateCommunity(community.address, community.isPpr);
+    return result;
+  }
+
   handleCommunityTokenApprovedEvent(communityAddress, event) {
     return this.updateCommunityTokenApproved(communityAddress, event.returnValues.tokenId, event.returnValues.registry);
   }
