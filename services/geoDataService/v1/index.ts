@@ -1673,17 +1673,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const community = await this.database.getCommunity(communityAddress);
 
     let contract = await this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress);
-    const ruleData = await this.chainService.callContractMethod(contract, 'meetings', [meetingId]);
+    const meetingData = await this.chainService.callContractMethod(contract, 'meetings', [meetingId]);
 
-    ruleData.createdAt = undefined;
-    ruleData.id = undefined;
-    ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
-    ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
+    meetingData.createdAt = undefined;
+    meetingData.id = undefined;
+    meetingData.meetingId = undefined;
+    meetingData.ipfsHash = this.chainService.hexToString(meetingData.ipfsHash);
+    meetingData.typeId = meetingData.typeId ? meetingData.typeId.toString(10) : null;
 
     return this.abstractUpdateCommunityMeeting(community, {
       meetingId,
-      isActive: ruleData.active,
-      ...ruleData
+      isActive: meetingData.active,
+      ...meetingData
     })
   }
 
