@@ -1665,6 +1665,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   handleCommunityMeetingEvent(communityAddress, event) {
+    console.log('handleCommunityMeetingEvent', event.returnValues);
     return this.updateCommunityMeeting(communityAddress, event.returnValues.id);
   }
 
@@ -1680,7 +1681,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
 
     return this.abstractUpdateCommunityMeeting(community, {
-      meetingId: meetingId,
+      meetingId,
       isActive: ruleData.active,
       ...ruleData
     })
