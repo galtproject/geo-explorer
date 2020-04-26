@@ -8,7 +8,7 @@
  */
 
 import IExplorerDatabase, {
-  CommunityApprovedQuery,
+  CommunityApprovedQuery, CommunityMeetingQuery,
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity, IPrivatePropertyRegistry,
   ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery, PropertyLockersQuery,
@@ -1828,6 +1828,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterCommunityRule(filterQuery),
       total: await this.database.filterCommunityRuleCount(filterQuery)
+    };
+  }
+
+  async filterCommunityMeetings(filterQuery: CommunityMeetingQuery) {
+    return {
+      list: await this.database.filterCommunityMeeting(filterQuery),
+      total: await this.database.filterCommunityMeetingCount(filterQuery)
     };
   }
 
