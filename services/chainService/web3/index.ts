@@ -102,6 +102,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   tokenizableCache: any = {};
 
   subscribedToEventsByContract: any = {};
+  contractNameByContract: any = {};
 
   redeployed = false;
 
@@ -263,13 +264,21 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     ].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);
-      const contractAbi = this.contractsConfig[config[contractName + 'Name'] + 'Abi'];
       if(!contractAddress) {
         return log(`✖️ Contract ${contractName} not found in config`);
       }
-      this[contractName] = new this.web3.eth.Contract(contractAbi, contractAddress);
+      this[contractName] = this.createContract(config[contractName + 'Name'], contractAddress);
       log(`✅️ Contract ${contractName} successfully init by address: ${contractAddress}`);
     });
+  }
+
+  createContract(contractName, contractAddress) {
+    this.contractNameByContract[contractAddress.toLowerCase()] = contractName;
+    return new this.web3.eth.Contract(this.contractsConfig[contractName + 'Abi'], contractAddress)
+  }
+
+  getContractNameByAddress(contractAddress) {
+    return this.contractNameByContract[contractAddress.toLowerCase()];
   }
 
   getCommunityFactoryContract(address) {
@@ -277,7 +286,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityFactory = new this.web3.eth.Contract(this.contractsConfig['fundFactoryAbi'] || this.contractsConfig['privateFundFactoryAbi'], address);
+    const communityFactory = this.createContract(this.contractsConfig['fundFactoryAbi'] ? 'fundFactory' : 'privateFundFactory', address);
     this.communityCache[address] = communityFactory;
     return communityFactory;
   }
@@ -287,7 +296,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
 
-    const pprTokenRegistry = new this.web3.eth.Contract(this.contractsConfig['ppTokenRegistryAbi'], address);
+    const pprTokenRegistry = this.createContract('ppTokenRegistry', address);
     this.pprCache[address] = pprTokenRegistry;
     return pprTokenRegistry;
   }
@@ -297,7 +306,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.tokenizableCache[address];
     }
 
-    const tokenizableContract = new this.web3.eth.Contract(this.contractsConfig['tokenizableLockerAbi'], address);
+    const tokenizableContract = this.createContract('tokenizableLocker', address);
     this.tokenizableCache[address] = tokenizableContract;
     return tokenizableContract;
   }
@@ -321,9 +330,9 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     let {contractType} = await this.ppTokenRegistry.methods.tokens(address).call({});
     contractType = contractType ? this.hexToString(contractType) : 'regular';
 
-    let abi = contractType === 'bridged' || !this.contractsConfig['ppTokenAbi'] ? this.contractsConfig['ppBridgedTokenAbi'] : this.contractsConfig['ppTokenAbi'];
+    let contractName = contractType === 'bridged' || !this.contractsConfig['ppTokenAbi'] ? 'ppBridgedToken' : 'ppToken';
 
-    const privatePropertyContract = new this.web3.eth.Contract(abi, address);
+    const privatePropertyContract = this.createContract(contractName, address);
     this.pprCache[address] = privatePropertyContract;
     return privatePropertyContract;
   }
@@ -332,9 +341,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(this.pprCache[address]) {
       return this.pprCache[address];
     }
-    let abi = this.contractsConfig['ppTokenControllerAbi'];
 
-    const privatePropertyControllerContract = new this.web3.eth.Contract(abi, address);
+    const privatePropertyControllerContract = this.createContract('ppTokenController', address);
     this.pprCache[address] = privatePropertyControllerContract;
     return privatePropertyControllerContract;
   }
@@ -348,7 +356,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return null;
     }
 
-    const privatePropertyVerificationContract = new this.web3.eth.Contract(abi, address);
+    const privatePropertyVerificationContract = this.createContract('ppContourVerification', address);
     this.pprCache[address] = privatePropertyVerificationContract;
     return privatePropertyVerificationContract;
   }
@@ -362,7 +370,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return null;
     }
 
-    const lockerContract = new this.web3.eth.Contract(abi, address);
+    const lockerContract = this.createContract('ppLocker', address);
     this.pprCache[address] = lockerContract;
     return lockerContract;
   }
@@ -609,7 +617,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.pprCache[address];
     }
 
-    const mediatorContract = new this.web3.eth.Contract(this.contractsConfig[type === 'foreign' ? 'ppForeignMediatorAbi' : 'ppHomeMediatorAbi'], address);
+    const mediatorContract = this.createContract(type === 'foreign' ? 'ppForeignMediator' : 'ppHomeMediator', address);
     this.pprCache[address] = mediatorContract;
     return mediatorContract;
   }
@@ -623,13 +631,17 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(this.getCommunityStorageAbi(isPpr), address);
+    const communityContract = this.createContract(this.getCommunityStorageContractName(isPpr), address);
     this.communityCache[address] = communityContract;
     return communityContract;
   }
 
+  getCommunityStorageContractName(isPpr = false) {
+    return isPpr ? 'privateFundStorage' : 'fundStorage';
+  }
+
   getCommunityStorageAbi(isPpr = false) {
-    return isPpr ? this.contractsConfig['privateFundStorageAbi'] : this.contractsConfig['fundStorageAbi'];
+    return this.contractsConfig[this.getCommunityStorageContractName(isPpr) + 'Abi'];
   }
 
   getCommunityRuleRegistryContract(address) {
@@ -637,7 +649,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityContract = new this.web3.eth.Contract(this.getCommunityRuleRegistryAbi(), address);
+    const communityContract = this.createContract('fundRuleRegistry', address);
     this.communityCache[address] = communityContract;
     return communityContract;
   }
@@ -651,7 +663,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityRaContract = new this.web3.eth.Contract(isPpr ? this.contractsConfig['privateFundRAAbi'] : this.contractsConfig['fundRAAbi'], address);
+    const communityRaContract = this.createContract(isPpr ? 'privateFundRA' : 'fundRA', address);
     this.communityCache[address] = communityRaContract;
     return communityRaContract;
   }
@@ -661,7 +673,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityProposalManagerContract = new this.web3.eth.Contract(this.contractsConfig['fundProposalManagerAbi'], address);
+    const communityProposalManagerContract = this.createContract('fundProposalManager', address);
     this.communityCache[address] = communityProposalManagerContract;
     return communityProposalManagerContract;
   }
@@ -671,7 +683,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return this.communityCache[address];
     }
 
-    const communityRegistryContract = new this.web3.eth.Contract(this.contractsConfig['fundRegistryAbi'], address);
+    const communityRegistryContract = this.createContract('fundRegistry', address);
     this.communityCache[address] = communityRegistryContract;
     return communityRegistryContract;
   }

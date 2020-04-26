@@ -234,6 +234,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } else {
       await this.database.setTokenOwners(geoDataToSave.tokenId, contractAddress, [geoData.owner]);
     }
+
+    if (geoData.lockerOwners.length) {
+      const lockerContract = await this.chainService.getLockerContract(geoDataToSave.locker);
+      if(geoDataToSave.lockerType === "REPUTATION" && lockerContract.methods.getLockerInfo) {
+        const communityAddresses = await lockerContract.methods.getTras().call({});
+        await pIteration.forEachSeries(communityAddresses, async (communityAddress) => {
+          const community = await this.database.getCommunity(communityAddress);
+          if(!community) {
+            return;
+          }
+          return this.updateCommunityTokenOwners(
+            community,
+            await this.database.getSpaceTokenGeoData(geoDataToSave.tokenId, geoDataToSave.contractAddress)
+          );
+        })
+      }
+    }
   }
 
   async addOrUpdateGeoData(geoDataToSave) {
@@ -1125,12 +1142,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunityMember(community: ICommunity, address, additionalData = {}) {
+    console.log('updateCommunityMember', address);
     const [contract, raContract] = await Promise.all([
       this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
       this.chainService.getCommunityRaContract(community.address, community.isPpr)
     ]);
 
-    const [currentReputation, basicReputation, fullNameHash, tokens] = await Promise.all([
+    let [currentReputation, basicReputation, fullNameHash, tokens] = await Promise.all([
       this.chainService.callContractMethod(raContract, 'balanceOf', [address], 'wei'),
       this.chainService.callContractMethod(raContract, 'ownedBalanceOf', [address], 'wei'),
       this.chainService.callContractMethod(contract, 'membersIdentification', [address], 'bytes32'),
@@ -1138,6 +1156,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ]);
 
     // console.log('updateCommunityMember', address, tokens.length);
+
+    tokens = await pIteration.filter(tokens, t => {
+      return this.chainService.callContractMethod(raContract, 'ownerReputationMinted', [address, t.contractAddress, t.tokenId], 'wei');
+    });
 
     if (tokens.length === 0) {
       const member = await this.database.getCommunityMember(community.id, address);
@@ -1156,9 +1178,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     } catch (e) {
       // photos not found
     }
-    let tokensJson = (await pIteration.filter(tokens, t => {
-      return this.chainService.callContractMethod(raContract, 'ownerReputationMinted', [address, t.contractAddress, t.tokenId], 'wei');
-    })).map(t => ({
+    let tokensJson = tokens.map(t => ({
       tokenId: t.tokenId,
       contractAddress: t.contractAddress,
       tokenType: t.tokenType,
@@ -1248,6 +1268,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async updateCommunityTokenOwners(community, propertyToken, additionalData = {}) {
     const owners = await propertyToken.getOwners();
+    // console.log('updateCommunityTokenOwners', owners);
     await pIteration.forEach(owners, (owner) => {
       return this.updateCommunityMember(community, owner.address, additionalData);
     })

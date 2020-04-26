@@ -60,6 +60,13 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     });
   });
 
+  service.post('/v1/get-contract-name', async (req, res) => {
+    if(!req.body.address) {
+      throw "invalid_input";
+    }
+    await respondByScheme(res, {name: chainService.getContractNameByAddress(req.body.address)});
+  });
+
   service.post('/v1/contours/by/inner-geohash', async (req, res) => {
     await respondByScheme(res, await geohashService.getContoursByInnerGeohash(req.body.geohash, req.body.contractAddress, req.body.level));
   });
