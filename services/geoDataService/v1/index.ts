@@ -1609,6 +1609,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.id = undefined;
     ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
+    ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
