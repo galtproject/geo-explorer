@@ -897,6 +897,7 @@ export interface CommunityProposalQuery {
   pmAddress?: string;
   communityAddress?: string;
 
+  meetingId?: string;
   ruleSearch?: string;
 }
 

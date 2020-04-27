@@ -1921,12 +1921,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityProposalWhere(communityProposalQuery);
 
     const ruleInclude: any = {association: 'rule'};
-    if (communityProposalQuery.ruleSearch) {
-      ruleInclude.where = {
-        description: {
+    if (communityProposalQuery.ruleSearch || communityProposalQuery.meetingId) {
+      ruleInclude.where = {};
+      if(communityProposalQuery.ruleSearch) {
+        ruleInclude.where['description'] = {
           [Op.like]: '%' + communityProposalQuery.ruleSearch + '%'
-        }
-      };
+        };
+      }
+      if(communityProposalQuery.meetingId) {
+        ruleInclude.where['meetingId'] = communityProposalQuery.meetingId;
+      }
       ruleInclude.required = true;
     }
     return {
@@ -2051,7 +2055,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   // =============================================================
-  // Community Rule
+  // Community Meetings
   // =============================================================
 
   async getCommunityMeeting(communityId, meetingId) {
