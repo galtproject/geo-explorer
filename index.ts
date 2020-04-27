@@ -779,7 +779,18 @@ const log = require('./services/logService');
         await setLastBlockNumber(newEvent.blockNumber);
       });
 
-      await chainService.getEventsFromBlock(ruleRegistryContract || storageContract, ChainServiceEvents.CommunityAddRule, lastBlockNumber).then(async (events) => {
+      await chainService.getEventsFromBlock(ruleRegistryContract, ChainServiceEvents.CommunityAddMeeting, lastBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityMeetingEvent(address, e);
+        });
+      });
+
+      chainService.subscribeForNewEvents(ruleRegistryContract, ChainServiceEvents.CommunityAddMeeting, startBlockNumber, async (err, newEvent) => {
+        await geoDataService.handleCommunityMeetingEvent(address, newEvent);
+        await setLastBlockNumber(newEvent.blockNumber);
+      });
+
+      await chainService.getEventsFromBlock(ruleRegistryContract, ChainServiceEvents.CommunityAddRule, lastBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
           await geoDataService.handleCommunityRuleEvent(address, e);
         });

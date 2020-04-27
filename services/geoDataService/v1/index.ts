@@ -8,7 +8,7 @@
  */
 
 import IExplorerDatabase, {
-  CommunityApprovedQuery,
+  CommunityApprovedQuery, CommunityMeetingQuery,
   CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
   ICommunity, IPrivatePropertyRegistry,
   ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery, PropertyLockersQuery,
@@ -1609,6 +1609,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.id = undefined;
     ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
+    ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
@@ -1659,6 +1660,64 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataLink,
       dataJson,
       type
+    });
+    await this.updateCommunity(community.address, community.isPpr);
+    return result;
+  }
+
+  handleCommunityMeetingEvent(communityAddress, event) {
+    console.log('handleCommunityMeetingEvent', event.returnValues);
+    return this.updateCommunityMeeting(communityAddress, event.returnValues.id);
+  }
+
+  async updateCommunityMeeting(communityAddress, meetingId) {
+    const community = await this.database.getCommunity(communityAddress);
+
+    let contract = await this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress);
+    const meetingData = await this.chainService.callContractMethod(contract, 'meetings', [meetingId]);
+
+    delete meetingData.createdAt;
+    delete meetingData.id;
+    delete meetingData.meetingId;
+    meetingData.ipfsHash = this.chainService.hexToString(meetingData.ipfsHash);
+    meetingData.typeId = meetingData.typeId ? meetingData.typeId.toString(10) : null;
+
+    return this.abstractUpdateCommunityMeeting(community, {
+      meetingId,
+      isActive: meetingData.active,
+      ...meetingData
+    })
+  }
+
+  async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
+    const {dataLink, createdAt} = meetingData;
+    let description = 'Not found';
+    let dataJson = '';
+    if (isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
+      // log('dataItem', dataItem);
+      try {
+        log('meeting data', data);
+        if (data.description) {
+          const ipldData = await this.geesome.getObject(data.description);
+          description = await this.geesome.getContentData(ipldData.storageId).catch(() => '');
+        }
+        dataJson = JSON.stringify(data);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const result = await this.database.addOrUpdateCommunityMeeting(community, {
+      ...meetingData,
+      communityId: community.id,
+      communityAddress: community.address,
+      description,
+      dataLink,
+      dataJson
     });
     await this.updateCommunity(community.address, community.isPpr);
     return result;
@@ -1772,6 +1831,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterCommunityRule(filterQuery),
       total: await this.database.filterCommunityRuleCount(filterQuery)
+    };
+  }
+
+  async filterCommunityMeetings(filterQuery: CommunityMeetingQuery) {
+    return {
+      list: await this.database.filterCommunityMeeting(filterQuery),
+      total: await this.database.filterCommunityMeetingCount(filterQuery)
     };
   }
 

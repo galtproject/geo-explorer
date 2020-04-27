@@ -175,6 +175,10 @@ module.exports = (geohashService: IExplorerGeohashService, chainService: IExplor
     await respondByScheme(res, await geoDataService.filterCommunityRules(req.body));
   });
 
+  service.post('/v1/community-meetings/search', async (req, res) => {
+    await respondByScheme(res, await geoDataService.filterCommunityMeetings(req.body));
+  });
+
   service.post('/v1/approved-communities/search', async (req, res) => {
     await respondByScheme(res, await geoDataService.filterCommunitiesWithApprovedTokens(req.body));
   });

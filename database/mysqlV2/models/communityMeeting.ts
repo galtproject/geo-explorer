@@ -10,7 +10,7 @@
 module.exports = async function (sequelize, models) {
   const Sequelize = require('sequelize');
 
-  const CommunityRule = sequelize.define('communityRule', {
+  const CommunityMeeting = sequelize.define('communityMeeting', {
     // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types
     communityAddress: {
       type: Sequelize.STRING(100)
@@ -18,40 +18,18 @@ module.exports = async function (sequelize, models) {
     creatorAddress: {
       type: Sequelize.STRING(100)
     },
-    pmAddress: {
-      type: Sequelize.STRING(100)
-    },
-    ruleId: {
-      type: Sequelize.STRING(100)
-    },
     meetingId: {
-      type: Sequelize.STRING(100)
-    },
-    typeId: {
-      type: Sequelize.STRING(100)
-    },
-    ipfsHash: {
-      type: Sequelize.STRING(100)
-    },
-    descriptionIpfsHash: {
-      type: Sequelize.STRING(100)
-    },
-    manager: {
-      type: Sequelize.STRING(100)
-    },
-    type: {
       type: Sequelize.STRING(100)
     },
     isActive: {
       type: Sequelize.BOOLEAN,
       defaultValue: false
     },
-    isAbstract: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: false
-    },
     dataLink: {
       type: Sequelize.STRING
+    },
+    rulesCount: {
+      type: Sequelize.INTEGER
     },
     dataJson: {
       type: Sequelize.TEXT
@@ -62,13 +40,13 @@ module.exports = async function (sequelize, models) {
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
-      {fields: ['communityAddress', 'ruleId'], unique: true},
+      {fields: ['communityAddress', 'meetingId'], unique: true},
       // {fields: ['owner']}
     ]
   });
 
-  CommunityRule.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
-  models.Community.hasMany(CommunityRule, {as: 'rules', foreignKey: 'communityId'});
+  CommunityMeeting.belongsTo(models.Community, {as: 'community', foreignKey: 'communityId'});
+  models.Community.hasMany(CommunityMeeting, {as: 'meetings', foreignKey: 'communityId'});
 
-  return CommunityRule.sync({});
+  return CommunityMeeting.sync({});
 };
