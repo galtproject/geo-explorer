@@ -2031,7 +2031,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'meetingId', 'type', Op.and]),
-      include: {association: 'proposal'}
+      // include: {association: 'proposal'}
     }
   }
 
