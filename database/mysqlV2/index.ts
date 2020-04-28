@@ -1870,6 +1870,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['data'] = communityProposalQuery.data;
     }
 
+    if(communityProposalQuery.uniqId) {
+      allWheres['uniqId'] = communityProposalQuery.uniqId;
+    }
+
     if(communityProposalQuery.marker) {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
@@ -1934,7 +1938,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', 'acceptedEnoughToExecute', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', 'acceptedEnoughToExecute', 'uniqId', Op.and]),
       include: ruleInclude
     }
   }

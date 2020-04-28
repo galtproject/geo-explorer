@@ -1519,6 +1519,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let dataLink = proposalData.dataLink;
     let description = dataLink;
+    let uniqId;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch((e) => {
@@ -1526,6 +1527,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         return {};
       });
       description = data.description;
+      uniqId = data.uniqId;
       dataJson = JSON.stringify(data);
     }
 
@@ -1569,6 +1571,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ...txData,
       status,
       description,
+      uniqId,
       dataLink,
       dataJson,
       data: proposalData.data,
