@@ -1619,17 +1619,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
     ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
 
-    const res = await this.abstractUpdateCommunityRule(community, {
+    return this.abstractUpdateCommunityRule(community, {
       ruleId,
       isActive: ruleData.active,
       ...ruleData
     });
-
-    if (parseInt(ruleData.meetingId)) {
-      await this.updateCommunityMeeting(community.address, ruleData.meetingId);
-    }
-
-    return res;
   }
 
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
@@ -1675,6 +1669,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
+
+    console.log('ruleData.meetingId', parseInt(ruleData.meetingId));
+    if (parseInt(ruleData.meetingId)) {
+      await this.updateCommunityMeeting(community.address, ruleData.meetingId);
+    }
+
     await this.updateCommunity(community.address, community.isPpr);
     return result;
   }
@@ -1704,6 +1704,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
+    console.log('abstractUpdateCommunityMeeting', meetingData.meetingId);
     const {dataLink, createdAt} = meetingData;
     let description = 'Not found';
     let dataJson = '';
@@ -1730,6 +1731,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communityAddress: community.address,
       meetingId: meetingData.meetingId
     });
+    console.log('rulesCount', rulesCount);
+
     let localProposalsToCreateCount = 0;
     if(data && data.proposals) {
       localProposalsToCreateCount = data.proposals.length - rulesCount;
