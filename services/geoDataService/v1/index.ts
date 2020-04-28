@@ -1509,6 +1509,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
         });
 
+        if (parseInt(proposalParsedData.inputs.meetingId)) {
+          await this.updateCommunityMeeting(community.address, proposalParsedData.inputs.meetingId);
+        }
+
         ruleDbId = dbRule.id;
       }
     }
@@ -1614,6 +1618,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
     ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
+
+    if (parseInt(ruleData.meetingId)) {
+      await this.updateCommunityMeeting(community.address, ruleData.meetingId);
+    }
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
