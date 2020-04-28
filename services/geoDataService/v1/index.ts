@@ -1504,6 +1504,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           isAbstract: true,
           typeId: proposalParsedData.methodName.replace('addRuleType', ''),
           manager: pmAddress,
+          meetingId: proposalParsedData.inputs.meetingId,
           dataLink: proposalParsedData.inputs.dataLink,
           ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
         });
@@ -1693,8 +1694,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const {dataLink, createdAt} = meetingData;
     let description = 'Not found';
     let dataJson = '';
+    let data;
     if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch((e) => {
+      data = await this.geesome.getObject(dataLink).catch((e) => {
         console.error('Failed to fetch', dataLink, e);
         return {};
       });
@@ -1711,10 +1713,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
+    let rulesCount = await this.database.filterCommunityRuleCount({
+      communityAddress: community.address,
+      meetingId: meetingData.meetingId
+    });
+    let localProposalsToCreateCount = 0;
+    if(data && data.proposals) {
+      localProposalsToCreateCount = data.proposals.length - rulesCount;
+    }
+
     const result = await this.database.addOrUpdateCommunityMeeting(community, {
       ...meetingData,
       communityId: community.id,
       communityAddress: community.address,
+      rulesCount,
+      localProposalsToCreateCount,
       description,
       dataLink,
       dataJson

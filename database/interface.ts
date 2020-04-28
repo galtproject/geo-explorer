@@ -910,6 +910,7 @@ export interface CommunityRuleQuery {
   sortDir?: string;
 
   communityAddress?: string;
+  meetingId?: string;
 }
 
 export interface CommunityMeetingQuery {

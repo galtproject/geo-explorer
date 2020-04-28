@@ -31,6 +31,12 @@ module.exports = async function (sequelize, models) {
     rulesCount: {
       type: Sequelize.INTEGER
     },
+    proposalsCount: {
+      type: Sequelize.INTEGER
+    },
+    localProposalsToCreateCount: {
+      type: Sequelize.INTEGER
+    },
     dataJson: {
       type: Sequelize.TEXT
     },
