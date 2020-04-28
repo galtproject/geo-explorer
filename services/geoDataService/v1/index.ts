@@ -1619,15 +1619,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
     ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
 
+    const res = await this.abstractUpdateCommunityRule(community, {
+      ruleId,
+      isActive: ruleData.active,
+      ...ruleData
+    });
+
     if (parseInt(ruleData.meetingId)) {
       await this.updateCommunityMeeting(community.address, ruleData.meetingId);
     }
 
-    return this.abstractUpdateCommunityRule(community, {
-      ruleId,
-      isActive: ruleData.active,
-      ...ruleData
-    })
+    return res;
   }
 
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
