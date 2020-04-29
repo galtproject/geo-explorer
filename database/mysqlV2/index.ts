@@ -1870,6 +1870,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['data'] = communityProposalQuery.data;
     }
 
+    if(communityProposalQuery.uniqId) {
+      allWheres['uniqId'] = communityProposalQuery.uniqId;
+    }
+
     if(communityProposalQuery.marker) {
       allWheres['marker'] = {[Op.like]: communityProposalQuery.marker};
     }
@@ -1934,7 +1938,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       ruleInclude.required = true;
     }
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', 'acceptedEnoughToExecute', Op.and]),
+      where: resultWhere(allWheres, ['communityAddress', 'pmAddress', 'status', 'marker', 'markerName', 'proposalId', 'isActual', 'data', 'closedAt', 'acceptedEnoughToExecute', 'uniqId', Op.and]),
       include: ruleInclude
     }
   }
@@ -2031,7 +2035,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     return {
       where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'meetingId', 'type', Op.and]),
-      include: {association: 'proposal'}
+      // include: {association: 'proposal'}
     }
   }
 
@@ -2097,7 +2101,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['communityAddress'] = {[Op.like]: communityMeetingQuery.communityAddress};
     }
 
-    ['isActive', 'type', 'ruleId'].forEach((field) => {
+    ['isActive', 'type', 'meetingId'].forEach((field) => {
       if(!_.isUndefined(communityMeetingQuery[field]) && !_.isNull(communityMeetingQuery[field]))
         allWheres[field] = {[Op.eq]: communityMeetingQuery[field]};
     });
@@ -2109,7 +2113,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityRuleWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'ruleId', 'type', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', Op.and])
     }
   }
 

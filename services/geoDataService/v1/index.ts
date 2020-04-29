@@ -1504,9 +1504,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           isAbstract: true,
           typeId: proposalParsedData.methodName.replace('addRuleType', ''),
           manager: pmAddress,
+          meetingId: proposalParsedData.inputs.meetingId,
           dataLink: proposalParsedData.inputs.dataLink,
           ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
         });
+
+        if (parseInt(proposalParsedData.inputs.meetingId)) {
+          await this.updateCommunityMeeting(community.address, proposalParsedData.inputs.meetingId);
+        }
 
         ruleDbId = dbRule.id;
       }
@@ -1518,6 +1523,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let dataLink = proposalData.dataLink;
     let description = dataLink;
+    let uniqId;
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch((e) => {
@@ -1525,6 +1531,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         return {};
       });
       description = data.description;
+      uniqId = data.uniqId;
       dataJson = JSON.stringify(data);
     }
 
@@ -1568,6 +1575,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ...txData,
       status,
       description,
+      uniqId,
       dataLink,
       dataJson,
       data: proposalData.data,
@@ -1615,7 +1623,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       ruleId,
       isActive: ruleData.active,
       ...ruleData
-    })
+    });
   }
 
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
@@ -1661,6 +1669,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
+
+    console.log('ruleData.meetingId', parseInt(ruleData.meetingId));
+    if (parseInt(ruleData.meetingId)) {
+      await this.updateCommunityMeeting(community.address, ruleData.meetingId);
+    }
+
     await this.updateCommunity(community.address, community.isPpr);
     return result;
   }
@@ -1690,11 +1704,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
+    console.log('abstractUpdateCommunityMeeting', meetingData.meetingId);
     const {dataLink, createdAt} = meetingData;
     let description = 'Not found';
     let dataJson = '';
+    let data;
     if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch((e) => {
+      data = await this.geesome.getObject(dataLink).catch((e) => {
         console.error('Failed to fetch', dataLink, e);
         return {};
       });
@@ -1711,10 +1727,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
+    let rulesCount = await this.database.filterCommunityRuleCount({
+      communityAddress: community.address,
+      meetingId: meetingData.meetingId
+    });
+    console.log('rulesCount', rulesCount);
+
+    let localProposalsToCreateCount = 0;
+    if(data && data.proposals) {
+      localProposalsToCreateCount = data.proposals.length - rulesCount;
+    }
+
     const result = await this.database.addOrUpdateCommunityMeeting(community, {
       ...meetingData,
       communityId: community.id,
       communityAddress: community.address,
+      rulesCount,
+      localProposalsToCreateCount,
       description,
       dataLink,
       dataJson
