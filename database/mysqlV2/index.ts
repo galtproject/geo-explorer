@@ -2132,7 +2132,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityMeetingWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', 'status', Op.and])
     }
   }
 
