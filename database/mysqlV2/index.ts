@@ -2146,6 +2146,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.limit = communityMeetingQuery.limit || 20;
     findAllParam.offset = communityMeetingQuery.offset || 0;
 
+    findAllParam.order = [
+      [communityMeetingQuery.sortBy || 'createdAt', communityMeetingQuery.sortDir || 'DESC']
+    ];
     return this.models.CommunityMeeting.findAll(findAllParam);
   }
 
