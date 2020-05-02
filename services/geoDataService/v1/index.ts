@@ -1527,6 +1527,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if (status === 'active') {
       if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName, 'addRuleType')) {
         const ruleId = pmAddress + '-' + proposalId;
+        const meetingId = proposalParsedData.inputs.meetingId.toString(10);
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId,
           addRuleProposalUniqId: uniqId,
@@ -1534,13 +1535,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           isAbstract: true,
           typeId: proposalParsedData.methodName.replace('addRuleType', ''),
           manager: pmAddress,
-          meetingId: proposalParsedData.inputs.meetingId,
+          meetingId: meetingId === '0' ? null : parseInt(meetingId),
           dataLink: proposalParsedData.inputs.dataLink,
           ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
         });
 
-        if (parseInt(proposalParsedData.inputs.meetingId)) {
-          const meeting = await this.updateCommunityMeeting(community.address, proposalParsedData.inputs.meetingId);
+        if (parseInt(meetingId)) {
+          const meeting = await this.updateCommunityMeeting(community.address, meetingId);
           if (meeting) {
             const data = JSON.parse(meeting.dataJson);
             const insideMeetingId = _.findIndex(data.proposals, { uniqId }) + 1;
@@ -1639,6 +1640,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
     ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
+    if(ruleData.meetingId === '0') {
+      ruleData.meetingId = null;
+    }
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
@@ -1691,13 +1695,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
-
-    console.log('ruleData.meetingId', parseInt(ruleData.meetingId));
-    if (parseInt(ruleData.meetingId)) {
-      const meeting = await this.updateCommunityMeeting(community.address, ruleData.meetingId);
-      const meetingData = JSON.parse(meeting.dataJson);
-      const insideMeetingId = _.findIndex()
-    }
 
     await this.updateCommunity(community.address, community.isPpr);
     return result;
