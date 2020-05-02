@@ -1468,11 +1468,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
           const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id, {
             addRuleProposalUniqId: uniqId
           });
+          console.log('dbRule.meetingId', dbRule.meetingId);
           if (dbRule.meetingId) {
             const [meeting] = await this.database.filterCommunityMeeting({
               communityAddress,
               meetingId: dbRule.meetingId
             });
+            console.log('meeting.id', meeting ? meeting.id : null);
             if (meeting) {
               const data = JSON.parse(meeting.dataJson);
               const insideMeetingId = _.findIndex(data.proposals, { uniqId }) + 1;
@@ -1695,6 +1697,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
+    if (parseInt(ruleData.meetingId)) {
+      await this.updateCommunityMeeting(community.address, ruleData.meetingId);
+    }
 
     await this.updateCommunity(community.address, community.isPpr);
     return result;
