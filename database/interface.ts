@@ -240,6 +240,10 @@ export default interface IExplorerDatabase {
 
   filterCommunityMeetingCount(filterQuery: CommunityMeetingQuery): Promise<number>;
 
+  getAllFailedTimeoutMeetings(): Promise<ICommunityMeeting[]>
+
+  getAllInProcessTimeoutMeetings(): Promise<ICommunityMeeting[]>
+
   // =============================================================
   // Values
   // =============================================================

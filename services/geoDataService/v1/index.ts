@@ -1800,8 +1800,21 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       sortDir: 'DESC'
     });
 
+    let status;
+    if(executedProposalsCount) {
+      status = 'done';
+    } else if(new Date() > meetingData.endDateTime) {
+      status = 'failed';
+    } else if(new Date() > meetingData.startDateTime) {
+      status = 'in_process';
+    } else {
+      status = 'planned';
+    }
+
+
     const result = await this.database.addOrUpdateCommunityMeeting(community, {
       ...meetingData,
+      status,
       communityId: community.id,
       communityAddress: community.address,
       rulesCount,

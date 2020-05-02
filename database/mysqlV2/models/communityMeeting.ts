@@ -21,6 +21,9 @@ module.exports = async function (sequelize, models) {
     meetingId: {
       type: Sequelize.STRING(100)
     },
+    status: {
+      type: Sequelize.STRING(100)
+    },
     isActive: {
       type: Sequelize.BOOLEAN,
       defaultValue: false

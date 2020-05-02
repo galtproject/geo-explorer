@@ -2152,6 +2152,18 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.CommunityMeeting.count(findAllParam);
   }
 
+  async getAllFailedTimeoutMeetings() {
+    return this.models.CommunityMeeting.findAll({
+      where: {status: {[Op.not]: 'failed'}, executedProposalsCount: 0, endDateTime: {[Op.lte]: new Date()}}
+    });
+  }
+
+  async getAllInProcessTimeoutMeetings() {
+    return this.models.CommunityMeeting.findAll({
+      where: {status: {[Op.not]: 'in_process'}, executedProposalsCount: 0, startDateTime: {[Op.lte]: new Date()}, endDateTime: {[Op.gte]: new Date()}}
+    });
+  }
+
   // =============================================================
   // Approved Tokens
   // =============================================================
