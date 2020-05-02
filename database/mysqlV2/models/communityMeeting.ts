@@ -52,6 +52,12 @@ module.exports = async function (sequelize, models) {
     createdAtBlock: {
       type: Sequelize.INTEGER
     },
+    endDateTime: {
+      type: Sequelize.DATE
+    },
+    startDateTime: {
+      type: Sequelize.DATE
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes

@@ -1754,6 +1754,25 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
+    let startDateTime;
+    let startTimeStr;
+    if(data.form === 'in_absentia' || data.form === 'mixed') {
+      startDateTime = data.inAbsentiaBulletinDate;
+      startTimeStr = data.inAbsentiaBulletinTime;
+    } else {
+      startDateTime = data.intramuralDate;
+      startTimeStr = data.intramuralTime;
+    }
+
+    if(startDateTime) {
+      startDateTime = new Date(startDateTime);
+      const splitTime = startTimeStr.split(':');
+      startDateTime.setHours(parseInt(splitTime[0]), parseInt(splitTime[1]));
+    }
+
+    meetingData.startDateTime = startDateTime;
+    meetingData.endDateTime = new Date(data.protocolFormationDate);
+
     let rulesCount = await this.database.filterCommunityRuleCount({
       communityAddress: community.address,
       meetingId: meetingData.meetingId

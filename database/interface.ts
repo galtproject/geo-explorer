@@ -925,6 +925,14 @@ export interface CommunityMeetingQuery {
 
   communityAddress?: string;
   meetingId?: string;
+
+  minExecutedProposalsCount?: number;
+  maxExecutedProposalsCount?: number;
+
+  maxEndDateTime?: any;
+  maxStartDateTime?: any;
+
+  minStartDateTime?: any;
 }
 
 export interface CommunityApprovedQuery {

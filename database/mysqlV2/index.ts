@@ -2094,11 +2094,27 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.getCommunityMeeting(community.id, meeting.meetingId);
   }
 
-  prepareCommunityMeetingWhere(communityMeetingQuery) {
+  prepareCommunityMeetingWhere(communityMeetingQuery: CommunityMeetingQuery) {
     const allWheres: any = {};
 
     if(communityMeetingQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityMeetingQuery.communityAddress};
+    }
+
+    if(communityMeetingQuery.minExecutedProposalsCount) {
+      allWheres['executedProposalsCount'] = {[Op.gte]: communityMeetingQuery.minExecutedProposalsCount}
+    }
+    if(communityMeetingQuery.maxExecutedProposalsCount) {
+      allWheres['executedProposalsCount'] = {[Op.lte]: communityMeetingQuery.maxExecutedProposalsCount}
+    }
+    if(communityMeetingQuery.maxEndDateTime) {
+      allWheres['endDateTime'] = {[Op.lte]: communityMeetingQuery.maxEndDateTime}
+    }
+    if(communityMeetingQuery.maxStartDateTime) {
+      allWheres['startDateTime'] = {[Op.lte]: communityMeetingQuery.maxStartDateTime}
+    }
+    if(communityMeetingQuery.minStartDateTime) {
+      allWheres['startDateTime'] = {[Op.gte]: communityMeetingQuery.minStartDateTime}
     }
 
     ['isActive', 'type', 'meetingId'].forEach((field) => {
@@ -2110,10 +2126,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   communityMeetingQueryToFindAllParam(communityMeetingQuery: CommunityMeetingQuery) {
-    const allWheres = this.prepareCommunityRuleWhere(communityMeetingQuery);
+    const allWheres = this.prepareCommunityMeetingWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', Op.and])
     }
   }
 
