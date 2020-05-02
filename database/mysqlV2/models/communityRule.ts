@@ -24,7 +24,13 @@ module.exports = async function (sequelize, models) {
     ruleId: {
       type: Sequelize.STRING(100)
     },
+    addRuleProposalUniqId: {
+      type: Sequelize.STRING(100)
+    },
     meetingId: {
+      type: Sequelize.STRING(100)
+    },
+    insideMeetingId: {
       type: Sequelize.STRING(100)
     },
     typeId: {

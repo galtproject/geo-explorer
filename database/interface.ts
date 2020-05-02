@@ -817,6 +817,9 @@ export interface ICommunityRule {
 
   communityAddress;
   ruleId;
+  meetingId;
+  insideMeetingId;
+  addRuleProposalUniqId;
   dataLink?;
   dataJson?;
   description?;
@@ -921,6 +924,7 @@ export interface CommunityMeetingQuery {
   sortDir?: string;
 
   communityAddress?: string;
+  meetingId?: string;
 }
 
 export interface CommunityApprovedQuery {
