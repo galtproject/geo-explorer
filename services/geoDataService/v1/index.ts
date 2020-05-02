@@ -1446,7 +1446,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         success: true,
         proposalId
       });
-      console.log('executeEvents', executeEvents);
+      // console.log('executeEvents', executeEvents);
       if (executeEvents.length) {
         txData.executeTxId = executeEvents[0]['transactionHash'];
         txData.closedAtBlock = parseInt(executeEvents[0]['blockNumber'].toString(10));
@@ -1463,7 +1463,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         );
 
         const AddFundRuleEvent = txReceipt.events.filter(e => e.name === 'AddFundRule')[0];
-        console.log('AddFundRuleEvent', AddFundRuleEvent);
+        // console.log('AddFundRuleEvent', AddFundRuleEvent);
         if (AddFundRuleEvent) {
           const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id, {
             addRuleProposalUniqId: uniqId
@@ -1770,8 +1770,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       startDateTime.setHours(parseInt(splitTime[0]), parseInt(splitTime[1]));
     }
 
-    meetingData.startDateTime = startDateTime;
-    meetingData.endDateTime = new Date(data.protocolFormationDate);
+    if(startDateTime && startDateTime.toString() !== 'Invalid Date') {
+      meetingData.startDateTime = startDateTime;
+    }
+    const endDateTime = new Date(data.protocolFormationDate);
+    if(endDateTime && endDateTime.toString() !== 'Invalid Date') {
+      meetingData.endDateTime = endDateTime;
+    }
+    console.log('startDateTime', startDateTime, 'endDateTime', meetingData.endDateTime);
 
     let rulesCount = await this.database.filterCommunityRuleCount({
       communityAddress: community.address,
