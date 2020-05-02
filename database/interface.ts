@@ -937,6 +937,8 @@ export interface CommunityMeetingQuery {
   maxStartDateTime?: any;
 
   minStartDateTime?: any;
+
+  status: string[];
 }
 
 export interface CommunityApprovedQuery {

@@ -2116,6 +2116,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityMeetingQuery.minStartDateTime) {
       allWheres['startDateTime'] = {[Op.gte]: communityMeetingQuery.minStartDateTime}
     }
+    if(communityMeetingQuery.status) {
+      allWheres['status'] = {[Op.in]: communityMeetingQuery.status}
+    }
 
     ['isActive', 'type', 'meetingId'].forEach((field) => {
       if(!_.isUndefined(communityMeetingQuery[field]) && !_.isNull(communityMeetingQuery[field]))
@@ -2146,7 +2149,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.models.CommunityMeeting.findAll(findAllParam);
   }
 
-  async filterCommunityMeetingCount(communityMeetingQuery: CommunityRuleQuery) {
+  async filterCommunityMeetingCount(communityMeetingQuery: CommunityMeetingQuery) {
     const findAllParam: any = this.communityMeetingQueryToFindAllParam(communityMeetingQuery);
 
     return this.models.CommunityMeeting.count(findAllParam);
