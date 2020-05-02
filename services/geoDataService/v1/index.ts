@@ -1707,10 +1707,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   handleCommunityMeetingEvent(communityAddress, event) {
     console.log('handleCommunityMeetingEvent', event.returnValues);
-    return this.updateCommunityMeeting(communityAddress, event.returnValues.id);
+    return this.updateCommunityMeeting(communityAddress, event.returnValues.id, {createdAtBlock: event.blockNumber});
   }
 
-  async updateCommunityMeeting(communityAddress, meetingId) {
+  async updateCommunityMeeting(communityAddress, meetingId, additionalFields = {}) {
     const community = await this.database.getCommunity(communityAddress);
 
     let contract = await this.chainService.getCommunityRuleRegistryContract(community.ruleRegistryAddress);
@@ -1725,7 +1725,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.abstractUpdateCommunityMeeting(community, {
       meetingId,
       isActive: meetingData.active,
-      ...meetingData
+      ...meetingData,
+      ...additionalFields
     })
   }
 
