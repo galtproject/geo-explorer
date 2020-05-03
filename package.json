@@ -25,7 +25,7 @@
     "kovan-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_kovan;'",
     "kovan-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_kovan; ALTER DATABASE geo_explorer_kovan CHARACTER SET utf8 COLLATE utf8_general_ci;'",
     "kovan-recreate": "npm run kovan-drop && npm run kovan-create",
-    "kovan": "DATABASE_NAME=geo_explorer_kovan CONTRACTS_CONFIG=kovan-a.json RPC_WS_SERVER=wss://kovan.infura.io/ws/v3/f2d134e9767442c88963a0244d171faf API_PORT=4400 ts-node ./index.ts",
+    "kovan": "DATABASE_NAME=geo_explorer_kovan CONTRACTS_CONFIG=kovan-a.json RPC_WS_SERVER=wss://wss-rpc.kovan.galtproject.io/ API_PORT=4400 ts-node ./index.ts",
     "sokol-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_sokol;'",
     "sokol-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_sokol; ALTER DATABASE geo_explorer_sokol CHARACTER SET utf8 COLLATE utf8_general_ci;'",
     "sokol-recreate": "npm run sokol-drop && npm run sokol-create",

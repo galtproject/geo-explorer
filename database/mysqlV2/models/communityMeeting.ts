@@ -48,7 +48,10 @@ module.exports = async function (sequelize, models) {
     },
     description: {
       type: Sequelize.TEXT
-    }
+    },
+    createdAtBlock: {
+      type: Sequelize.INTEGER
+    },
   }, {
     indexes: [
       // http://docs.sequelizejs.com/manual/tutorial/models-definition.html#indexes
