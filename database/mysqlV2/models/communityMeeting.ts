@@ -34,6 +34,12 @@ module.exports = async function (sequelize, models) {
     proposalsCount: {
       type: Sequelize.INTEGER
     },
+    executedProposalsCount: {
+      type: Sequelize.INTEGER
+    },
+    lastProposalTimeoutAt: {
+      type: Sequelize.INTEGER
+    },
     localProposalsToCreateCount: {
       type: Sequelize.INTEGER
     },

@@ -1738,12 +1738,24 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       localProposalsToCreateCount = data.proposals.length - rulesCount;
     }
 
+    const executedProposalsCount = await this.database.filterCommunityProposalCount({
+      meetingId: meetingData.meetingId,
+    });
+
+    const [lastProposalByTimeout] = await this.database.filterCommunityProposal({
+      meetingId: meetingData.meetingId,
+      sortBy: 'timeoutAt',
+      sortDir: 'DESC'
+    });
+
     const result = await this.database.addOrUpdateCommunityMeeting(community, {
       ...meetingData,
       communityId: community.id,
       communityAddress: community.address,
       rulesCount,
       localProposalsToCreateCount,
+      executedProposalsCount,
+      lastProposalTimeoutAt: lastProposalByTimeout ? lastProposalByTimeout.timeoutAt : null,
       description,
       dataLink,
       dataJson
