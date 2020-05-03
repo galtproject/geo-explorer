@@ -1787,6 +1787,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     const executedProposalsCount = await this.database.filterCommunityProposalCount({
       meetingId: meetingData.meetingId,
+      status: 'executed'
     });
 
     const [lastProposalByTimeout] = await this.database.filterCommunityProposal({
