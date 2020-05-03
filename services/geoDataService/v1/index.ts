@@ -1414,6 +1414,20 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({})
     ]);
 
+    let dataLink = proposalData.dataLink;
+    let description = dataLink;
+    let uniqId;
+    let dataJson = '';
+    if (isIpldHash(dataLink)) {
+      const data = await this.geesome.getObject(dataLink).catch((e) => {
+        console.error('Failed to fetch', dataLink, e);
+        return {};
+      });
+      description = data.description;
+      uniqId = data.uniqId;
+      dataJson = JSON.stringify(data);
+    }
+
     const createdAtBlock = parseInt(proposalVotingData.creationBlock.toString(10));
 
     let status = {
@@ -1451,7 +1465,23 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         const AddFundRuleEvent = txReceipt.events.filter(e => e.name === 'AddFundRule')[0];
         console.log('AddFundRuleEvent', AddFundRuleEvent);
         if (AddFundRuleEvent) {
-          const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id);
+          const dbRule = await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id, {
+            addRuleProposalUniqId: uniqId
+          });
+          console.log('dbRule.meetingId', dbRule.meetingId);
+          if (dbRule.meetingId) {
+            const [meeting] = await this.database.filterCommunityMeeting({
+              communityAddress,
+              meetingId: dbRule.meetingId
+            });
+            console.log('meeting.id', meeting ? meeting.id : null);
+            if (meeting) {
+              const data = JSON.parse(meeting.dataJson);
+              const insideMeetingId = _.findIndex(data.proposals, { uniqId }) + 1;
+              await this.updateCommunityRule(communityAddress, AddFundRuleEvent.values.id, {insideMeetingId});
+            }
+          }
+
           ruleDbId = dbRule.id;
           const disableEvents = await this.chainService.getEventsFromBlock(ruleRegistryContract || storageContract, 'DisableFundRule', createdAtBlock, {id: AddFundRuleEvent.values.id});
           if (disableEvents.length) {
@@ -1498,19 +1528,27 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if (status === 'active') {
       if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName, 'addRuleType')) {
+        const ruleId = pmAddress + '-' + proposalId;
+        const meetingId = proposalParsedData.inputs.meetingId.toString(10);
         const dbRule = await this.abstractUpdateCommunityRule(community, {
-          ruleId: pmAddress + '-' + proposalId,
+          ruleId,
+          addRuleProposalUniqId: uniqId,
           isActive: false,
           isAbstract: true,
           typeId: proposalParsedData.methodName.replace('addRuleType', ''),
           manager: pmAddress,
-          meetingId: proposalParsedData.inputs.meetingId,
+          meetingId: meetingId === '0' ? null : parseInt(meetingId),
           dataLink: proposalParsedData.inputs.dataLink,
           ipfsHash: this.chainService.hexToString(proposalParsedData.inputs.ipfsHash)
         });
 
-        if (parseInt(proposalParsedData.inputs.meetingId)) {
-          await this.updateCommunityMeeting(community.address, proposalParsedData.inputs.meetingId);
+        if (parseInt(meetingId)) {
+          const meeting = await this.updateCommunityMeeting(community.address, meetingId);
+          if (meeting) {
+            const data = JSON.parse(meeting.dataJson);
+            const insideMeetingId = _.findIndex(data.proposals, { uniqId }) + 1;
+            await this.abstractUpdateCommunityRule(community, {ruleId, insideMeetingId});
+          }
         }
 
         ruleDbId = dbRule.id;
@@ -1520,20 +1558,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     // if (isActual && status === 'rejected') {
     //   isActual = false;
     // }
-
-    let dataLink = proposalData.dataLink;
-    let description = dataLink;
-    let uniqId;
-    let dataJson = '';
-    if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch((e) => {
-        console.error('Failed to fetch', dataLink, e);
-        return {};
-      });
-      description = data.description;
-      uniqId = data.uniqId;
-      dataJson = JSON.stringify(data);
-    }
 
     const createdAt = new Date();
     createdAt.setTime(createdAtBlockTimestamp * 1000);
@@ -1600,7 +1624,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.updateCommunityRule(communityAddress, event.returnValues.id);
   }
 
-  async updateCommunityRule(communityAddress, ruleId) {
+  async updateCommunityRule(communityAddress, ruleId, additionalData = {}) {
     const community = await this.database.getCommunity(communityAddress);
 
     let contract;
@@ -1618,11 +1642,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ruleData.ipfsHash = this.chainService.hexToString(ruleData.ipfsHash);
     ruleData.typeId = ruleData.typeId ? ruleData.typeId.toString(10) : null;
     ruleData.meetingId = ruleData.meetingId ? ruleData.meetingId.toString(10) : null;
+    if(ruleData.meetingId === '0') {
+      ruleData.meetingId = null;
+    }
 
     return this.abstractUpdateCommunityRule(community, {
       ruleId,
       isActive: ruleData.active,
-      ...ruleData
+      ...ruleData,
+      ...additionalData
     });
   }
 
@@ -1669,8 +1697,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       type
     });
-
-    console.log('ruleData.meetingId', parseInt(ruleData.meetingId));
     if (parseInt(ruleData.meetingId)) {
       await this.updateCommunityMeeting(community.address, ruleData.meetingId);
     }
