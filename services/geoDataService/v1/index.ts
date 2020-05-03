@@ -1108,7 +1108,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.database.filterCommunityMemberCount({communityAddress: raAddress})
     ]);
 
-    log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount, 'ruleRegistryAddress', ruleRegistryAddress);
+    // log('community', raAddress, 'tokensCount', tokensCount, 'spaceTokenOwnersCount', spaceTokenOwnersCount, 'ruleRegistryAddress', ruleRegistryAddress);
 
     let description = dataLink;
     let dataJson = '';
@@ -1142,7 +1142,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunityMember(community: ICommunity, address, additionalData = {}) {
-    console.log('updateCommunityMember', address);
+    // console.log('updateCommunityMember', address);
     const [contract, raContract] = await Promise.all([
       this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
       this.chainService.getCommunityRaContract(community.address, community.isPpr)
@@ -1655,6 +1655,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
+    console.log('abstractUpdateCommunityRule', ruleData);
     const {dataLink, createdAt} = ruleData;
     let description = 'Not found';
     let descriptionIpfsHash;
@@ -1743,7 +1744,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       });
       // log('dataItem', dataItem);
       try {
-        log('meeting data', data);
+        // log('meeting data', data);
         if (data.description) {
           const ipldData = await this.geesome.getObject(data.description);
           description = await this.geesome.getContentData(ipldData.storageId).catch(() => '');
