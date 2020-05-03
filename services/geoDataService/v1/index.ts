@@ -1657,46 +1657,40 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async abstractUpdateCommunityRule(community: ICommunity, ruleData) {
     console.log('abstractUpdateCommunityRule', ruleData);
     const {dataLink, createdAt} = ruleData;
-    let description = 'Not found';
-    let descriptionIpfsHash;
-    let type = null;
-    let dataJson = '';
-    if (isIpldHash(dataLink)) {
-      const data = await this.geesome.getObject(dataLink).catch((e) => {
-        console.error('Failed to fetch', dataLink, e);
-        return {};
-      });
-      // log('dataItem', dataItem);
-      try {
-        log('rule data', data);
-        if (data.description) {
-          const ipldData = await this.geesome.getObject(data.description);
-          descriptionIpfsHash = ipldData.storageId;
-          description = await this.geesome.getContentData(descriptionIpfsHash).catch(() => '');
-        } else if (data.text) {
-          if (isIpldHash(data.text)) {
-            description = await this.geesome.getContentData(data.text).catch(() => '');
-          } else {
-            description = data.text;
+    if (dataLink) {
+      ruleData.description = 'Not found';
+      if (isIpldHash(dataLink)) {
+        const data = await this.geesome.getObject(dataLink).catch((e) => {
+          console.error('Failed to fetch', dataLink, e);
+          return {};
+        });
+        // log('dataItem', dataItem);
+        try {
+          log('rule data', data);
+          if (data.description) {
+            const ipldData = await this.geesome.getObject(data.description);
+            ruleData.descriptionIpfsHash = ipldData.storageId;
+            ruleData.description = await this.geesome.getContentData(ruleData.descriptionIpfsHash).catch(() => '');
+          } else if (data.text) {
+            if (isIpldHash(data.text)) {
+              ruleData.description = await this.geesome.getContentData(data.text).catch(() => '');
+            } else {
+              ruleData.description = data.text;
+            }
           }
+          ruleData.type = data.type;
+          log('description', ruleData.description, 'type', ruleData.type);
+          ruleData.dataJson = JSON.stringify(data);
+        } catch (e) {
+          console.error(e);
         }
-        type = data.type;
-        log('description', description, 'type', type);
-        dataJson = JSON.stringify(data);
-      } catch (e) {
-        console.error(e);
       }
     }
 
     const result = await this.database.addOrUpdateCommunityRule(community, {
       ...ruleData,
       communityId: community.id,
-      communityAddress: community.address,
-      descriptionIpfsHash,
-      description,
-      dataLink,
-      dataJson,
-      type
+      communityAddress: community.address
     });
     if (parseInt(ruleData.meetingId)) {
       await this.updateCommunityMeeting(community.address, ruleData.meetingId);
