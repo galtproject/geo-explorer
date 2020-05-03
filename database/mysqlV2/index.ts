@@ -2094,11 +2094,30 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     return this.getCommunityMeeting(community.id, meeting.meetingId);
   }
 
-  prepareCommunityMeetingWhere(communityMeetingQuery) {
+  prepareCommunityMeetingWhere(communityMeetingQuery: CommunityMeetingQuery) {
     const allWheres: any = {};
 
     if(communityMeetingQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityMeetingQuery.communityAddress};
+    }
+
+    if(communityMeetingQuery.minExecutedProposalsCount) {
+      allWheres['executedProposalsCount'] = {[Op.gte]: communityMeetingQuery.minExecutedProposalsCount}
+    }
+    if(communityMeetingQuery.maxExecutedProposalsCount) {
+      allWheres['executedProposalsCount'] = {[Op.lte]: communityMeetingQuery.maxExecutedProposalsCount}
+    }
+    if(communityMeetingQuery.maxEndDateTime) {
+      allWheres['endDateTime'] = {[Op.lte]: communityMeetingQuery.maxEndDateTime}
+    }
+    if(communityMeetingQuery.maxStartDateTime) {
+      allWheres['startDateTime'] = {[Op.lte]: communityMeetingQuery.maxStartDateTime}
+    }
+    if(communityMeetingQuery.minStartDateTime) {
+      allWheres['startDateTime'] = {[Op.gte]: communityMeetingQuery.minStartDateTime}
+    }
+    if(communityMeetingQuery.status) {
+      allWheres['status'] = {[Op.in]: communityMeetingQuery.status}
     }
 
     ['isActive', 'type', 'meetingId'].forEach((field) => {
@@ -2110,10 +2129,10 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   }
 
   communityMeetingQueryToFindAllParam(communityMeetingQuery: CommunityMeetingQuery) {
-    const allWheres = this.prepareCommunityRuleWhere(communityMeetingQuery);
+    const allWheres = this.prepareCommunityMeetingWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', 'status', Op.and])
     }
   }
 
@@ -2127,13 +2146,28 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     findAllParam.limit = communityMeetingQuery.limit || 20;
     findAllParam.offset = communityMeetingQuery.offset || 0;
 
+    findAllParam.order = [
+      [communityMeetingQuery.sortBy || 'createdAt', communityMeetingQuery.sortDir || 'DESC']
+    ];
     return this.models.CommunityMeeting.findAll(findAllParam);
   }
 
-  async filterCommunityMeetingCount(communityMeetingQuery: CommunityRuleQuery) {
+  async filterCommunityMeetingCount(communityMeetingQuery: CommunityMeetingQuery) {
     const findAllParam: any = this.communityMeetingQueryToFindAllParam(communityMeetingQuery);
 
     return this.models.CommunityMeeting.count(findAllParam);
+  }
+
+  async getAllFailedTimeoutMeetings() {
+    return this.models.CommunityMeeting.findAll({
+      where: {status: {[Op.not]: 'failed'}, executedProposalsCount: 0, endDateTime: {[Op.lte]: new Date()}}
+    });
+  }
+
+  async getAllInProcessTimeoutMeetings() {
+    return this.models.CommunityMeeting.findAll({
+      where: {status: {[Op.not]: 'in_process'}, executedProposalsCount: 0, startDateTime: {[Op.lte]: new Date()}, endDateTime: {[Op.gte]: new Date()}}
+    });
   }
 
   // =============================================================

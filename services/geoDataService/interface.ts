@@ -176,6 +176,8 @@ export default interface IExplorerGeoDataService {
 
   updateCommunity(address, isPpr): Promise<void>;
 
+  updateCommunityMeeting(communityAddress, meetingId, additionalField?): Promise<any>;
+
   filterCommunities(communityQuery: FilterCommunityGeoQuery): Promise<ICommunityListResponse>;
 
   getCommunity(address): Promise<ICommunity>;

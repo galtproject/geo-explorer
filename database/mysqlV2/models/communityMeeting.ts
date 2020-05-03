@@ -21,6 +21,9 @@ module.exports = async function (sequelize, models) {
     meetingId: {
       type: Sequelize.STRING(100)
     },
+    status: {
+      type: Sequelize.STRING(100)
+    },
     isActive: {
       type: Sequelize.BOOLEAN,
       defaultValue: false
@@ -51,6 +54,12 @@ module.exports = async function (sequelize, models) {
     },
     createdAtBlock: {
       type: Sequelize.INTEGER
+    },
+    endDateTime: {
+      type: Sequelize.DATE
+    },
+    startDateTime: {
+      type: Sequelize.DATE
     },
   }, {
     indexes: [

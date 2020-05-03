@@ -964,12 +964,23 @@ const log = require('./services/logService');
 
     await setLastBlockNumber(startBlockNumber);
     //
-    // setInterval(async () => {
-    //   const timeoutProposals = await database.getAllTimeoutProposals();
-    //   timeoutProposals.forEach(proposal => {
-    //     geoDataService.updateCommunityProposal(proposal.communityAddress, proposal.pmAddress, proposal.marker, proposal.proposalId);
-    //   })
-    // }, 60 * 1000);
+    setInterval(async () => {
+      const failedTimeoutMeetings = await database.getAllFailedTimeoutMeetings();
+      if(failedTimeoutMeetings.length){
+        console.log('failedTimeoutMeetings.length', failedTimeoutMeetings.length);
+      }
+      failedTimeoutMeetings.forEach(meeting => {
+        geoDataService.updateCommunityMeeting(meeting.communityAddress, meeting.meetingId);
+      });
+
+      const inProcessTimeoutMeetings = await database.getAllInProcessTimeoutMeetings();
+      if(inProcessTimeoutMeetings.length){
+        console.log('inProcessTimeoutMeetings.length', inProcessTimeoutMeetings.length);
+      }
+      inProcessTimeoutMeetings.forEach(meeting => {
+        geoDataService.updateCommunityMeeting(meeting.communityAddress, meeting.meetingId);
+      })
+    }, 60 * 1000);
 
     //todo: handle DeleteSpaceTokenGeoData
   }
