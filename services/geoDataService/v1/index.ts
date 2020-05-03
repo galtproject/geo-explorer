@@ -1752,8 +1752,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let startDateTime;
     let startTimeStr;
     if(data.form === 'in_absentia' || data.form === 'mixed') {
-      startDateTime = data.inAbsentiaBulletinDate;
-      startTimeStr = data.inAbsentiaBulletinTime;
+      startDateTime = data.inAbsentiaDate;
+      startTimeStr = data.inAbsentiaTime;
     } else {
       startDateTime = data.intramuralDate;
       startTimeStr = data.intramuralTime;
