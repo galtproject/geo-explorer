@@ -84,6 +84,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   pprManagedCommunityFactory: any;
   communityMockFactory: any;
   tokenizableFactory: any;
+  ppLockerRegistry: any;
 
   ppDepositHolder: any;
   ppHomeMediatorFactory: any;
@@ -260,7 +261,8 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       'ppPoaMediatorFactory',
       'ppXDaiMediatorFactory',
       'ppTokenRegistry',
-      'ppLockerFactory'
+      'ppLockerFactory',
+      'ppLockerRegistry'
     ].forEach(contractName => {
       const contractAddress = this.contractsConfig[config[contractName + 'Name'] + 'Address'];
       log(contractName, 'address', contractAddress);

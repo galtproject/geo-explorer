@@ -179,6 +179,8 @@ export enum ChainServiceEvents {
   PrivatePropertySetExtraData = 'SetPropertyExtraData',
 
   NewPropertyLocker = 'NewPPLocker',
+  LockerTransferShare = 'TransferShare',
+  LockerChangeOwners = 'ChangeOwners',
 
   PPDepositHolderDeposit = 'Deposit',
   PPDepositHolderWithdraw = 'Withdrawal',
@@ -206,7 +208,7 @@ export enum ChainServiceEvents {
   CommunityAddMeeting = 'AddMeeting',
   CommunityApproveToken = 'ApproveMint',
   CommunityExpelToken = 'Expel',
-  CommunityBurnExpelledToken = 'BurnExpelled'
+  CommunityBurnExpelledToken = 'BurnExpelled',
 }
 
 export interface ChainServiceSaleOrder {

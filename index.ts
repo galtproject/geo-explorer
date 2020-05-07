@@ -592,15 +592,53 @@ const log = require('./services/logService');
       });
     });
 
+    const subscribedToPpLocer = {
+      // lockerAddress => bool
+    };
+
     await chainService.getEventsFromBlock(chainService.ppLockerFactory, ChainServiceEvents.NewPropertyLocker, lastBlockNumber).then(async (events) => {
       await pIteration.forEach(events, (e) => {
-        return geoDataService.handlePropertyLockerCreation(e)
+        subscribeToPpLocker(e.returnValues.locker);
+        return geoDataService.handlePropertyLockerCreation(e);
       });
     });
 
     subscribeForNewEvents(chainService.ppLockerFactory, ChainServiceEvents.NewPropertyLocker, startBlockNumber, async (err, newEvent) => {
+      subscribeToPpLocker(newEvent.returnValues.locker);
       await geoDataService.handlePropertyLockerCreation(newEvent);
     });
+
+    async function subscribeToPpLocker(lockerAddress) {
+      lockerAddress = lockerAddress.toLowerCase();
+      if(subscribedToPpLocer[lockerAddress]) {
+        return;
+      }
+      subscribedToPpLocer[lockerAddress] = true;
+
+      const lockerContract = await chainService.getLockerContract(lockerAddress);
+
+      async function updateLockerTokenId() {
+        const [registryAddress, tokenId] = await Promise.all([
+          chainService.callContractMethod(lockerContract, 'tokenContract', []),
+          chainService.callContractMethod(lockerContract, 'tokenId', []),
+        ]);
+
+        await geoDataService.saveSpaceTokenById(registryAddress, tokenId);
+      }
+      const updateLockerTokenIdDebounce = _.debounce(updateLockerTokenId, 500);
+
+      await pIteration.forEachSeries(['LockerTransferShare', 'LockerChangeOwners'], async (eventName) => {
+        await chainService.getEventsFromBlock(lockerContract, ChainServiceEvents[eventName], lastBlockNumber).then(async (events) => {
+          await pIteration.forEach(events, async (e) => {
+            updateLockerTokenIdDebounce();
+          });
+        });
+
+        subscribeForNewEvents(lockerContract, ChainServiceEvents[eventName], startBlockNumber, async (err, newEvent) => {
+          await updateLockerTokenId();
+        });
+      });
+    }
 
     const subscribedToCommunity = {
       // communityAddress => bool
