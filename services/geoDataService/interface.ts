@@ -52,6 +52,8 @@ export default interface IExplorerGeoDataService {
   // ====================================================
   handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent): Promise<void>;
 
+  saveSpaceTokenById(contractAddress, tokenId, additionalData?): Promise<any>;
+
   filterSpaceTokens(spaceTokensQuery: FilterSpaceTokensGeoQuery): Promise<ISpaceTokensListResponse>;
 
   getSpaceTokenById(tokenId, contractAddress): Promise<ISpaceTokenGeoData>;
