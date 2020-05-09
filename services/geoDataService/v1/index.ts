@@ -1807,7 +1807,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       status = 'planned';
     }
 
-
     const result = await this.database.addOrUpdateCommunityMeeting(community, {
       ...meetingData,
       status,
@@ -1821,6 +1820,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataLink,
       dataJson
     });
+    console.log('result.id', result.id, result.communityAddress);
     await this.updateCommunity(community.address, community.isPpr);
     return result;
   }
