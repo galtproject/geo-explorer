@@ -2100,6 +2100,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityMeetingQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityMeetingQuery.communityAddress};
     }
+    if(communityMeetingQuery.dataLink) {
+      allWheres['dataLink'] = {[Op.like]: communityMeetingQuery.dataLink};
+    }
 
     if(communityMeetingQuery.minExecutedProposalsCount) {
       allWheres['executedProposalsCount'] = {[Op.gte]: communityMeetingQuery.minExecutedProposalsCount}
@@ -2132,7 +2135,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityMeetingWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', 'status', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'dataLink', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', 'status', Op.and])
     }
   }
 

@@ -929,6 +929,7 @@ export interface CommunityMeetingQuery {
 
   communityAddress?: string;
   meetingId?: string;
+  dataLink?: string;
 
   minExecutedProposalsCount?: number;
   maxExecutedProposalsCount?: number;
