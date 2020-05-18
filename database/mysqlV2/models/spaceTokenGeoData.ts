@@ -137,6 +137,9 @@ module.exports = async function (sequelize, models) {
     imageHash: {
       type: Sequelize.STRING(100)
     },
+    purpose: {
+      type: Sequelize.STRING(100)
+    },
     dataLink: {
       type: Sequelize.STRING
     },

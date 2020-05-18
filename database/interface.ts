@@ -418,6 +418,7 @@ export interface ApplicationsQuery {
 
   tokensIds?: string[];
   tokenType?: string;
+  purpose?: string;
   contractType?: string;
   availableRoles?: string[];
   oracleAddress?: string;

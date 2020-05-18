@@ -214,6 +214,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       pprId,
       type: details.type,
       subtype: details.subtype,
+      purpose: details.purpose,
       imageHash,
       modelIpfsHash,
       photosCount: (photos || []).length,
