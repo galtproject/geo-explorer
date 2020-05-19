@@ -34,6 +34,8 @@ const log = require('./services/logService');
   const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database, chainService);
   const geoDataService: IExplorerGeoDataService = await require('./services/geoDataService/' + config.geoDataService)(database, geohashService, chainService);
 
+  const waitForHandleEventsByBlock = {};
+
   chainService.onReconnect(fetchAndSubscribe);
 
   // return console.log(await database.filterCommunityTokensCount({
@@ -55,8 +57,6 @@ const log = require('./services/logService');
 
   let startBlockNumber = await chainService.getCurrentBlock();
   console.log('startBlockNumber', startBlockNumber);
-
-  const waitForHandleEventsByBlock = {};
 
   async function setLastBlockNumber(blockNumber) {
     const lastBlockNumber = parseInt(await database.getValue('lastBlockNumber'));

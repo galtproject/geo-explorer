@@ -727,7 +727,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       allWheres['level'] = {[Op.in]: spaceTokensQuery.level};
     }
 
-    ['tokenType', 'inLocker', 'isPpr', 'modelIpfsHash'].forEach((field) => {
+    ['tokenType', 'inLocker', 'isPpr', 'modelIpfsHash', 'purpose'].forEach((field) => {
       if(!_.isUndefined(spaceTokensQuery[field]) && !_.isNull(spaceTokensQuery[field]))
         allWheres[field] = spaceTokensQuery[field];
     });
@@ -741,7 +741,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     const result: any = {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'tokenType', 'geohashesCount', 'contractAddress', 'level', 'levelNumber', 'modelIpfsHash', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'purpose', 'tokenId', 'tokenType', 'geohashesCount', 'contractAddress', 'level', 'levelNumber', 'modelIpfsHash', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     };
@@ -2100,6 +2100,9 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     if(communityMeetingQuery.communityAddress) {
       allWheres['communityAddress'] = {[Op.like]: communityMeetingQuery.communityAddress};
     }
+    if(communityMeetingQuery.dataLink) {
+      allWheres['dataLink'] = {[Op.like]: communityMeetingQuery.dataLink};
+    }
 
     if(communityMeetingQuery.minExecutedProposalsCount) {
       allWheres['executedProposalsCount'] = {[Op.gte]: communityMeetingQuery.minExecutedProposalsCount}
@@ -2132,7 +2135,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     const allWheres = this.prepareCommunityMeetingWhere(communityMeetingQuery);
 
     return {
-      where: resultWhere(allWheres, ['communityAddress', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', 'status', Op.and])
+      where: resultWhere(allWheres, ['communityAddress', 'dataLink', 'isActive', 'meetingId', 'type', 'executedProposalsCount', 'endDateTime', 'startDateTime', 'status', Op.and])
     }
   }
 
