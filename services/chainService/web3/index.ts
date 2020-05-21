@@ -706,12 +706,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       try {
         contract.methods[method].apply(contract, args).call({}, (error, res) => {
           if(error) {
-            console.error('Error callContractMethod', method, args);
+            console.error('Error callContractMethod', contract._address, method, args);
           }
           return error ? reject(error) : resolve(res);
         });
       } catch (e) {
-        console.error('Error apply callContractMethod', method, args);
+        console.error('Error apply callContractMethod', contract._address, method, args);
         reject(e);
       }
     });
