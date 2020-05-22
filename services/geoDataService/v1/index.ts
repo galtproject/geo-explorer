@@ -1298,7 +1298,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleCommunityAddVotingEvent(communityAddress, event) {
-    return this.updateCommunityVoting(communityAddress, event.returnValues.marker);
+    return this.updateCommunityVoting(communityAddress, event.returnValues.marker || event.returnValues.key);
   }
 
   async updateCommunityVoting(communityAddress, marker) {
