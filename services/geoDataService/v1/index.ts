@@ -210,7 +210,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let latLonShiftedBaseContour;
 
     if(viewOptions && viewOptions.showBaseContour && supportFields && supportFields.baseContour) {
-      latLonBaseContour = geoData.baseContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
+      latLonBaseContour = supportFields.baseContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
       if(offset) {
         latLonShiftedBaseContour = galtUtils.coordinates.polygonShift(
           latLonBaseContour.map(({lat, lon}) => [lat, lon]),
