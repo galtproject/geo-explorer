@@ -199,11 +199,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let latLonShiftedContour;
     let latLonShiftedCenter;
     if(offset) {
+      let {mapbox} = offset;
       latLonShiftedContour = galtUtils.coordinates.polygonShift(
         latLonContour.map(({lat, lon}) => [lat, lon]),
-        offset.x, offset.y, offset.angle || 0, offset.scaleX || 1, offset.scaleY || 1
+        mapbox.x, mapbox.y, mapbox.angle || 0, mapbox.scaleX || 1, mapbox.scaleY || 1
       );
-      latLonShiftedCenter = galtUtils.latLon.shift(latLonCenter[0], latLonCenter[1], offset.x, offset.y, offset.angle || 0);
+      latLonShiftedCenter = galtUtils.latLon.shift(latLonCenter[0], latLonCenter[1], mapbox.x, mapbox.y, mapbox.angle || 0);
     }
 
     let latLonBaseContour;
@@ -212,9 +213,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(viewOptions && viewOptions.showBaseContour && supportFields && supportFields.baseContour) {
       latLonBaseContour = supportFields.baseContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
       if(offset) {
+        let {mapbox} = offset;
         latLonShiftedBaseContour = galtUtils.coordinates.polygonShift(
           latLonBaseContour.map(({lat, lon}) => [lat, lon]),
-          offset.x, offset.y, offset.angle || 0, offset.scaleX || 1, offset.scaleY || 1
+          mapbox.x, mapbox.y, mapbox.angle || 0, mapbox.scaleX || 1, mapbox.scaleY || 1
         );
       }
     }
