@@ -198,12 +198,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let latLonShiftedContour;
     let latLonShiftedCenter;
+    let contractShiftedContour;
     if(offset) {
       let {mapbox} = offset;
       latLonShiftedContour = galtUtils.coordinates.polygonShift(
         latLonContour.map(({lat, lon}) => [lat, lon]),
         mapbox.x, mapbox.y, mapbox.angle || 0, mapbox.scaleX || 1, mapbox.scaleY || 1
       );
+      contractShiftedContour = latLonShiftedContour.map(latLon => {
+        return galtUtils.contractPoint.encodeFromLatLng(latLon[0], latLon[1]);
+      });
       latLonShiftedCenter = galtUtils.coordinates.polygonCenter(latLonShiftedContour);
     }
 
@@ -254,6 +258,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
       offsetJson: offset ? JSON.stringify(offset) : null,
       latLonBaseContourJson: latLonBaseContour ? JSON.stringify(latLonBaseContour) : null,
+      contractShiftedContour: contractShiftedContour ? JSON.stringify(contractShiftedContour) : null,
       latLonShiftedBaseContourJson: latLonShiftedBaseContour ? JSON.stringify(latLonShiftedBaseContour) : null,
       latLonContourJson: latLonContour ? JSON.stringify(latLonContour) : null,
       latLonShiftedContourJson: latLonShiftedContour ? JSON.stringify(latLonShiftedContour) : null,

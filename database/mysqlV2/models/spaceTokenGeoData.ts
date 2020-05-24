@@ -161,6 +161,9 @@ module.exports = async function (sequelize, models) {
     latLonBaseContourJson: {
       type: Sequelize.TEXT
     },
+    contractShiftedContourJson: {
+      type: Sequelize.TEXT
+    },
     latLonShiftedBaseContourJson: {
       type: Sequelize.TEXT
     },
