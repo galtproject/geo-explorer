@@ -258,7 +258,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
       offsetJson: offset ? JSON.stringify(offset) : null,
       latLonBaseContourJson: latLonBaseContour ? JSON.stringify(latLonBaseContour) : null,
-      contractShiftedContour: contractShiftedContour ? JSON.stringify(contractShiftedContour) : null,
+      contractShiftedContourJson: contractShiftedContour ? JSON.stringify(contractShiftedContour) : null,
       latLonShiftedBaseContourJson: latLonShiftedBaseContour ? JSON.stringify(latLonShiftedBaseContour) : null,
       latLonContourJson: latLonContour ? JSON.stringify(latLonContour) : null,
       latLonShiftedContourJson: latLonShiftedContour ? JSON.stringify(latLonShiftedContour) : null,
