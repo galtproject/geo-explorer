@@ -702,7 +702,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     if(!contract || !contract.methods[method]) {
       return null;
     }
-    let value = await contract.methods[method].apply(contract, args).call({});
+    let value: any = await new Promise((resolve, reject) => {
+      try {
+        contract.methods[method].apply(contract, args).call({}, (error, res) => {
+          if(error) {
+            console.error('Error callContractMethod', contract._address, method, args);
+          }
+          return error ? reject(error) : resolve(res);
+        });
+      } catch (e) {
+        console.error('Error apply callContractMethod', contract._address, method, args);
+        reject(e);
+      }
+    });
     if(type === 'wei') {
       value = this.weiToEther(value);
     }

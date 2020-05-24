@@ -1099,13 +1099,17 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.database.getCommunity(raAddress)
     ]);
 
+
     const [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
-      storageContract.methods.name().call({}),
-      storageContract.methods.dataLink().call({}),
+      this.chainService.callContractMethod(storageContract, 'name', []),
+      this.chainService.callContractMethod(storageContract, 'dataLink', []),
       this.chainService.callContractMethod(ruleRegistryContract || storageContract, 'getActiveFundRulesCount', [], 'number'),
       (async () => community ? await this.database.getCommunityTokensCount(community) : 0)(),
       this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei'),
-      (async () => (await storageContract.methods.config(await storageContract.methods.IS_PRIVATE().call({})).call({})) != '0x0000000000000000000000000000000000000000000000000000000000000000')(),
+      (async () => {
+        const isPrivateKey = await this.chainService.callContractMethod(storageContract, 'IS_PRIVATE', []);
+        return (await this.chainService.callContractMethod(storageContract, 'config', [isPrivateKey])) != '0x0000000000000000000000000000000000000000000000000000000000000000';
+      })(),
       this.database.filterCommunityMemberCount({communityAddress: raAddress})
     ]);
 
@@ -1294,7 +1298,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleCommunityAddVotingEvent(communityAddress, event) {
-    return this.updateCommunityVoting(communityAddress, event.returnValues.marker);
+    return this.updateCommunityVoting(communityAddress, event.returnValues.marker || event.returnValues.key);
   }
 
   async updateCommunityVoting(communityAddress, marker) {
@@ -1303,7 +1307,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const storageContract = await this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr);
 
     let [markerData, communityProposalsCount] = await Promise.all([
-      storageContract.methods.proposalMarkers(marker).call({}),
+      this.chainService.callContractMethod(storageContract, 'proposalMarkers', [marker]),
       this.database.filterCommunityProposalCount({communityAddress, marker})
     ]);
     // console.log('updateCommunityVoting', this.chainService.hexToString(markerData.name), marker, markerData);
@@ -1410,9 +1414,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const [proposalData, proposalVotingData, proposalVotingProgress] = await Promise.all([
-      proposalManagerContract.methods.proposals(proposalId).call({}),
-      proposalManagerContract.methods.getProposalVoting(proposalId).call({}),
-      proposalManagerContract.methods.getProposalVotingProgress(proposalId).call({})
+      this.chainService.callContractMethod(proposalManagerContract, 'proposals', [proposalId]),
+      this.chainService.callContractMethod(proposalManagerContract, 'getProposalVoting', [proposalId]),
+      this.chainService.callContractMethod(proposalManagerContract, 'getProposalVotingProgress', [proposalId]),
     ]);
 
     let dataLink = proposalData.dataLink;

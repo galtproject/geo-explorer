@@ -861,13 +861,22 @@ const log = require('./services/logService');
 
       await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunityNewProposal, lastBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
-          // log('CommunityNewProposal', _.pick(e,['contractAddress', 'returnValues']));
           await geoDataService.handleCommunityAddProposalEvent(communityAddress, e);
         });
       });
 
       subscribeForNewEvents(contractPm, ChainServiceEvents.CommunityNewProposal, startBlockNumber, async (err, newEvent) => {
         await geoDataService.handleCommunityAddProposalEvent(communityAddress, newEvent);
+      });
+
+      await chainService.getEventsFromBlock(contractPm, ChainServiceEvents.CommunitySetProposalConfig, lastBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityAddVotingEvent(communityAddress, e);
+        });
+      });
+
+      subscribeForNewEvents(contractPm, ChainServiceEvents.CommunitySetProposalConfig, startBlockNumber, async (err, newEvent) => {
+        await geoDataService.handleCommunityAddVotingEvent(communityAddress, newEvent);
       });
 
       await pIteration.forEachSeries(['CommunityAyeProposal', 'CommunityNayProposal', 'CommunityApprovedProposal', 'CommunityAbstainProposal', 'CommunityExecuteProposal'], async (eventName) => {
