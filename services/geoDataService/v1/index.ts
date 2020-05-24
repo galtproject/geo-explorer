@@ -204,7 +204,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         latLonContour.map(({lat, lon}) => [lat, lon]),
         mapbox.x, mapbox.y, mapbox.angle || 0, mapbox.scaleX || 1, mapbox.scaleY || 1
       );
-      latLonShiftedCenter = galtUtils.latLon.shift(latLonCenter[0], latLonCenter[1], mapbox.x, mapbox.y, mapbox.angle || 0);
+      latLonShiftedCenter = galtUtils.coordinates.polygonCenter(latLonShiftedContour);
     }
 
     let latLonBaseContour;
