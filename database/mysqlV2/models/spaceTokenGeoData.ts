@@ -158,6 +158,24 @@ module.exports = async function (sequelize, models) {
     geohashContourJson: {
       type: Sequelize.TEXT
     },
+    latLonBaseContourJson: {
+      type: Sequelize.TEXT
+    },
+    latLonShiftedBaseContourJson: {
+      type: Sequelize.TEXT
+    },
+    latLonContourJson: {
+      type: Sequelize.TEXT
+    },
+    latLonShiftedContourJson: {
+      type: Sequelize.TEXT
+    },
+    latLonCenterJson: {
+      type: Sequelize.TEXT
+    },
+    latLonShiftedCenterJson: {
+      type: Sequelize.TEXT
+    },
     geohashesCount: {
       type: Sequelize.INTEGER
     },
