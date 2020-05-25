@@ -327,7 +327,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterSpaceTokens(filterQuery: FilterSpaceTokensGeoQuery) {
     if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getTokenIdsByParentGeohashArray(filterQuery.surroundingsGeohashBox, filterQuery.contractAddress)).map(i => i.tokenId.toString());
     }
     return {
       list: await this.database.filterSpaceTokens(filterQuery),
@@ -499,7 +499,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterOrders(filterQuery: FilterSaleOrdersGeoQuery) {
     if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getTokenIdsByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     return {
       list: await this.database.filterSaleOrders(filterQuery),
@@ -636,7 +636,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterApplications(filterQuery: FilterApplicationsGeoQuery) {
     if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.tokensIds = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
+      filterQuery.tokensIds = (await this.geohashService.getTokenIdsByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.tokenId.toString());
     }
     return {
       list: await this.database.filterApplications(filterQuery),
@@ -804,7 +804,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterPrivatePropertyRegistries(filterQuery: FilterPrivatePropertyRegistryGeoQuery) {
     if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.addresses = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
+      filterQuery.addresses = (await this.geohashService.getTokenIdsByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
     }
     return {
       list: await this.database.filterPrivatePropertyRegistry(filterQuery),
@@ -1939,7 +1939,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
   async filterCommunities(filterQuery: FilterCommunityGeoQuery) {
     if (filterQuery.surroundingsGeohashBox && filterQuery.surroundingsGeohashBox.length) {
-      filterQuery.addresses = (await this.geohashService.getContoursByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
+      filterQuery.addresses = (await this.geohashService.getTokenIdsByParentGeohashArray(filterQuery.surroundingsGeohashBox)).map(i => i.contractAddress.toLowerCase());
     }
     return {
       list: await this.database.filterCommunity(filterQuery),

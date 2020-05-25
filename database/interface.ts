@@ -18,6 +18,8 @@ export default interface IExplorerDatabase {
 
   getContourBySpaceTokenId(tokenId, contractAddress?: string, level?: string): Promise<string[]>;
 
+  getTokenIdsByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
+
   getContoursByParentGeohash(parentGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]>;
 
   // =============================================================
