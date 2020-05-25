@@ -423,19 +423,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         cPoint = cPoint.toString(10);
 
         // log('cPoint', cPoint);
-        // if(galtUtils.contractPoint.isContractPoint(cPoint)) {
+        if(process.env.CONTRACTS_CONFIG === 'mainnet.json') {
+          const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
+          heightsContour.push(height);
+          const geohash = galtUtils.numberToGeohash(geohash5);
+          geohashContour.push(geohash);
+          contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
+        } else {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
           heightsContour.push(height);
-        // } else {
-        //   const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-        //   heightsContour.push(height);
-        //   const geohash = galtUtils.numberToGeohash(geohash5);
-        //   geohashContour.push(geohash);
-        //   contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
-        // }
+        }
       });
       return {
         geohashContour,
@@ -477,19 +477,19 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         cPoint = cPoint.toString(10);
 
         // log('cPoint', cPoint);
-        // if(galtUtils.contractPoint.isContractPoint(cPoint)) {
+        if(process.env.CONTRACTS_CONFIG === 'mainnet.json') {
+          const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
+          heightsContour.push(height);
+          const geohash = galtUtils.numberToGeohash(geohash5);
+          geohashContour.push(geohash);
+          contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
+        } else {
           contractContour.push(cPoint);
           const { lat, lon, height } = galtUtils.contractPoint.decodeToLatLonHeight(cPoint);
           const geohash = galtUtils.geohash.extra.encodeFromLatLng(lat, lon, 12);
           geohashContour.push(geohash);
           heightsContour.push(height);
-        // } else {
-        //   const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
-        //   heightsContour.push(height);
-        //   const geohash = galtUtils.numberToGeohash(geohash5);
-        //   geohashContour.push(geohash);
-        //   contractContour.push(galtUtils.contractPoint.encodeFromGeohash(geohash));
-        // }
+        }
       });
       const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
       return {
