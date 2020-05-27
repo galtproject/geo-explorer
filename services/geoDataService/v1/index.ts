@@ -31,6 +31,7 @@ import IExplorerGeohashService from "../../geohashService/interface";
 
 const _ = require("lodash");
 const pIteration = require("p-iteration");
+const galtUtils = require('@galtproject/utils');
 
 const {GeesomeClient} = require('geesome-libs/src/GeesomeClient');
 const {isIpldHash} = require('geesome-libs/src/ipfsHelper');
@@ -159,7 +160,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async saveSpaceTokenByDataLink(contractAddress, dataLink, geoData) {
-
     let geoDataToSave = {
       contractAddress,
       isPpr: !this.chainService.spaceGeoData || contractAddress.toLowerCase() !== this.chainService.spaceGeoData._address.toLowerCase(),
@@ -179,7 +179,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const spaceData = (await this.geesome.getObject(dataLink).catch(() => null)) || {};
-    let {details, floorPlans, photos, models, modelIpfsHash, offset} = spaceData;
+    let {details, floorPlans, photos, models, modelIpfsHash, offset, viewOptions, supportFields} = spaceData;
 
     if (!details) {
       details = spaceData.data;
@@ -191,6 +191,38 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if (!details) {
       return this.addOrUpdateGeoData(geoDataToSave);
+    }
+
+    const latLonContour = geoData.contractContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
+    const latLonCenter = galtUtils.coordinates.polygonCenter(latLonContour.map(({lat, lon}) => [lat, lon]));
+
+    let latLonShiftedContour;
+    let latLonShiftedCenter;
+    let contractShiftedContour;
+    if(offset) {
+      let {mapbox} = offset;
+      latLonShiftedContour = galtUtils.coordinates.polygonShift(
+        latLonContour.map(({lat, lon}) => [lat, lon]),
+        mapbox.x, mapbox.y, mapbox.angle || 0, mapbox.scaleX || 1, mapbox.scaleY || 1
+      );
+      contractShiftedContour = latLonShiftedContour.map(latLon => {
+        return galtUtils.contractPoint.encodeFromLatLng(latLon[0], latLon[1]);
+      });
+      latLonShiftedCenter = galtUtils.coordinates.polygonCenter(latLonShiftedContour);
+    }
+
+    let latLonBaseContour;
+    let latLonShiftedBaseContour;
+
+    if(viewOptions && viewOptions.showBaseContour && supportFields && supportFields.baseContour) {
+      latLonBaseContour = supportFields.baseContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
+      if(offset) {
+        let {mapbox} = offset;
+        latLonShiftedBaseContour = galtUtils.coordinates.polygonShift(
+          latLonBaseContour.map(({lat, lon}) => [lat, lon]),
+          mapbox.x, mapbox.y, mapbox.angle || 0, mapbox.scaleX || 1, mapbox.scaleY || 1
+        );
+      }
     }
 
     let imageHash;
@@ -223,7 +255,16 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
       dataJson: JSON.stringify(spaceData),
+
       offsetJson: offset ? JSON.stringify(offset) : null,
+      latLonBaseContourJson: latLonBaseContour ? JSON.stringify(latLonBaseContour) : null,
+      contractShiftedContourJson: contractShiftedContour ? JSON.stringify(contractShiftedContour) : null,
+      latLonShiftedBaseContourJson: latLonShiftedBaseContour ? JSON.stringify(latLonShiftedBaseContour) : null,
+      latLonContourJson: latLonContour ? JSON.stringify(latLonContour) : null,
+      latLonShiftedContourJson: latLonShiftedContour ? JSON.stringify(latLonShiftedContour) : null,
+      latLonCenterJson: latLonCenter ? JSON.stringify(latLonCenter) : null,
+      latLonShiftedCenterJson: latLonShiftedCenter ? JSON.stringify(latLonShiftedCenter) : null,
+
       ledgerIdentifier: details.ledgerIdentifier || geoData.ledgerIdentifier,
       featureArray: details.features ? '|' + details.features.join('|') + '|' : ''
     }, geoDataToSave);
