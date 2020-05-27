@@ -139,7 +139,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
     })
   }
 
-  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string, tokenType: string, contractAddress: string }]> {
+  async getTokenIdsByParentGeohash(parentGeohash: string, contractAddress?, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string, tokenType: string, contractAddress: string }]> {
     const where: any = { contourGeohash: {[Op.like]: parentGeohash + '%'} };
     if(contractAddress) {
       where.contractAddress = contractAddress;
@@ -151,6 +151,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     foundContourGeohashes = _.uniqBy(foundContourGeohashes, (c) => c.contractAddress + c.tokenId);
 
+    return foundContourGeohashes;
+  }
+
+  async getContoursByParentGeohash(parentGeohash: string, contractAddress?, level?: string[]): Promise<[{ contour: string[], tokenId: number, level: string, tokenType: string, contractAddress: string }]> {
+    let foundContourGeohashes = await this.getTokenIdsByParentGeohash(parentGeohash, contractAddress, level);
     return await pIteration.map(foundContourGeohashes, async (geohashObj) => {
       const {tokenId, contractAddress, level, tokenType} = geohashObj;
 

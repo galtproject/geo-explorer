@@ -79,6 +79,16 @@ class ExplorerGeohashV1Service implements IExplorerGeohashService {
     return _.uniqBy(resultContours, (c) => c.contractAddress + c.tokenId);
   }
 
+  async getTokenIdsByParentGeohashArray(parentGeohashArray: string[], contractAddress?: string, level?: string[]) {
+    let resultContours = [];
+    await pIteration.forEach(parentGeohashArray, async (parentGeohash) => {
+      const contoursByParent = await this.database.getTokenIdsByParentGeohash(parentGeohash, contractAddress, level);
+      // console.log('contoursByParent', parentGeohash, contoursByParent);
+      resultContours = resultContours.concat(contoursByParent);
+    });
+    return _.uniqBy(resultContours, (c) => c.contractAddress + c.tokenId);
+  }
+
   async getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string, level?: string[]): Promise<[IExplorerResultContour]> {
     let resultContours = [];
 

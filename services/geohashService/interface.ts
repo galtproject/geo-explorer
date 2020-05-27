@@ -16,5 +16,7 @@ export default interface IExplorerGeohashService {
 
   getContoursByParentGeohashArray(parentGeohash: string[], contractAddress?: string, level?: string[]): Promise<IExplorerResultContour[]>;
 
+  getTokenIdsByParentGeohashArray(parentGeohash: string[], contractAddress?: string, level?: string[]): Promise<IExplorerResultContour[]>;
+
   getContoursByInnerGeohash(innerGeohash: string, contractAddress?: string, level?: string[]): Promise<IExplorerResultContour[]>;
 }
