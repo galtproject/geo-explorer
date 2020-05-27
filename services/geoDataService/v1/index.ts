@@ -1561,6 +1561,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
 
+    console.log('proposalVotingProgress', proposalVotingProgress);
     let [ayeShare, abstainShare, nayShare, createdAtBlockTimestamp] = await Promise.all([
       this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei'),
       this.chainService.callContractMethod(proposalManagerContract, 'getAbstainShare', [proposalId], 'wei'),
@@ -1615,7 +1616,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let minAcceptQuorum: any = this.chainService.weiToEther(proposalVotingProgress.minAcceptQuorum);
     let requiredSupport: any = this.chainService.weiToEther(proposalVotingProgress.requiredSupport);
-    const currentQuorum: any = this.chainService.weiToEther(proposalVotingProgress.currentQuorum);
+    const currentQuorum: any = this.chainService.weiToEther(proposalVotingProgress.currentQuorum || '0');
     const currentSupport: any = this.chainService.weiToEther(proposalVotingProgress.currentSupport);
 
     let acceptedEnoughToExecute = parseFloat(currentQuorum) >= parseFloat(minAcceptQuorum) && parseFloat(currentSupport) >= parseFloat(requiredSupport);
