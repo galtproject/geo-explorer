@@ -166,6 +166,8 @@ export default interface IExplorerDatabase {
 
   getCommunityTokensCount(community: ICommunity): Promise<number>;
 
+  getTokenCommunitiesCount(spaceToken: ISpaceTokenGeoData): Promise<number>;
+
   getCommunityMemberTokens(community: ICommunity, memberAddress): Promise<ISpaceTokenGeoData[]>;
 
   // =============================================================

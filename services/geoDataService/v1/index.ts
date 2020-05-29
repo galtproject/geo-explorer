@@ -242,6 +242,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       pprId = ppr.id;
     }
 
+    const spaceToken = await this.database.getSpaceToken(geoDataToSave.tokenId, contractAddress);
+    let communitiesCount = 0;
+
+    if(spaceToken) {
+      communitiesCount = await this.database.getTokenCommunitiesCount(spaceToken);
+    }
+
     const owners = (geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
 
     geoDataToSave = _.extend({
@@ -258,6 +265,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       yearBuilt: details.yearBuilt,
       dataJson: JSON.stringify(spaceData),
       ownersJson: JSON.stringify(owners),
+      communitiesCount,
 
       offsetJson: offset ? JSON.stringify(offset) : null,
       latLonBaseContourJson: latLonBaseContour ? JSON.stringify(latLonBaseContour) : null,
