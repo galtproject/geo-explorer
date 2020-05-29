@@ -1279,15 +1279,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if (propertyToken) {
       await this.updateCommunityTokenOwners(community, propertyToken);
+
+      await this.database.addOrUpdateGeoData({
+        tokenId: propertyToken.tokenId,
+        contractAddress: propertyToken.contractAddress,
+        communitiesCount: await this.database.getTokenCommunitiesCount(propertyToken)
+      });
     }
 
-    const communitiesCount = await this.database.getTokenCommunitiesCount(propertyToken);
-
-    await this.database.addOrUpdateGeoData({
-      tokenId: propertyToken.tokenId,
-      contractAddress: propertyToken.contractAddress,
-      communitiesCount
-    });
 
     return this.updateCommunity(communityAddress, isPpr);
   }
@@ -1322,6 +1321,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if (propertyToken) {
       await this.updateCommunityTokenOwners(community, propertyToken);
+
+      await this.database.addOrUpdateGeoData({
+        tokenId: propertyToken.tokenId,
+        contractAddress: propertyToken.contractAddress,
+        communitiesCount: await this.database.getTokenCommunitiesCount(propertyToken)
+      });
     }
 
     return this.updateCommunity(communityAddress, isPpr);
