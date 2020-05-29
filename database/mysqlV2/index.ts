@@ -1661,7 +1661,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getTokenCommunitiesCount(spaceToken) {
     return this.models.SpaceTokensCommunities.count({
-      where: {spaceTokenGeoDataId: spaceToken.id},
+      where: {spaceTokenGeoDatumId: spaceToken.id},
     });
   }
 
