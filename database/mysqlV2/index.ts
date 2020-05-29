@@ -751,11 +751,16 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
       )
     };
     if(spaceTokensQuery['owner']) {
-      result.include = [{
-        association: 'owners',
-        required: true,
-        where: {address: spaceTokensQuery['owner'].toLowerCase()}
-      }];
+      if(spaceTokensQuery.groupBy) {
+        //TODO: optimize without getting error: "Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'geo_explorer_kovan.spaceTokenGeoData.id' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by"
+        result.where.ownersJson = {[Op.like]: '%' + spaceTokensQuery['owner'].toLowerCase() + '%'};
+      } else {
+        result.include = [{
+          association: 'owners',
+          required: true,
+          where: {address: spaceTokensQuery['owner'].toLowerCase()}
+        }];
+      }
     }
     return result;
   }

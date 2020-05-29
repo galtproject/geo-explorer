@@ -242,6 +242,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       pprId = ppr.id;
     }
 
+    const owners = (geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
+
     geoDataToSave = _.extend({
       pprId,
       type: details.type,
@@ -255,6 +257,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       bedroomsCount: details.bedrooms,
       yearBuilt: details.yearBuilt,
       dataJson: JSON.stringify(spaceData),
+      ownersJson: JSON.stringify(owners),
 
       offsetJson: offset ? JSON.stringify(offset) : null,
       latLonBaseContourJson: latLonBaseContour ? JSON.stringify(latLonBaseContour) : null,
@@ -271,11 +274,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     await this.addOrUpdateGeoData(geoDataToSave);
 
-    if(geoData.lockerOwners.length > 1) {
-      await this.database.setTokenOwners(geoDataToSave.tokenId, contractAddress, geoData.lockerOwners);
-    } else {
-      await this.database.setTokenOwners(geoDataToSave.tokenId, contractAddress, [geoData.owner]);
-    }
+    await this.database.setTokenOwners(geoDataToSave.tokenId, contractAddress, owners);
 
     if (geoData.lockerOwners.length) {
       const lockerContract = await this.chainService.getLockerContract(geoDataToSave.locker);
