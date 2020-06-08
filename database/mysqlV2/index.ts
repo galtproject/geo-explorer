@@ -699,7 +699,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   spaceTokensQueryToFindAllParam(spaceTokensQuery: SpaceTokensQuery) {
     const allWheres: any = {};
 
-    ['bedroomsCount', 'bathroomsCount', 'area', 'geohashesCount', 'levelNumber'].forEach(field => {
+    ['bedroomsCount', 'bathroomsCount', 'area', 'geohashesCount', 'levelNumber', 'communitiesCount'].forEach(field => {
       const minVal = parseFloat(spaceTokensQuery[field + 'Min']);
       const maxVal = parseFloat(spaceTokensQuery[field + 'Max']);
       if(!minVal && !maxVal)
@@ -746,7 +746,7 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
     const result: any = {
       where: _.extend(
-        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'purpose', 'tokenId', 'tokenType', 'geohashesCount', 'contractAddress', 'level', 'levelNumber', 'modelIpfsHash', Op.and]),
+        resultWhere(allWheres, ['area', 'inLocker', 'isPpr', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'purpose', 'tokenId', 'tokenType', 'geohashesCount', 'contractAddress', 'level', 'levelNumber', 'modelIpfsHash', 'communitiesCount', Op.and]),
         // resultWhere(allWheres, ['area', 'bedroomsCount', 'bathroomsCount', 'type', 'subtype', 'tokenId', 'regionLvl1', 'regionLvl2', 'regionLvl3', 'regionLvl4', 'regionLvl5', 'regionLvl6', 'regionLvl7', 'regionLvl8', 'regionLvl9'], 'spaceTokenGeoDatum')
       )
     };
@@ -1656,6 +1656,12 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
   async getCommunityTokensCount(community) {
     return this.models.SpaceTokensCommunities.count({
       where: {communityId: community.id},
+    });
+  }
+
+  async getTokenCommunitiesCount(spaceToken) {
+    return this.models.SpaceTokensCommunities.count({
+      where: {spaceTokenGeoDatumId: spaceToken.id},
     });
   }
 

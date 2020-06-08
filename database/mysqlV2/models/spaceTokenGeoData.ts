@@ -93,6 +93,9 @@ module.exports = async function (sequelize, models) {
     inLocker: {
       type: Sequelize.BOOLEAN,
     },
+    communitiesCount: {
+      type: Sequelize.INTEGER,
+    },
     isPpr: {
       type: Sequelize.BOOLEAN,
     },

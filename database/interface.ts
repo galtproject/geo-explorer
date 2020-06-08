@@ -166,6 +166,8 @@ export default interface IExplorerDatabase {
 
   getCommunityTokensCount(community: ICommunity): Promise<number>;
 
+  getTokenCommunitiesCount(spaceToken: ISpaceTokenGeoData): Promise<number>;
+
   getCommunityMemberTokens(community: ICommunity, memberAddress): Promise<ISpaceTokenGeoData[]>;
 
   // =============================================================
@@ -261,13 +263,13 @@ export interface ISpaceTokenGeoData {
   id?;
   tokenId;
   imageHash?;
-  tokenType;
-  type;
-  subtype;
-  level: string[];
-  levelNumber;
-  contractAddress;
-  fullRegion;
+  tokenType?;
+  type?;
+  subtype?;
+  level?: string[];
+  levelNumber?;
+  contractAddress?;
+  fullRegion?;
   regionLvl1?;
   regionLvl2?;
   regionLvl3?;
@@ -277,29 +279,29 @@ export interface ISpaceTokenGeoData {
   regionLvl7?;
   regionLvl8?;
   regionLvl9?;
-  humanAddress;
-  photosCount;
-  floorPlansCount;
-  bathroomsCount;
-  bedroomsCount;
-  yearBuilt;
-  area;
-  highestPoint;
-  owner;
-  locker;
-  inLocker;
-  areaSource;
-  ledgerIdentifier;
-  dataLink;
-  dataJson;
-  contractContourJson;
-  geohashContourJson;
-  geohashesCount;
-  heightsContourJson;
-  featureArray;
-  createdAtBlock;
-  updatedAtBlock;
-  isPpr;
+  humanAddress?;
+  photosCount?;
+  floorPlansCount?;
+  bathroomsCount?;
+  bedroomsCount?;
+  yearBuilt?;
+  area?;
+  highestPoint?;
+  owner?;
+  locker?;
+  inLocker?;
+  areaSource?;
+  ledgerIdentifier?;
+  dataLink?;
+  dataJson?;
+  contractContourJson?;
+  geohashContourJson?;
+  geohashesCount?;
+  heightsContourJson?;
+  featureArray?;
+  createdAtBlock?;
+  updatedAtBlock?;
+  isPpr?;
   proposalsToEditCount?;
   proposalsToBurnCount?;
   burnWithoutPledgeOn?;
@@ -309,7 +311,9 @@ export interface ISpaceTokenGeoData {
   spaceTokensOrders?;
   modelIpfsHash?;
 
-  getOwners();
+  communitiesCount?;
+
+  getOwners?();
 }
 
 export interface ISaleOrder {
