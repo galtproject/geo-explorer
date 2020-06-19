@@ -34,7 +34,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@galtproject/utils": "git+ssh://git@github.com/galtproject/galtproject-utils-js.git#0c42631",
+    "@galtproject/utils": "git+ssh://git@github.com/galtproject/galtproject-utils-js.git#43a7bd0",
     "@types/es6-promise": "^3.3.0",
     "axios": "^0.19.0",
     "fs": "0.0.1-security",
