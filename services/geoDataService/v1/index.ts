@@ -193,7 +193,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
 
+    console.log('geoData.contractContour', geoData.contractContour);
     const latLonContour = geoData.contractContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
+    console.log('latLonContour', latLonContour.map(({lat, lon}) => [lat, lon]));
     const latLonCenter = galtUtils.coordinates.polygonCenter(latLonContour.map(({lat, lon}) => [lat, lon]));
 
     let latLonShiftedContour;
