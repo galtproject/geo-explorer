@@ -2874,9 +2874,9 @@ gc-stats@^1.2.1:
     nan "^2.13.2"
     node-pre-gyp "^0.13.0"
 
-"geesome-libs@git://github.com/galtproject/geesome-libs.git#edd5a53":
+"geesome-libs@git://github.com/galtproject/geesome-libs.git#db7d3fc":
   version "1.0.0"
-  resolved "git://github.com/galtproject/geesome-libs.git#edd5a536a8c2ade557c192831ace884f2852a8bc"
+  resolved "git://github.com/galtproject/geesome-libs.git#db7d3fc443b99df3bee46b3464a87e6357ccff29"
   dependencies:
     axios "^0.19.0"
     base64url "^3.0.1"
@@ -2894,6 +2894,7 @@ gc-stats@^1.2.1:
     it-last "^1.0.1"
     it-to-stream "^0.1.1"
     lodash "^4.17.11"
+    multicodec "^1.0.2"
     multihashes "~0.4.14"
     node-forge "0.8.5"
     openpgp "^4.6.0"
