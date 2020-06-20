@@ -476,7 +476,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       result.contour.map((cPoint) => {
         cPoint = cPoint.toString(10);
 
-        log('cPoint', cPoint);
+        // log('cPoint', cPoint);
         // if(process.env.CONTRACTS_CONFIG === 'mainnet.json') {
         //   const { geohash5, height } = galtUtils.geohash5zToGeohash5(cPoint);
         //   heightsContour.push(height);
