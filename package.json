@@ -29,7 +29,7 @@
     "sokol-drop": "mysql -uroot -proot -e 'DROP DATABASE geo_explorer_sokol;'",
     "sokol-create": "mysql -uroot -proot -e 'CREATE DATABASE geo_explorer_sokol; ALTER DATABASE geo_explorer_sokol CHARACTER SET utf8 COLLATE utf8_general_ci;'",
     "sokol-recreate": "npm run sokol-drop && npm run sokol-create",
-    "sokol": "DATABASE_NAME=geo_explorer_sokol CONTRACTS_CONFIG=sokol-d.json RPC_WS_SERVER=ws://sokol-rpc-parity-001.poa.network:8546 API_PORT=4411 ts-node ./index.ts"
+    "sokol": "DATABASE_NAME=geo_explorer_sokol CONTRACTS_CONFIG=sokol-d.json RPC_WS_SERVER=ws://sokol-archive.blockscout.com:8546 API_PORT=4411 ts-node ./index.ts"
   },
   "author": "",
   "license": "ISC",
