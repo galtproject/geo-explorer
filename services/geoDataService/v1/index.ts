@@ -857,7 +857,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      description = data.description;
+      if(data.description) {
+        description = data.description.lang ? data.description['en'] || data.description['ru'] : data.description;
+      }
+      if(isIpldHash(description)) {
+        description = await this.geesome.getContentData(description).catch(() => '')
+      }
       dataJson = JSON.stringify(data);
     }
 
@@ -1737,14 +1742,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         try {
           log('rule data', data);
           if (data.description) {
-            const ipldData = await this.geesome.getObject(data.description);
+            const ipldData = await this.geesome.getObject(data.description.lang ? data.description['en'] || data.description['ru'] : data.description);
             ruleData.descriptionIpfsHash = ipldData.storageId;
             ruleData.description = await this.geesome.getContentData(ruleData.descriptionIpfsHash).catch(() => '');
           } else if (data.text) {
-            if (isIpldHash(data.text)) {
-              ruleData.description = await this.geesome.getContentData(data.text).catch(() => '');
+            const text = data.text.lang ? data.text['en'] || data.text['ru'] : data.text;
+            if (isIpldHash(text)) {
+              ruleData.description = await this.geesome.getContentData(text).catch(() => '');
             } else {
-              ruleData.description = data.text;
+              ruleData.description = text;
             }
           }
           ruleData.type = data.type;
