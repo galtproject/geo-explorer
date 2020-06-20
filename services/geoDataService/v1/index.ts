@@ -46,7 +46,7 @@ module.exports = async (database: IExplorerDatabase, geohashService: IExplorerGe
   });
 
   await geesome.init();
-  await geesome.initRuntimeIpfsNode();
+  // await geesome.initRuntimeIpfsNode();
 
   return new ExplorerGeoDataV1Service(database, geohashService, chainService, geesome);
 };
