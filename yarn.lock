@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@galtproject/utils@git+ssh://git@github.com/galtproject/galtproject-utils-js.git#7614296":
+"@galtproject/utils@git+ssh://git@github.com/galtproject/galtproject-utils-js.git#5c9d3aa":
   version "0.9.1"
-  resolved "git+ssh://git@github.com/galtproject/galtproject-utils-js.git#7614296b73970e2a84e7025d445a2525c9697370"
+  resolved "git+ssh://git@github.com/galtproject/galtproject-utils-js.git#5c9d3aa884b56c1bf44e166d702f930ddd35151c"
   dependencies:
     bn.js "^4.11.8"
     bs58 "^4.0.1"
