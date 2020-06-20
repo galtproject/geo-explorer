@@ -78,7 +78,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     log('getSpaceTokenData', tokenId);
 
     const existToken = await this.database.getSpaceTokenGeoData(tokenId, contractAddress);
-    console.log('existToken', existToken && existToken.updatedAtBlock, additionalData.blockNumber);
+    // console.log('existToken', existToken && existToken.updatedAtBlock, additionalData.blockNumber);
     if(existToken && existToken.updatedAtBlock >= additionalData.blockNumber) {
       delete additionalData.createdAtBlock;
       delete additionalData.blockNumber;
