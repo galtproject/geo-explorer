@@ -1496,7 +1496,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         console.error('Failed to fetch', dataLink, e);
         return {};
       });
-      description = data.description;
+      if(data.description) {
+        description = data.description.lang ? data.description['en'] || data.description['ru'] : data.description;
+      }
       uniqId = data.uniqId;
       dataJson = JSON.stringify(data);
     }
