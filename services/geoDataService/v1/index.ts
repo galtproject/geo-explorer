@@ -857,9 +857,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      if(data.description) {
-        description = data.description.lang ? data.description['en'] || data.description['ru'] : data.description;
-      }
+      description = this.getLangValue(data.description);
       if(isIpldHash(description)) {
         description = await this.geesome.getContentData(description).catch(() => '')
       }
@@ -1155,7 +1153,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ]);
 
 
-    const [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
+    let [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
       this.chainService.callContractMethod(storageContract, 'name', []),
       this.chainService.callContractMethod(storageContract, 'dataLink', []),
       this.chainService.callContractMethod(ruleRegistryContract || storageContract, 'getActiveFundRulesCount', [], 'number'),
@@ -1174,7 +1172,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      description = data.description;
+      if(data.name) {
+        name = this.getLangValue(data.name);
+      }
+      description = this.getLangValue(data.description);
       dataJson = JSON.stringify(data);
     }
     // log('community', dataJson, 'dataLink', dataLink);
@@ -1454,6 +1455,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
   }
 
+  getLangValue(value, lang = 'en') {
+    if(!value) {
+      return value;
+    }
+    return value.lang ? value[lang] || value['en'] || value['ru'] : value;
+  }
+
   async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId, proposeTxId?) {
     const [community, proposal] = await Promise.all([
       this.database.getCommunity(communityAddress),
@@ -1496,9 +1504,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         console.error('Failed to fetch', dataLink, e);
         return {};
       });
-      if(data.description) {
-        description = data.description.lang ? data.description['en'] || data.description['ru'] : data.description;
-      }
+      description = this.getLangValue(data.description);
       uniqId = data.uniqId;
       dataJson = JSON.stringify(data);
     }
@@ -1744,11 +1750,11 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         try {
           log('rule data', data);
           if (data.description) {
-            const ipldData = await this.geesome.getObject(data.description.lang ? data.description['en'] || data.description['ru'] : data.description);
+            const ipldData = await this.geesome.getObject(this.getLangValue(data.description));
             ruleData.descriptionIpfsHash = ipldData.storageId;
             ruleData.description = await this.geesome.getContentData(ruleData.descriptionIpfsHash).catch(() => '');
           } else if (data.text) {
-            const text = data.text.lang ? data.text['en'] || data.text['ru'] : data.text;
+            const text = this.getLangValue(data.text);
             if (isIpldHash(text)) {
               ruleData.description = await this.geesome.getContentData(text).catch(() => '');
             } else {
@@ -1817,8 +1823,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       try {
         // log('meeting data', data);
         if (data.description) {
-          const ipldData = await this.geesome.getObject(data.description);
-          description = await this.geesome.getContentData(ipldData.storageId).catch(() => '');
+          description = await this.geesome.getContentData(this.getLangValue(data.description));
         }
         dataJson = JSON.stringify(data);
       } catch (e) {
