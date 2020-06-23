@@ -1821,7 +1821,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       });
       // log('dataItem', dataItem);
       try {
-        // log('meeting data', data);
+        log('meeting data', data);
         if (data.description) {
           const descriptionLink = this.getLangValue(data.description);
           console.log('descriptionLink', descriptionLink);
