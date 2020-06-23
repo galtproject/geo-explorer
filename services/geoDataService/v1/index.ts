@@ -857,7 +857,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      description = data.description;
+      description = this.getLangValue(data.description);
+      if(isIpldHash(description)) {
+        description = await this.geesome.getContentData(description).catch(() => '')
+      }
       dataJson = JSON.stringify(data);
     }
 
@@ -1150,7 +1153,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     ]);
 
 
-    const [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
+    let [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
       this.chainService.callContractMethod(storageContract, 'name', []),
       this.chainService.callContractMethod(storageContract, 'dataLink', []),
       this.chainService.callContractMethod(ruleRegistryContract || storageContract, 'getActiveFundRulesCount', [], 'number'),
@@ -1169,7 +1172,10 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      description = data.description;
+      if(data.name) {
+        name = this.getLangValue(data.name);
+      }
+      description = this.getLangValue(data.description);
       dataJson = JSON.stringify(data);
     }
     // log('community', dataJson, 'dataLink', dataLink);
@@ -1449,6 +1455,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return this.updateCommunityProposal(communityAddress, event.contractAddress, event.returnValues.marker, event.returnValues.proposalId);
   }
 
+  getLangValue(value, lang = 'en') {
+    if(!value) {
+      return value;
+    }
+    return value.lang ? value[lang] || value['en'] || value['ru'] : value;
+  }
+
   async updateCommunityProposal(communityAddress, pmAddress, marker, proposalId, proposeTxId?) {
     const [community, proposal] = await Promise.all([
       this.database.getCommunity(communityAddress),
@@ -1491,7 +1504,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         console.error('Failed to fetch', dataLink, e);
         return {};
       });
-      description = data.description;
+      description = this.getLangValue(data.description);
       uniqId = data.uniqId;
       dataJson = JSON.stringify(data);
     }
@@ -1737,14 +1750,15 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
         try {
           log('rule data', data);
           if (data.description) {
-            const ipldData = await this.geesome.getObject(data.description);
+            const ipldData = await this.geesome.getObject(this.getLangValue(data.description));
             ruleData.descriptionIpfsHash = ipldData.storageId;
             ruleData.description = await this.geesome.getContentData(ruleData.descriptionIpfsHash).catch(() => '');
           } else if (data.text) {
-            if (isIpldHash(data.text)) {
-              ruleData.description = await this.geesome.getContentData(data.text).catch(() => '');
+            const text = this.getLangValue(data.text);
+            if (isIpldHash(text)) {
+              ruleData.description = await this.geesome.getContentData(text).catch(() => '');
             } else {
-              ruleData.description = data.text;
+              ruleData.description = text;
             }
           }
           ruleData.type = data.type;
@@ -1797,7 +1811,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
     console.log('abstractUpdateCommunityMeeting', meetingData.meetingId);
     const {dataLink, createdAt} = meetingData;
-    let description = 'Not found';
+    let description = '';
     let dataJson = '';
     let data;
     if (isIpldHash(dataLink)) {
@@ -1807,10 +1821,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       });
       // log('dataItem', dataItem);
       try {
-        // log('meeting data', data);
+        log('meeting data', data);
         if (data.description) {
-          const ipldData = await this.geesome.getObject(data.description);
-          description = await this.geesome.getContentData(ipldData.storageId).catch(() => '');
+          const descriptionLink = this.getLangValue(data.description);
+          console.log('descriptionLink', descriptionLink);
+          if(descriptionLink) {
+            description = await this.geesome.getContentData(descriptionLink);
+          }
         }
         dataJson = JSON.stringify(data);
       } catch (e) {
