@@ -1811,7 +1811,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
     console.log('abstractUpdateCommunityMeeting', meetingData.meetingId);
     const {dataLink, createdAt} = meetingData;
-    let description = 'Not found';
+    let description = '';
     let dataJson = '';
     let data;
     if (isIpldHash(dataLink)) {
