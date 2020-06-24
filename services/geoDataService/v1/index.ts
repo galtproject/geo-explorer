@@ -1799,6 +1799,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     delete meetingData.meetingId;
     meetingData.ipfsHash = this.chainService.hexToString(meetingData.ipfsHash);
     meetingData.typeId = meetingData.typeId ? meetingData.typeId.toString(10) : null;
+    meetingData.creatorAddress = meetingData.creator;
 
     return this.abstractUpdateCommunityMeeting(community, {
       meetingId,
