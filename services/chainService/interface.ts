@@ -207,6 +207,7 @@ export enum ChainServiceEvents {
   CommunityAddRule = 'AddFundRule',
   CommunityRemoveRule = 'DisableFundRule',
   CommunityAddMeeting = 'AddMeeting',
+  CommunityEditMeeting = 'EditMeeting',
   CommunityApproveToken = 'ApproveMint',
   CommunityExpelToken = 'Expel',
   CommunityBurnExpelledToken = 'BurnExpelled',

@@ -812,6 +812,16 @@ const log = require('./services/logService');
         await geoDataService.handleCommunityMeetingEvent(address, newEvent);
       });
 
+      await chainService.getEventsFromBlock(ruleRegistryContract, ChainServiceEvents.CommunityEditMeeting, lastBlockNumber).then(async (events) => {
+        await pIteration.forEach(events, async (e) => {
+          await geoDataService.handleCommunityMeetingEvent(address, e);
+        });
+      });
+
+      subscribeForNewEvents(ruleRegistryContract, ChainServiceEvents.CommunityEditMeeting, startBlockNumber, async (err, newEvent) => {
+        await geoDataService.handleCommunityMeetingEvent(address, newEvent);
+      });
+
       await chainService.getEventsFromBlock(ruleRegistryContract, ChainServiceEvents.CommunityAddRule, lastBlockNumber).then(async (events) => {
         await pIteration.forEach(events, async (e) => {
           await geoDataService.handleCommunityRuleEvent(address, e);
