@@ -1583,7 +1583,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(!proposalParsedData.methodName) {
       proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityRuleRegistryAbi());
     }
-    console.log('proposalParsedData.methodName', proposalParsedData.methodName);
+    // console.log('proposalParsedData.methodName', proposalParsedData.methodName);
 
     if (_.startsWith(proposalParsedData.methodName, 'disableRuleType')) {
       const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
@@ -1598,7 +1598,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
 
-    console.log('proposalVotingProgress', proposalVotingProgress);
+    // console.log('proposalVotingProgress', proposalVotingProgress);
     let [ayeShare, abstainShare, nayShare, createdAtBlockTimestamp] = await Promise.all([
       this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei'),
       this.chainService.callContractMethod(proposalManagerContract, 'getAbstainShare', [proposalId], 'wei'),
