@@ -511,6 +511,7 @@ const log = require('./services/logService');
         mediatorContract = chainService.getMediatorContract(ppr.homeMediator, mediatorType);
       }
 
+      console.log('mediatorType', mediatorType, 'ppr.isBridgetForeign', ppr.isBridgetForeign, ppr.foreignMediator);
       await pIteration.forEachSeries(['PPMediatorSetOtherSide'], async eventName => {
         await chainService.getEventsFromBlock(mediatorContract, ChainServiceEvents[eventName], fromBlockNumber).then(async (events) => {
           await pIteration.forEach(events, async (e) => {
