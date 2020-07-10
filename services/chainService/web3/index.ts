@@ -704,6 +704,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
       return null;
     }
     if(!contract || !contract.methods[method]) {
+      console.log('contract.methods', contract.methods);
       console.error('Method', method, ' not found in contract',  contract._address);
       return null;
     }
