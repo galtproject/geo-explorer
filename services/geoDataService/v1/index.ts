@@ -251,7 +251,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communitiesCount = await this.database.getTokenCommunitiesCount(spaceToken);
     }
 
-    const owners = (geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
+    console.log('geoData', geoData);
+    const owners = (geoData.lockerOwners && geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
 
     geoDataToSave = _.extend({
       pprId,
