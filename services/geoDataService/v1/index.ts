@@ -69,7 +69,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   // =============================================================
 
   async handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent) {
-    console.log('handleChangeSpaceTokenDataEvent', event.blockNumber);
+    // console.log('handleChangeSpaceTokenDataEvent', event.blockNumber);
     let tokenId: string = event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'] || event.returnValues['_spaceTokenId'] || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'];
     await this.saveSpaceTokenById(spaceGeoDataAddress, tokenId, {createdAtBlock: event.blockNumber, blockNumber: event.blockNumber});
   };
@@ -192,9 +192,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
 
-    console.log('geoData.contractContour', geoData.contractContour);
+    // console.log('geoData.contractContour', geoData.contractContour);
     const latLonContour = geoData.contractContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
-    console.log('latLonContour', latLonContour.map(({lat, lon}) => [lat, lon]));
+    // console.log('latLonContour', latLonContour.map(({lat, lon}) => [lat, lon]));
     const latLonCenter = galtUtils.coordinates.polygonCenter(latLonContour.map(({lat, lon}) => [lat, lon]));
 
     let latLonShiftedContour;
@@ -250,7 +250,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communitiesCount = await this.database.getTokenCommunitiesCount(spaceToken);
     }
 
-    console.log('geoData', geoData);
+    // console.log('geoData', geoData);
     const owners = (geoData.lockerOwners && geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
 
     geoDataToSave = _.extend({
@@ -1072,11 +1072,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleMediatorCreation(event, mediatorType) {
+    console.log('handleMediatorCreation', event.returnValues);
     const {mediator, tokenId} = event.returnValues;
     return this.updatePrivateRegistryMediatorAddress(tokenId, mediator, mediatorType);
   }
 
   async handleMediatorOtherSideSet(registryAddress, event, mediatorType) {
+    console.log('handleMediatorOtherSideSet', event.returnValues);
     const ppr = await this.getPrivatePropertyRegistry(registryAddress);
     return this.updatePrivateRegistryMediatorAddress(registryAddress, mediatorType === 'foreign' ? ppr.foreignMediator : ppr.homeMediator, mediatorType);
   }
