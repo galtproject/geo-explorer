@@ -75,7 +75,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   };
 
   async saveSpaceTokenById(contractAddress, tokenId, additionalData: any = {}) {
-    log('getSpaceTokenData', tokenId);
+    log('getSpaceTokenData', contractAddress, tokenId);
 
     const existToken = await this.database.getSpaceTokenGeoData(tokenId, contractAddress);
     // console.log('existToken', existToken && existToken.updatedAtBlock, additionalData.blockNumber);
