@@ -620,6 +620,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     const mediatorContract = this.createContract(type === 'foreign' ? 'ppForeignMediator' : 'ppHomeMediator', address);
+    console.log('mediatorContract', mediatorContract);
     this.pprCache[address] = mediatorContract;
     return mediatorContract;
   }
