@@ -1072,7 +1072,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleMediatorCreation(event, mediatorType) {
-    console.log('handleMediatorCreation', event.returnValues);
+    // console.log('handleMediatorCreation', event.returnValues);
     const {mediator, tokenId} = event.returnValues;
     return this.updatePrivateRegistryMediatorAddress(tokenId, mediator, mediatorType);
   }
@@ -1104,6 +1104,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       additionalData['homeMediator'] = mediatorContractOnOtherSide;
       additionalData['homeMediatorNetwork'] = network;
     }
+    console.log('updatePrivateRegistryMediatorAddress', registryAddress, additionalData);
     return this.updatePrivatePropertyRegistry(registryAddress, additionalData);
   }
 
