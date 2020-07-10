@@ -620,7 +620,6 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     }
 
     const mediatorContract = this.createContract(type === 'foreign' ? 'ppForeignMediator' : 'ppHomeMediator', address);
-    console.log('mediatorContract', mediatorContract);
     this.pprCache[address] = mediatorContract;
     return mediatorContract;
   }
@@ -700,7 +699,12 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
   }
 
   public async callContractMethod(contract, method, args, type) {
+    if(!contract) {
+      console.error('Contract not found, return null');
+      return null;
+    }
     if(!contract || !contract.methods[method]) {
+      console.error('Method', method, ' not found in contract',  contract._address);
       return null;
     }
     let value: any = await new Promise((resolve, reject) => {
