@@ -90,7 +90,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     if(!owner || owner === '0x0000000000000000000000000000000000000000') {
       log('owner is null, token not exists');
-      return;
+      await this.database.deleteGeoData(tokenId, contractAddress);
+      return this.database.deleteContour(tokenId, contractAddress);
     }
 
     log('saveSpaceTokenById', tokenId, owner);
