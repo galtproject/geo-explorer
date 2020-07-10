@@ -86,9 +86,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     }
 
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
-    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch((e) => {
-      console.error('getSpaceTokenOwner', contractAddress, tokenId, e);
-    });
+    const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId);
+
+    if(!owner) {
+      log('owner is null, token not exists');
+      return;
+    }
 
     log('saveSpaceTokenById', tokenId, owner);
 
