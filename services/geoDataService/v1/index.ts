@@ -1855,12 +1855,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       sortDir: 'DESC'
     });
 
+    console.log('activeProposal', activeProposal);
+    meetingData.startDateTime = new Date(parseInt(meetingData.startOn.toString(10)) * 1000);
     if(activeProposal || executedProposal) {
       let lastProposal = activeProposal || executedProposal;
-      meetingData.startDateTime = new Date(parseInt(lastProposal.timeoutAt.toString(10)) * 1000);
       meetingData.endDateTime = new Date(parseInt(lastProposal.timeoutAt.toString(10)) * 1000);
     } else {
-      meetingData.startDateTime = new Date(parseInt(meetingData.startOn.toString(10)) * 1000);
       meetingData.endDateTime = new Date(parseInt(meetingData.endOn.toString(10)) * 1000);
     }
     console.log('startDateTime', meetingData.startDateTime, 'endDateTime', meetingData.endDateTime);
