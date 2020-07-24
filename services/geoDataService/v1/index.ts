@@ -1616,6 +1616,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName, 'addRuleType')) {
         const ruleId = pmAddress + '-' + proposalId;
         const meetingId = proposalParsedData.inputs.meetingId.toString(10);
+        txData.meetingId = meetingId;
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId,
           addRuleProposalUniqId: uniqId,
