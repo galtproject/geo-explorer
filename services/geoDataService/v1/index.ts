@@ -1859,7 +1859,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(startDateTime && startDateTime.toString() !== 'Invalid Date') {
       meetingData.startDateTime = startDateTime;
     }
-    const endDateTime = new Date(data.protocolFormationDate);
+    const endDateTime = new Date(data.inAbsentiaBulletinDate);
     if(endDateTime && endDateTime.toString() !== 'Invalid Date') {
       meetingData.endDateTime = endDateTime;
     }
