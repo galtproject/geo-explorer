@@ -8,10 +8,20 @@
  */
 
 import IExplorerDatabase, {
-  CommunityApprovedQuery, CommunityMeetingQuery,
-  CommunityMemberQuery, CommunityProposalQuery, CommunityRuleQuery, CommunityTokensQuery, CommunityVotingQuery,
-  ICommunity, IPrivatePropertyRegistry,
-  ISaleOffer, PprMemberQuery, PrivatePropertyProposalQuery, PropertyLockersQuery,
+  CommunityApprovedQuery,
+  CommunityMeetingQuery,
+  CommunityMemberQuery,
+  CommunityMemberTokensQuery,
+  CommunityProposalQuery,
+  CommunityRuleQuery,
+  CommunityTokensQuery,
+  CommunityVotingQuery,
+  ICommunity,
+  IPrivatePropertyRegistry,
+  ISaleOffer,
+  PprMemberQuery,
+  PrivatePropertyProposalQuery,
+  PropertyLockersQuery,
   SaleOffersQuery,
   TokenizableMemberQuery
 } from "../../../database/interface";
@@ -2000,6 +2010,14 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     return {
       list: await this.database.filterCommunityTokens(filterQuery),
       total: await this.database.filterCommunityTokensCount(filterQuery)
+    };
+  }
+
+  async filterCommunityMemberTokens(filterQuery: CommunityMemberTokensQuery) {
+    const community = await this.database.getCommunity(filterQuery.communityAddress);
+    return {
+      list: await this.database.getCommunityMemberTokens(community, filterQuery.memberAddress),
+      total: await this.database.getCommunityMemberTokensCount(community, filterQuery.memberAddress)
     };
   }
 
