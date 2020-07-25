@@ -88,6 +88,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
+    const innerHeight = geoData.highestPoint - _.orderBy(geoData.heightsContour, [(h) => h], ['asc'])[0];
+
     if(!owner || owner === '0x0000000000000000000000000000000000000000') {
       log('owner is null, token not exists');
       await this.database.deleteGeoData(tokenId, contractAddress);
@@ -148,6 +150,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       owner: lockerOwners.length > 1 ? 'shared' : lockerOwners[0] || owner,
       locker: lockerOwners.length ? owner : null,
       inLocker: !!lockerOwners.length,
+      innerHeight,
       level,
       lockerType,
       lockerOwners,

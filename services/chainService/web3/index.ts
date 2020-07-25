@@ -493,13 +493,14 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
         // }
       });
       const tokenType = (result.spaceTokenType || result.tokenType).toString(10);
+      const highestPoint = parseInt(result.highestPoint.toString(10)) / 100;
       return {
         area: Web3Utils.fromWei(result.area.toString(10), 'ether'),
         geohashContour,
         contractContour,
         heightsContour,
+        highestPoint,
         ledgerIdentifier,
-        highestPoint: parseInt(result.highestPoint.toString(10)) / 100,
         humanAddress: result.humanAddress,
         dataLink: result.dataLink,
         spaceTokenType: ({"0": "null", "1": "land", "2": "building", "3": "room"})[tokenType]
