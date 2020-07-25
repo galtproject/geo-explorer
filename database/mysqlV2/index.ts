@@ -1655,7 +1655,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
 
   async getCommunityMemberTokensCount(community, memberAddress) {
     return community.countSpaceTokens({
+      attributes: [],
+      // https://github.com/sequelize/sequelize/issues/5168
+      raw: true,
       include: [{
+        attributes: [],
         association: 'owners',
         required: true,
         where: {address: memberAddress.toLowerCase()}
