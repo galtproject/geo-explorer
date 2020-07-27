@@ -46,6 +46,9 @@ module.exports = async function (sequelize, models) {
     localProposalsToCreateCount: {
       type: Sequelize.INTEGER
     },
+    multisigOwnersJson: {
+      type: Sequelize.TEXT
+    },
     dataJson: {
       type: Sequelize.TEXT
     },

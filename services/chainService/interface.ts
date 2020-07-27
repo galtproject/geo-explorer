@@ -109,6 +109,8 @@ export default interface IExplorerChainService {
 
   getCommunityFundRegistryContract(address): Promise<any>;
 
+  getCommunityMultiSigContract(address): Promise<any>;
+
   getMediatorFactoryAbi(): any;
 
   getMediatorContract(address, mediatorType): Promise<any>;
