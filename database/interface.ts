@@ -729,6 +729,7 @@ export interface ICommunity {
   tokensCount?;
   isPrivate?;
   isPpr?;
+  multisigOwnersJson?;
 
   createdAtBlock?;
   updatedAtBlock?;

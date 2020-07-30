@@ -1163,16 +1163,18 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       this.chainService.callContractMethod(registryContract, 'getRuleRegistryAddress', []).catch(() => null)
     ]);
 
-    const [storageContract, ruleRegistryContract, community] = await Promise.all([
+    const [storageContract, ruleRegistryContract, multisigContract, community] = await Promise.all([
       this.chainService.getCommunityStorageContract(storageAddress, isPpr),
       ruleRegistryAddress ? this.chainService.getCommunityRuleRegistryContract(ruleRegistryAddress) : null,
+      this.chainService.getCommunityMultiSigContract(multiSigAddress),
       this.database.getCommunity(raAddress)
     ]);
 
 
-    let [name, dataLink, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
+    let [name, dataLink, owners, activeFundRulesCount, tokensCount, reputationTotalSupply, isPrivate, spaceTokenOwnersCount] = await Promise.all([
       this.chainService.callContractMethod(storageContract, 'name', []),
       this.chainService.callContractMethod(storageContract, 'dataLink', []),
+      this.chainService.callContractMethod(multisigContract, 'getOwners', []),
       this.chainService.callContractMethod(ruleRegistryContract || storageContract, 'getActiveFundRulesCount', [], 'number'),
       (async () => community ? await this.database.getCommunityTokensCount(community) : 0)(),
       this.chainService.callContractMethod(raContract, 'totalSupply', [], 'wei'),
@@ -1212,7 +1214,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       dataJson,
       description,
       name,
-      createdAtBlock
+      createdAtBlock,
+      multisigOwnersJson: JSON.stringify(owners)
     });
     if (!community) {
       log('community created', raAddress, JSON.stringify(_community))

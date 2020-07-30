@@ -692,6 +692,16 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
     return communityRegistryContract;
   }
 
+  getCommunityMultiSigContract(address) {
+    if(this.communityCache[address]) {
+      return this.communityCache[address];
+    }
+
+    const communityRaContract = this.createContract('fundMultiSig', address);
+    this.communityCache[address] = communityRaContract;
+    return communityRaContract;
+  }
+
   // =============================================================
   // Common
   // =============================================================
