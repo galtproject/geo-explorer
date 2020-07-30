@@ -69,13 +69,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   // =============================================================
 
   async handleChangeSpaceTokenDataEvent(spaceGeoDataAddress, event: IExplorerGeoDataEvent) {
-    console.log('handleChangeSpaceTokenDataEvent', event.blockNumber);
+    // console.log('handleChangeSpaceTokenDataEvent', event.blockNumber);
     let tokenId: string = event.returnValues['id'] || event.returnValues['_tokenId'] || event.returnValues['tokenId'] || event.returnValues['_spaceTokenId'] || event.returnValues['spaceTokenId'] || event.returnValues['privatePropertyId'];
     await this.saveSpaceTokenById(spaceGeoDataAddress, tokenId, {createdAtBlock: event.blockNumber, blockNumber: event.blockNumber});
   };
 
   async saveSpaceTokenById(contractAddress, tokenId, additionalData: any = {}) {
-    log('getSpaceTokenData', tokenId);
+    log('getSpaceTokenData', contractAddress, tokenId);
 
     const existToken = await this.database.getSpaceTokenGeoData(tokenId, contractAddress);
     // console.log('existToken', existToken && existToken.updatedAtBlock, additionalData.blockNumber);
@@ -88,12 +88,12 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     const geoData = await this.chainService.getSpaceTokenData(contractAddress, tokenId);
     const owner = await this.chainService.getSpaceTokenOwner(contractAddress, tokenId).catch(() => null);
 
-    //TODO: remove
-    // if(contractAddress === '0x6a3ABb1d426243756F301dD5beA4aa4f3C1Ec3aF') {
-    //   if(geoData.geohashContour.indexOf('sezuwtvgb8bj') !== -1) {
-    //     return;
-    //   }
-    // }
+    if(!owner || owner === '0x0000000000000000000000000000000000000000') {
+      log('owner is null, token not exists');
+      await this.database.deleteGeoData(tokenId, contractAddress);
+      return this.database.deleteContour(tokenId, contractAddress);
+    }
+
     log('saveSpaceTokenById', tokenId, owner);
 
     let level;
@@ -193,9 +193,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       return this.addOrUpdateGeoData(geoDataToSave);
     }
 
-    console.log('geoData.contractContour', geoData.contractContour);
+    // console.log('geoData.contractContour', geoData.contractContour);
     const latLonContour = geoData.contractContour.map(cPoint => galtUtils.contractPoint.decodeToLatLonHeight(cPoint));
-    console.log('latLonContour', latLonContour.map(({lat, lon}) => [lat, lon]));
+    // console.log('latLonContour', latLonContour.map(({lat, lon}) => [lat, lon]));
     const latLonCenter = galtUtils.coordinates.polygonCenter(latLonContour.map(({lat, lon}) => [lat, lon]));
 
     let latLonShiftedContour;
@@ -251,7 +251,8 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       communitiesCount = await this.database.getTokenCommunitiesCount(spaceToken);
     }
 
-    const owners = (geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
+    // console.log('geoData', geoData);
+    const owners = (geoData.lockerOwners && geoData.lockerOwners.length > 1 ? geoData.lockerOwners : [geoData.owner]).map(o => o.toLowerCase());
 
     geoDataToSave = _.extend({
       pprId,
@@ -1072,11 +1073,13 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async handleMediatorCreation(event, mediatorType) {
+    // console.log('handleMediatorCreation', event.returnValues);
     const {mediator, tokenId} = event.returnValues;
     return this.updatePrivateRegistryMediatorAddress(tokenId, mediator, mediatorType);
   }
 
   async handleMediatorOtherSideSet(registryAddress, event, mediatorType) {
+    console.log('handleMediatorOtherSideSet', event.returnValues);
     const ppr = await this.getPrivatePropertyRegistry(registryAddress);
     return this.updatePrivateRegistryMediatorAddress(registryAddress, mediatorType === 'foreign' ? ppr.foreignMediator : ppr.homeMediator, mediatorType);
   }
@@ -1102,6 +1105,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       additionalData['homeMediator'] = mediatorContractOnOtherSide;
       additionalData['homeMediatorNetwork'] = network;
     }
+    console.log('updatePrivateRegistryMediatorAddress', registryAddress, additionalData);
     return this.updatePrivatePropertyRegistry(registryAddress, additionalData);
   }
 
@@ -1581,7 +1585,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     if(!proposalParsedData.methodName) {
       proposalParsedData = this.chainService.parseData(proposalData.data, this.chainService.getCommunityRuleRegistryAbi());
     }
-    console.log('proposalParsedData.methodName', proposalParsedData.methodName);
+    // console.log('proposalParsedData.methodName', proposalParsedData.methodName);
 
     if (_.startsWith(proposalParsedData.methodName, 'disableRuleType')) {
       const dbRule = await this.updateCommunityRule(communityAddress, proposalParsedData.inputs.id);
@@ -1596,7 +1600,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
 
     let timeoutAt = parseInt(proposalVotingProgress.timeoutAt.toString(10));
 
-    console.log('proposalVotingProgress', proposalVotingProgress);
+    // console.log('proposalVotingProgress', proposalVotingProgress);
     let [ayeShare, abstainShare, nayShare, createdAtBlockTimestamp] = await Promise.all([
       this.chainService.callContractMethod(proposalManagerContract, 'getAyeShare', [proposalId], 'wei'),
       this.chainService.callContractMethod(proposalManagerContract, 'getAbstainShare', [proposalId], 'wei'),
