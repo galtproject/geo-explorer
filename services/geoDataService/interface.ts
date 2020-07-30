@@ -42,7 +42,12 @@ import {
   IPrivatePropertyLegalAgreement,
   IPprMember,
   ITokenizableMember,
-  CommunityApprovedQuery, PropertyLockersQuery, IPrivatePropertyLocker, ICommunityMeeting, CommunityMeetingQuery
+  CommunityApprovedQuery,
+  PropertyLockersQuery,
+  IPrivatePropertyLocker,
+  ICommunityMeeting,
+  CommunityMeetingQuery,
+  CommunityMemberTokensQuery
 } from "../../database/interface";
 
 export default interface IExplorerGeoDataService {
@@ -185,6 +190,8 @@ export default interface IExplorerGeoDataService {
   getCommunity(address): Promise<ICommunity>;
 
   filterCommunityTokens(communityQuery: CommunityTokensQuery): Promise<ICommunityTokensListResponse>;
+
+  filterCommunityMemberTokens(communityQuery: CommunityMemberTokensQuery): Promise<ICommunityTokensListResponse>;
 
   filterCommunityVotings(communityQuery: CommunityVotingQuery): Promise<ICommunityVotingListResponse>;
 
