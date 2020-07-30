@@ -1616,6 +1616,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       if (!ruleDbId && proposeTxId && _.startsWith(proposalParsedData.methodName, 'addRuleType')) {
         const ruleId = pmAddress + '-' + proposalId;
         const meetingId = proposalParsedData.inputs.meetingId.toString(10);
+        txData.meetingId = meetingId;
         const dbRule = await this.abstractUpdateCommunityRule(community, {
           ruleId,
           addRuleProposalUniqId: uniqId,
@@ -1814,7 +1815,6 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async abstractUpdateCommunityMeeting(community: ICommunity, meetingData) {
-    console.log('abstractUpdateCommunityMeeting', meetingData.meetingId);
     const {dataLink, createdAt} = meetingData;
     let description = '';
     let dataJson = '';
@@ -1840,30 +1840,31 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
       }
     }
 
-    let startDateTime;
-    let startTimeStr;
-    if(data.form === 'in_absentia' || data.form === 'mixed') {
-      startDateTime = data.inAbsentiaDate;
-      startTimeStr = data.inAbsentiaTime;
+    const [activeProposal] = await this.database.filterCommunityProposal({
+      meetingId: meetingData.meetingId,
+      status: ['active'],
+      limit: 1,
+      sortBy: 'timeoutAt',
+      sortDir: 'DESC'
+    });
+
+    const [executedProposal] = await this.database.filterCommunityProposal({
+      meetingId: meetingData.meetingId,
+      status: ['executed'],
+      limit: 1,
+      sortBy: 'timeoutAt',
+      sortDir: 'DESC'
+    });
+
+    console.log('activeProposal', activeProposal);
+    meetingData.startDateTime = new Date(parseInt(meetingData.startOn.toString(10)) * 1000);
+    if(activeProposal || executedProposal) {
+      let lastProposal = activeProposal || executedProposal;
+      meetingData.endDateTime = new Date(parseInt(lastProposal.timeoutAt.toString(10)) * 1000);
     } else {
-      startDateTime = data.intramuralDate;
-      startTimeStr = data.intramuralTime;
+      meetingData.endDateTime = new Date(parseInt(meetingData.endOn.toString(10)) * 1000);
     }
-
-    if(startDateTime) {
-      startDateTime = new Date(startDateTime);
-      const splitTime = startTimeStr.split(':');
-      startDateTime.setHours(parseInt(splitTime[0]), parseInt(splitTime[1]));
-    }
-
-    if(startDateTime && startDateTime.toString() !== 'Invalid Date') {
-      meetingData.startDateTime = startDateTime;
-    }
-    const endDateTime = new Date(data.protocolFormationDate);
-    if(endDateTime && endDateTime.toString() !== 'Invalid Date') {
-      meetingData.endDateTime = endDateTime;
-    }
-    console.log('startDateTime', startDateTime, 'endDateTime', meetingData.endDateTime);
+    console.log('startDateTime', meetingData.startDateTime, 'endDateTime', meetingData.endDateTime);
 
     let rulesCount = await this.database.filterCommunityRuleCount({
       communityAddress: community.address,

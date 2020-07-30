@@ -29,14 +29,15 @@ const _ = require('lodash');
   console.log('contractsConfig', Object.keys(contractsConfig));
 
 
-  console.log('contractsConfig.ppHomeMediatorFactoryAbi', contractsConfig.ppHomeMediatorFactoryAbi.filter(m => m.name === 'NewPPMediator'));
+  // console.log('contractsConfig.ppHomeMediatorFactoryAbi', contractsConfig.ppHomeMediatorFactoryAbi.filter(m => m.name === 'NewPPMediator'));
+  const storageContract = await chainService.getCommunityStorageContract('0x22c8847931bc6D96254Ea80C157A48752842a68E', true);
 
-  await chainService.getEventsFromBlock(chainService.ppHomeMediatorFactory, ChainServiceEvents.PPMediatorNew, 0).then(async (events) => {
-    console.log('events.length', events.length);
+  await chainService.getEventsFromBlock(storageContract, ChainServiceEvents.CommunityChangeName, 0).then(async (events) => {
+    console.log('events', events.map(e => e.returnValues));
   });
 
-  console.log('tx receipt', await chainService.getTransactionReceipt('0x0bf3ff0739572b933c5fd2746a23a7c99ba6608d3b697554086d104974ce00e2', [
-    {address: contractsConfig.ppHomeMediatorFactoryAddress, abi: contractsConfig.ppHomeMediatorFactoryAbi}
-  ]))
+  // console.log('tx receipt', await chainService.getTransactionReceipt('0x0bf3ff0739572b933c5fd2746a23a7c99ba6608d3b697554086d104974ce00e2', [
+  //   {address: contractsConfig.ppHomeMediatorFactoryAddress, abi: contractsConfig.ppHomeMediatorFactoryAbi}
+  // ]))
 
 })();
