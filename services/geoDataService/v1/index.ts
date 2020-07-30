@@ -802,7 +802,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     let dataJson = '';
     if (isIpldHash(dataLink)) {
       const data = await this.geesome.getObject(dataLink).catch(() => ({}));
-      description = data.description;
+      description = data.description && data.description.lang ? data.description['en'] || data.description['ru'] : '';
       dataJson = JSON.stringify(data);
     }
 
