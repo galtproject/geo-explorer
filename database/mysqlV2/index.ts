@@ -759,6 +759,8 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
           association: 'owners',
           required: true,
           where: {address: spaceTokensQuery['owner'].toLowerCase()}
+        },{
+          association: 'ppr'
         }];
       }
     }
