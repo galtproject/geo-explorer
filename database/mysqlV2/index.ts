@@ -1730,6 +1730,11 @@ class MysqlExplorerDatabase implements IExplorerDatabase {
         allWheres[field.replace('In', '')] = {[Op.in]: communityMemberQuery[field]};
     });
 
+    ['addressNot'].forEach((field) => {
+      if(communityMemberQuery[field])
+        allWheres[field.replace('Not', '')] = {[Op.ne]: communityMemberQuery[field]};
+    });
+
     return allWheres;
   }
 
