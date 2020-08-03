@@ -1223,6 +1223,7 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
   }
 
   async updateCommunityMember(community: ICommunity, address, additionalData = {}) {
+    address = address.toLowerCase();
     // console.log('updateCommunityMember', address);
     const [contract, raContract] = await Promise.all([
       this.chainService.getCommunityStorageContract(community.storageAddress, community.isPpr),
