@@ -1906,7 +1906,9 @@ class ExplorerGeoDataV1Service implements IExplorerGeoDataService {
     });
 
     let status;
-    if(executedProposalsCount) {
+    if(!meetingData.isActive) {
+      status = 'deactivated';
+    } else if(executedProposalsCount) {
       status = 'done';
     } else if(new Date() > meetingData.endDateTime) {
       status = 'failed';
