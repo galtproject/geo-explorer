@@ -40,7 +40,7 @@
     "fs": "0.0.1-security",
     "geesome-libs": "git://github.com/galtproject/geesome-libs.git#db7d3fc",
     "is-ipfs": "^0.6.3",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "mysql2": "^1.6.4",
     "p-fifo": "^1.0.0",
     "p-iteration": "^1.1.7",
