@@ -36,9 +36,9 @@ module.exports = async function (sequelize, models) {
     dataJson: {
       type: Sequelize.TEXT
     },
-    multisigOwnersJson: {
-      type: Sequelize.TEXT
-    },
+    // multisigOwnersJson: {
+    //   type: Sequelize.TEXT
+    // },
     description: {
       type: Sequelize.TEXT
     },
