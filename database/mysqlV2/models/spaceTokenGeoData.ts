@@ -33,9 +33,9 @@ module.exports = async function (sequelize, models) {
     levelNumber: {
       type: Sequelize.FLOAT
     },
-    innerHeight: {
-      type: Sequelize.FLOAT
-    },
+    // innerHeight: {
+    //   type: Sequelize.FLOAT
+    // },
     fullRegion: {
       type: Sequelize.TEXT
     },
