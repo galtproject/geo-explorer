@@ -36,7 +36,7 @@
   "dependencies": {
     "@galtproject/utils": "git+ssh://git@github.com/galtproject/galtproject-utils-js.git#8f98b92",
     "@types/es6-promise": "^3.3.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "fs": "0.0.1-security",
     "geesome-libs": "git://github.com/galtproject/geesome-libs.git#db7d3fc",
     "is-ipfs": "^0.6.3",
