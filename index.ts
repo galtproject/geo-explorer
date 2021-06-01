@@ -34,6 +34,8 @@ const log = require('./services/logService');
   const geohashService: IExplorerGeohashService = await require('./services/geohashService/' + config.geohashService)(database, chainService);
   const geoDataService: IExplorerGeoDataService = await require('./services/geoDataService/' + config.geoDataService)(database, geohashService, chainService);
 
+  const server = await require('./api/')(geohashService, chainService, database, geoDataService, process.env.API_PORT || config.apiPort);
+
   const waitForHandleEventsByBlock = {};
 
   chainService.onReconnect(fetchAndSubscribe);
@@ -1020,7 +1022,5 @@ const log = require('./services/logService');
 
     //todo: handle DeleteSpaceTokenGeoData
   }
-
-  const server = await require('./api/')(geohashService, chainService, database, geoDataService, process.env.API_PORT || config.apiPort);
 })();
 
