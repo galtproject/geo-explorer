@@ -117,7 +117,7 @@ class ExplorerChainWeb3Service implements IExplorerChainService {
 
     this.createContractInstance();
 
-    this.subscribeForReconnect();
+    // this.subscribeForReconnect();
   }
 
   // =============================================================
